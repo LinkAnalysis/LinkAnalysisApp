@@ -23,6 +23,16 @@ jobs:
         with:
           go-version: '1.24'
 
+      - name: Set up Node.js v22.14.0
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.14.0"
+
+      - name: Install Node.js dependencies
+        run: |
+          npm install
+        working-directory: frontend
+
       - name: Run pre-commit hooks
         run: |
           pre-commit install-hooks
