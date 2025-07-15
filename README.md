@@ -71,5 +71,5 @@ wails dev
 
 If the above command fails, try running
 ```
-wails dev -tags webkit2_41  
+wails dev -tags webkit2_41
 ```
