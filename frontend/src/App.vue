@@ -35,14 +35,12 @@ provide("currentLang", currentLang)
   gap: 0;
 }
 
-/* Lewy panel – prawa linia */
 .left-panel {
   background-color: #fdfdfd;
   border-right: 2px solid #ccc;
   height: 100%;
 }
 
-/* Środkowy – linie po obu stronach */
 .center-panel {
   background-color: #fff;
   border-left: 2px solid #ccc;
@@ -50,7 +48,6 @@ provide("currentLang", currentLang)
   height: 100%;
 }
 
-/* Prawy – lewa linia */
 .right-panel {
   background-color: #fdfdfd;
   border-left: 2px solid #ccc;
