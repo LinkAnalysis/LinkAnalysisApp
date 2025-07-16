@@ -1,8 +1,17 @@
 <script lang="js" setup>
-import { ref, provide } from "vue"
+import { ref, provide, watch } from "vue"
 import HeaderComponent from "./components/header/HeaderComponent.vue"
+import GraphView from "./components/GraphView.vue"
+import Graph from "graphology"
+import { load_graph } from "./graph_constructor/file_loader"
 
 const currentLang = ref("en")
+
+const graph = ref(null)
+
+load_graph("/random_node.csv", "/random_edge.csv").then(g => {
+  graph.value = g
+})
 
 provide("currentLang", currentLang)
 </script>
@@ -18,6 +27,7 @@ provide("currentLang", currentLang)
           </div>
           <div class="center-panel">
             <MainContent :currentSection="currentSection" />
+            <GraphView v-if="graph" :graph="graph" />
           </div>
           <div class="right-panel">
             <RightPanel />
@@ -54,7 +64,9 @@ provide("currentLang", currentLang)
 .layout-grid {
   display: grid;
   grid-template-columns: 16% 64% 20%;
-  flex: 1 1 auto;
+  height: calc(100vh - 48px);
+  padding: 0;
+  gap: 0;
 }
 
 .left-panel,

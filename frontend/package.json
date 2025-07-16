@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "graphology": "^0.26.0",
+    "graphology-layout": "^0.6.1",
+    "papaparse": "^5.5.3",
     "sigma": "^3.0.2",
     "vue": "^3.2.37"
   },
