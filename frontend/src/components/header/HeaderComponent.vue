@@ -1,16 +1,32 @@
 <template>
-  <div class="header-bar">
+  <v-app-bar class="header-bar" flat elevation="0" app>
     <div class="branding">
       <img src="@/assets/images/logo.svg" alt="Logo" class="logo" />
       <span class="app-name">LinkAnalysis</span>
     </div>
-
     <div class="button-box">
-      <HeaderButtonComponent
-        :label="labels.file"
-        name="file"
-        @click="emitChange"
-      />
+      <div class="file-button-box">
+        <HeaderButtonComponent
+          :label="labels.file"
+          name="file"
+          :options="[
+            {
+              label: 'Upload Graph',
+              onClick: () => console.log('Upload Graph'),
+              children: [
+                {
+                  label: 'Upload nodes configuration',
+                  onClick: () => console.log('Upload Graph nodes'),
+                },
+                {
+                  label: 'Upload edges configuration',
+                  onClick: () => console.log('Upload Graph edges'),
+                },
+              ],
+            },
+          ]"
+        />
+      </div>
       <HeaderButtonComponent
         :label="labels.workspace"
         name="workspace"
@@ -27,7 +43,7 @@
         @click="emitChange"
       />
     </div>
-  </div>
+  </v-app-bar>
 </template>
 
 <script setup>
@@ -96,5 +112,71 @@ const emitChange = section => {
   margin-right: auto;
   display: flex;
   gap: 1rem;
+}
+
+.file-box-popup {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 8px;
+  padding: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.file-button-box {
+  position: relative;
+  display: inline-block;
+}
+
+.custom-file-name {
+  margin-left: 0.5rem;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.hidden-input {
+  display: none;
+}
+
+.file-input-label {
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.custom-file-name {
+  font-style: italic;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.file-select-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.file-trigger {
+  padding: 0.25rem 0.5rem;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  font-style: italic;
+  min-width: 160px;
+}
+
+.hidden-input {
+  display: none;
 }
 </style>
