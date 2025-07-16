@@ -9,10 +9,6 @@ const currentLang = ref("en")
 
 const graph = ref(null)
 
-//graph.value.addNode('n1', { label: 'Node 1', x: 0, y: 0, size: 10, color: '#FF5733' })
-//graph.value.addNode('n2', { label: 'Node 2', x: 3, y: 1, size: 10, color: '#33C1FF' })
-//graph.value.addEdge('n1', 'n2')
-
 load_graph("/random_node.csv", "/random_edge.csv").then(g => {
   graph.value = g
 })
