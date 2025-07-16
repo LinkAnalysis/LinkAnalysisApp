@@ -11,8 +11,6 @@
             :label="labels.file"
             name="file"
             :options="[
-              { label: 'New File', onClick: () => console.log('New File') },
-              { label: 'Open File', onClick: () => console.log('Open File') },
               {
                 label: 'Upload Graph',
                 children: [
