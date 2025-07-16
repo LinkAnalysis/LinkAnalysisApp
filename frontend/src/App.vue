@@ -27,6 +27,7 @@ provide("currentLang", currentLang)
           </div>
           <div class="center-panel">
             <MainContent :currentSection="currentSection" />
+            <GraphView v-if="graph" :graph="graph" />
           </div>
           <div class="right-panel">
             <RightPanel />
@@ -63,7 +64,9 @@ provide("currentLang", currentLang)
 .layout-grid {
   display: grid;
   grid-template-columns: 16% 64% 20%;
-  flex: 1 1 auto;
+  height: calc(100vh - 48px);
+  padding: 0;
+  gap: 0;
 }
 
 .left-panel,

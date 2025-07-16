@@ -40,9 +40,11 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .graph-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  height: 100%;
   position: relative;
-  width: 100%;
-  height: 94%;
 }
 
 .controls {
@@ -64,6 +66,7 @@ onBeforeUnmount(() => {
 }
 
 .sigma-container {
+  flex: 1 1 auto;
   width: 100%;
   height: 100%;
   background: lightblue;
