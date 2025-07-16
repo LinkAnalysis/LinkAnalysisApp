@@ -87,7 +87,7 @@ const emitChange = section => {
   white-space: nowrap;
   font-size: 1.5rem;
   font-weight: bold;
-  line-height: 1;
+  line-height: 1.3;
   color: #000;
 }
 
