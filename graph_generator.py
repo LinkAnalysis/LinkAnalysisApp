@@ -1,6 +1,5 @@
 import networkx as nx
 import random
-import csv
 
 def generate_random_graph(num_of_nodes, num_of_edges, edge_file, node_file):
     G = nx.gnm_random_graph(num_of_nodes, num_of_edges)
