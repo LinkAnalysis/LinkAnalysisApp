@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue"
+import { ref, nextTick } from "vue"
 import MenuItem from "./MenuItem.vue"
 
 const props = defineProps({
@@ -10,10 +10,21 @@ const props = defineProps({
 
 const emit = defineEmits(["click"])
 const isOpen = ref(false)
+const menuPosition = ref({ top: 0, left: 0 })
 
-const toogleMenu = event => {
+const buttonRef = ref(null)
+
+const toogleMenu = async event => {
   if (props.options.length > 0) {
     isOpen.value = !isOpen.value
+    if (isOpen.value) {
+      await nextTick()
+      const rect = buttonRef.value.getBoundingClientRect()
+      menuPosition.value = {
+        top: rect.bottom + window.scrollY,
+        left: rect.left + window.scrollX,
+      }
+    }
     event.stopPropagation()
   } else {
     emit("click")
@@ -23,17 +34,28 @@ const toogleMenu = event => {
 
 <template>
   <div class="dropdown-wrapper">
-    <button class="header-button" @click="toogleMenu">
+    <button ref="buttonRef" class="header-button" @click="toogleMenu">
       {{ label }}
     </button>
-    <ul v-if="isOpen && options.length" class="dropdown menu-level">
-      <MenuItem
-        v-for="(option, index) in options"
-        :key="index"
-        :option="option"
-        @close-all="isOpen = false"
-      />
-    </ul>
+
+    <teleport to="body">
+      <ul
+        v-if="isOpen && options.length"
+        class="dropdown menu-level"
+        :style="{
+          position: 'absolute',
+          top: menuPosition.top + 'px',
+          left: menuPosition.left + 'px',
+        }"
+      >
+        <MenuItem
+          v-for="(option, index) in options"
+          :key="index"
+          :option="option"
+          @close-all="isOpen = false"
+        />
+      </ul>
+    </teleport>
   </div>
 </template>
 
@@ -70,7 +92,7 @@ const toogleMenu = event => {
   border: 1px solid #ccc;
   border-radius: 8px;
   box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
-  z-index: 100;
+  z-index: 1000;
   list-style: none;
   padding: 0;
 }

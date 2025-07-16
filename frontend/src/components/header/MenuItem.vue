@@ -61,7 +61,7 @@ const handleClick = () => {
   border: 1px solid #ccc;
   border-radius: 6px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  z-index: 200;
+  z-index: 2000;
   list-style: none;
   padding: 0;
 }

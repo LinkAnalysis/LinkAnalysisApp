@@ -1,48 +1,47 @@
 <template>
-  <div class="header-bar">
+  <v-app-bar class="header-bar" flat elevation="0" app>
     <div class="branding">
       <img src="@/assets/images/logo.svg" alt="Logo" class="logo" />
       <span class="app-name">LinkAnalysis</span>
     </div>
-
-      <div class="button-box">
-        <div class="file-button-box">
-          <HeaderButtonComponent
-            :label="labels.file"
-            name="file"
-            :options="[
-              {
-                label: 'Upload Graph',
-                children: [
-                  {
-                    label: 'Upload nodes configuration',
-                    onClick: () => console.log('Upload Graph nodes'),
-                  },
-                  {
-                    label: 'Upload edges configuration',
-                    onClick: () => console.log('Upload Graph edges'),
-                  },
-                ],
-              },
-            ]"
-          />
-        </div>
+    <div class="button-box">
+      <div class="file-button-box">
         <HeaderButtonComponent
-          :label="labels.workspace"
-          name="workspace"
-          @click="emitChange"
-        />
-        <HeaderButtonComponent
-          :label="labels.view"
-          name="view"
-          @click="emitChange"
-        />
-        <HeaderButtonComponent
-          :label="labels.settings"
-          name="settings"
-          @click="emitChange"
+          :label="labels.file"
+          name="file"
+          :options="[
+            {
+              label: 'Upload Graph',
+              onClick: () => console.log('Upload Graph'),
+              children: [
+                {
+                  label: 'Upload nodes configuration',
+                  onClick: () => console.log('Upload Graph nodes'),
+                },
+                {
+                  label: 'Upload edges configuration',
+                  onClick: () => console.log('Upload Graph edges'),
+                },
+              ],
+            },
+          ]"
         />
       </div>
+      <HeaderButtonComponent
+        :label="labels.workspace"
+        name="workspace"
+        @click="emitChange"
+      />
+      <HeaderButtonComponent
+        :label="labels.view"
+        name="view"
+        @click="emitChange"
+      />
+      <HeaderButtonComponent
+        :label="labels.settings"
+        name="settings"
+        @click="emitChange"
+      />
     </div>
   </v-app-bar>
 </template>
@@ -126,7 +125,7 @@ const emitChange = section => {
   border-radius: 8px;
   background-color: #f9f9f9;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  z-index: 10;
+  z-index: 100;
   min-width: 200px;
   display: flex;
   flex-direction: column;
