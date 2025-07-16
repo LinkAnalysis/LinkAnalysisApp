@@ -8,6 +8,17 @@ html, body, #app {
   color: #222;
   overflow: hidden;
 }
+.v-app {
+  padding: 0 !important;
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+.v-main {
+  padding: 0 !important;
+  margin: 0;
+  height: 100%;
+}
 .v-application {
   background-color: #ffffff !important;
 }

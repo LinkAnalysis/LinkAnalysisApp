@@ -54,9 +54,7 @@ provide("currentLang", currentLang)
 .layout-grid {
   display: grid;
   grid-template-columns: 16% 64% 20%;
-  height: calc(100vh - 64px);
-  padding: 0;
-  gap: 0;
+  flex: 1 1 auto;
 }
 
 .left-panel,
