@@ -1,6 +1,7 @@
 <script setup>
 import Graph from "graphology"
 import Sigma from "sigma"
+
 import { onBeforeUnmount, onMounted, ref, watch } from "vue"
 
 const props = defineProps({
@@ -8,6 +9,9 @@ const props = defineProps({
 })
 const container = ref(null)
 let renderer = null
+
+let draggedNode = null
+let isDragging = false
 
 const zoomIn = () => renderer?.getCamera().animatedZoom({ duration: 600 })
 const zoomOut = () => renderer?.getCamera().animatedUnzoom({ duration: 600 })
@@ -20,6 +24,37 @@ onMounted(() => {
     renderEdgeLabels: true,
     labelRenderedSizeThreshold: 6,
   })
+  renderer.on("downNode", e => {
+    isDragging = true
+    draggedNode = e.node
+    props.graph.setNodeAttribute(draggedNode, "highlighted", true)
+    if (!renderer.getCustomBBox()) renderer.setCustomBBox(renderer.getBBox())
+  })
+  renderer.on("moveBody", ({ event }) => {
+    if (!isDragging || !draggedNode) return
+
+    // Get new position of node
+    const pos = renderer.viewportToGraph(event)
+
+    props.graph.setNodeAttribute(draggedNode, "x", pos.x)
+    props.graph.setNodeAttribute(draggedNode, "y", pos.y)
+
+    // Prevent sigma to move camera:
+    event.preventSigmaDefault()
+    event.original.preventDefault()
+    event.original.stopPropagation()
+  })
+
+  // On mouse up, we reset the dragging mode
+  const handleUp = () => {
+    if (draggedNode) {
+      props.graph.removeNodeAttribute(draggedNode, "highlighted")
+    }
+    isDragging = false
+    draggedNode = null
+  }
+  renderer.on("upNode", handleUp)
+  renderer.on("upStage", handleUp)
 })
 
 onBeforeUnmount(() => {
