@@ -1,35 +1,33 @@
 <template>
-  <v-app-bar class="header-bar" flat elevation="0" app>
-    <div class="header-content">
-      <div class="branding">
-        <img src="@/assets/images/logo.svg" alt="Logo" class="logo" />
-        <span class="app-name">LinkAnalysis</span>
-      </div>
-
-      <div class="button-box">
-        <HeaderButtonComponent
-          :label="labels.file"
-          name="file"
-          @click="emitChange"
-        />
-        <HeaderButtonComponent
-          :label="labels.workspace"
-          name="workspace"
-          @click="emitChange"
-        />
-        <HeaderButtonComponent
-          :label="labels.view"
-          name="view"
-          @click="emitChange"
-        />
-        <HeaderButtonComponent
-          :label="labels.settings"
-          name="settings"
-          @click="emitChange"
-        />
-      </div>
+  <div class="header-bar">
+    <div class="branding">
+      <img src="@/assets/images/logo.svg" alt="Logo" class="logo" />
+      <span class="app-name">LinkAnalysis</span>
     </div>
-  </v-app-bar>
+
+    <div class="button-box">
+      <HeaderButtonComponent
+        :label="labels.file"
+        name="file"
+        @click="emitChange"
+      />
+      <HeaderButtonComponent
+        :label="labels.workspace"
+        name="workspace"
+        @click="emitChange"
+      />
+      <HeaderButtonComponent
+        :label="labels.view"
+        name="view"
+        @click="emitChange"
+      />
+      <HeaderButtonComponent
+        :label="labels.settings"
+        name="settings"
+        @click="emitChange"
+      />
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -52,35 +50,50 @@ const emitChange = section => {
 
 <style scoped>
 .header-bar {
+  min-height: 48px;
   background-color: white;
-  border-bottom: 2px solid #ccc;
-  padding: 0 2rem;
-}
-
-.header-content {
+  border-bottom: 2px solid #000000;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  padding: 0 0.5rem;
+  box-sizing: border-box;
   width: 100%;
+  overflow: hidden;
 }
 
 .branding {
+  width: 16%;
   display: flex;
   align-items: center;
-  gap: 1rem;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .logo {
-  height: 40px;
+  height: 30px;
+  display: block;
+  flex-shrink: 0;
 }
 
 .app-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 1.5rem;
   font-weight: bold;
-  color: #2c3e50;
+  line-height: 1;
+  color: #000;
 }
 
 .button-box {
+  padding-left: 1rem;
+  margin-right: auto;
   display: flex;
   gap: 1rem;
 }

@@ -25,11 +25,11 @@ const handleClick = () => {
 
 <style scoped>
 .header-button {
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: 500;
-  padding: 0.5rem 0.7rem;
-  border: 3px solid #000;
-  border-radius: 15px;
+  padding: 0.2rem 0.6rem;
+  border: 2px solid #000;
+  border-radius: 7px;
   background-color: white;
   color: black;
   cursor: pointer;
