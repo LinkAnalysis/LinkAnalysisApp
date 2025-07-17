@@ -9,11 +9,8 @@ const currentLang = ref("en")
 
 const graph = ref(null)
 const isLoading = ref(false)
-// load_graph("/random_node.csv", "/random_edge.csv").then(g => {
-//   graph.value = g
-// })
+
 const currentSection = ref("overview")
-const statusMessage = ref("No graph loaded. Please upload node and edge files.")
 watch(
   () => [
     fileStore.selectedNodeFilePath.value,
@@ -24,22 +21,22 @@ watch(
       isLoading.value = true
       graph.value = await load_graph(nodeFile, edgeFile)
       isLoading.value = false
-      statusMessage.value = ""
-      return
+    } else if (edgeFile) {
+      isLoading.value = true
+      graph.value = await load_graph(null, edgeFile)
+      isLoading.value = false
     } else {
       graph.value = null
-      if (nodeFile && !edgeFile) {
-        statusMessage.value = "Node file loaded. Please upload edge file."
-      } else if (!nodeFile && edgeFile) {
-        statusMessage.value = "Edge file loaded. Please upload node file."
-      } else {
-        statusMessage.value =
-          "No graph loaded. Please upload node and edge files."
-      }
     }
   },
   { immediate: true },
 )
+
+const graphKey = ref(0)
+
+watch(graph, () => {
+  graphKey.value++
+})
 
 provide("currentLang", currentLang)
 </script>
@@ -55,10 +52,10 @@ provide("currentLang", currentLang)
           </div>
           <div class="center-panel">
             <MainContent :current-section="currentSection" />
-            <GraphView v-if="graph" :graph="graph" />
-            <div v-else class="graph-status-message">
+            <GraphView v-if="graph" :key="graphKey" :graph="graph" />
+            <!-- <div v-else class="graph-status-message">
               <p>{{ statusMessage }}</p>
-            </div>
+            </div> -->
           </div>
           <div class="right-panel">
             <RightPanelComponent :graph="graph" />
