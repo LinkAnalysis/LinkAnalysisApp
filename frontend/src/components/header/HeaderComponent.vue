@@ -47,17 +47,12 @@
 </template>
 
 <script setup>
-import { inject, computed, toValue } from "vue"
 import HeaderButtonComponent from "./HeaderButtonComponent.vue"
-import { translations } from "@/i18n/translations.js"
+import { useTranslations } from "@/i18n/useTranslations"
 
-const currentLang = inject("currentLang", "en")
 const emit = defineEmits(["change-section"])
 
-const labels = computed(() => {
-  const lang = toValue(currentLang)
-  return translations[lang] || translations.en
-})
+const { currentLang, labels } = useTranslations()
 
 const emitChange = section => {
   emit("change-section", section)

@@ -28,8 +28,6 @@ export async function load_graph(node_file, edge_file) {
 
   const nodes = await parseCSV(csv_n)
   const edges = await parseCSV(csv_e)
-  console.log(nodes)
-  console.log(edges)
 
   nodes.forEach(line => {
     const id = line.id

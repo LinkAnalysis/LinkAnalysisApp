@@ -1,9 +1,9 @@
 <script lang="js" setup>
-import { ref, provide, watch } from "vue"
+import { ref, provide } from "vue"
 import HeaderComponent from "./components/header/HeaderComponent.vue"
 import GraphView from "./components/GraphView.vue"
-import Graph from "graphology"
 import { load_graph } from "./graph_constructor/file_loader"
+import RightPanelComponent from "./components/rightpanel/RightPanelComponent.vue"
 
 const currentLang = ref("en")
 
@@ -23,14 +23,14 @@ provide("currentLang", currentLang)
       <v-main class="main-area">
         <v-container fluid class="layout-grid">
           <div class="left-panel">
-            <LeftPanel />
+            <LeftPanelComponent :graph="graph" />
           </div>
           <div class="center-panel">
             <MainContent :currentSection="currentSection" />
             <GraphView v-if="graph" :graph="graph" />
           </div>
           <div class="right-panel">
-            <RightPanel />
+            <RightPanelComponent :graph="graph" />
           </div>
         </v-container>
       </v-main>
