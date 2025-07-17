@@ -1,44 +1,48 @@
 <script setup>
 import { ref, watch } from "vue"
-import OverviewComponent from "./OverviewComponent.vue"
-import FilterComponent from "./FilterComponent.vue"
-import StatisticsComponent from "./StatisticsComponent.vue"
+import EdgesNodesComponent from "./EdgesNodesComponent.vue"
+import LayoutComponent from "./LayoutComponent.vue"
+import VisualizationComponent from "./VisualizationComponent.vue"
 import Graph from "graphology"
+
 const props = defineProps({
   graph: Graph,
 })
-const nodeCount = ref(0)
-const edgeCount = ref(0)
+
+const nodes = ref([])
+const edges = ref([])
 
 watch(
   () => props.graph,
   newGraph => {
     if (newGraph) {
-      nodeCount.value = newGraph.order
-      edgeCount.value = newGraph.size
+      nodes.value = newGraph.nodes()
+      edges.value = newGraph.edges()
     } else {
-      nodeCount.value = 0
-      edgeCount.value = 0
+      nodes.value = []
+      edges.value = []
     }
   },
   { immediate: true },
 )
+console.log("Nodes:", nodes)
+console.log("Edges:", edges)
 </script>
 
 <template>
   <div class="panel-content">
     <div class="panel-wrapper">
-      <OverviewComponent
+      <EdgesNodesComponent
         class="panel-section"
-        :nodeCount="nodeCount"
-        :edgesCount="edgeCount"
+        :nodes="nodes"
+        :edges="edges"
       />
     </div>
     <div class="panel-wrapper">
-      <FilterComponent class="panel-section" />
+      <LayoutComponent class="panel-section" />
     </div>
     <div class="panel-wrapper">
-      <StatisticsComponent class="panel-section" />
+      <VisualizationComponent class="panel-section" />
     </div>
   </div>
 </template>
