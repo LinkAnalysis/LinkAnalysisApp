@@ -49,17 +49,15 @@ console.log("Edges:", edges)
 
 <style scoped>
 .panel-content {
-  max-height: 92vh;
-  overflow-y: auto;
-  padding: 8px;
+  padding: 4px;
   display: flex;
   flex-direction: column;
 }
 
 .panel-wrapper {
   flex: 1;
-  margin: 8px 0;
-  padding: 0 8px;
+  margin: 4px 0;
+  padding: 0 4px;
 }
 
 .panel-section {

@@ -25,21 +25,22 @@ const statLabels = [
 <style scoped>
 .panel-section {
   border: 2px solid black;
-  padding: 16px 24px;
-  width: 300px;
+  padding: 8px;
+  width: 100%;
   font-family: sans-serif;
 }
 
 h2 {
+  margin-top: 0;
   text-align: center;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
 }
 
 .stat-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .label {
