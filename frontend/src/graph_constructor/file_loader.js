@@ -16,27 +16,22 @@ export function parseCSV(filename) {
   })
 }
 
-// constructs the graphology Graph from the node and edge files
-export async function load_graph(node_file, edge_file) {
-  const graph = new Graph()
-
-  const resp_n = await fetch(node_file)
-  const csv_n = await resp_n.text()
-
-  const resp_e = await fetch(edge_file)
-  const csv_e = await resp_e.text()
-
-  const nodes = await parseCSV(csv_n)
-  const edges = await parseCSV(csv_e)
-
-  nodes.forEach(line => {
-    const id = line.id
-    const description = line.Description
-    graph.addNode(id, { label: description, size: 20 })
+export function update_graph_nodes(graph, nodes_csv) {
+  nodes_csv.forEach(line => {
+    graph.mergeNode(line.id, { label: line.Description, size: 15, x: 0, y: 0 })
   })
 
-  edges.forEach(line => {
+  circular.assign(graph)
+
+  return graph
+}
+
+export function update_graph_edges(graph, edges_csv) {
+  graph.clearEdges()
+  edges_csv.forEach(line => {
     const w = parseInt(line.edgeWeight)
+    graph.mergeNode(line.x, { size: 15, x: 0, y: 0 })
+    graph.mergeNode(line.y, { size: 15, x: 0, y: 0 })
     graph.addEdge(line.x, line.y, {
       label: line.edgeLabel,
       weight: w,
@@ -44,7 +39,6 @@ export async function load_graph(node_file, edge_file) {
       color: "#000000",
     })
   })
-
   circular.assign(graph)
 
   return graph
