@@ -2,16 +2,35 @@
 import { ref, provide } from "vue"
 import HeaderComponent from "./components/header/HeaderComponent.vue"
 import GraphView from "./components/GraphView.vue"
-import { load_graph } from "./graph_constructor/file_loader"
+import {
+  parseCSV,
+  update_graph_edges,
+  update_graph_nodes,
+} from "./graph_constructor/file_loader"
 import RightPanelComponent from "./components/rightpanel/RightPanelComponent.vue"
+import Graph from "graphology"
 
 const currentLang = ref("en")
 
-const graph = ref(null)
+const graph = ref(new Graph())
 
-load_graph("/random_node.csv", "/random_edge.csv").then(g => {
-  graph.value = g
-})
+const get_edges_data = () => {
+  fetch("/random_edge.csv")
+    .then(resp => resp.text())
+    .then(csv_r => parseCSV(csv_r))
+    .then(csv => update_graph_edges(graph.value, csv))
+}
+
+const get_nodes_data = () => {
+  fetch("/random_node.csv")
+    .then(resp => resp.text())
+    .then(csv_r => parseCSV(csv_r))
+    .then(csv => update_graph_nodes(graph.value, csv))
+}
+
+const clear_graph = () => {
+  graph.value.clear()
+}
 
 provide("currentLang", currentLang)
 </script>
@@ -23,6 +42,9 @@ provide("currentLang", currentLang)
       <v-main class="main-area">
         <v-container fluid class="layout-grid">
           <div class="left-panel">
+            <button @click="get_nodes_data">Nodes</button>
+            <button @click="get_edges_data">Edges</button>
+            <button @click="clear_graph">Clear</button>
             <LeftPanelComponent :graph="graph" />
           </div>
           <div class="center-panel">
