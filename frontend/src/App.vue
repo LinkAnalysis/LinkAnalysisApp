@@ -4,6 +4,7 @@ import HeaderComponent from "./components/header/HeaderComponent.vue"
 import GraphView from "./components/GraphView.vue"
 import { load_graph } from "./graph_constructor/file_loader"
 import RightPanelComponent from "./components/rightpanel/RightPanelComponent.vue"
+import LeftPanelComponent from "./components/leftpanel/LeftPanelComponent.vue"
 
 const currentLang = ref("en")
 
