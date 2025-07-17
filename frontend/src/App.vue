@@ -14,23 +14,23 @@ const currentLang = ref("en")
 
 const graph = ref(new Graph())
 
-const get_edges_data = () => {
-  fetch("/random_edge.csv")
-    .then(resp => resp.text())
-    .then(csv_r => parseCSV(csv_r))
-    .then(csv => update_graph_edges(graph.value, csv))
-}
+// const get_edges_data = () => {
+//   fetch("/random_edge.csv")
+//     .then(resp => resp.text())
+//     .then(csv_r => parseCSV(csv_r))
+//     .then(csv => update_graph_edges(graph.value, csv))
+// }
 
-const get_nodes_data = () => {
-  fetch("/random_node.csv")
-    .then(resp => resp.text())
-    .then(csv_r => parseCSV(csv_r))
-    .then(csv => update_graph_nodes(graph.value, csv))
-}
+// const get_nodes_data = () => {
+//   fetch("/random_node.csv")
+//     .then(resp => resp.text())
+//     .then(csv_r => parseCSV(csv_r))
+//     .then(csv => update_graph_nodes(graph.value, csv))
+// }
 
-const clear_graph = () => {
-  graph.value.clear()
-}
+// const clear_graph = () => {
+//   graph.value.clear()
+// }
 
 provide("currentLang", currentLang)
 </script>
@@ -42,9 +42,6 @@ provide("currentLang", currentLang)
       <v-main class="main-area">
         <v-container fluid class="layout-grid">
           <div class="left-panel">
-            <button @click="get_nodes_data">Nodes</button>
-            <button @click="get_edges_data">Edges</button>
-            <button @click="clear_graph">Clear</button>
             <LeftPanelComponent :graph="graph" />
           </div>
           <div class="center-panel">
