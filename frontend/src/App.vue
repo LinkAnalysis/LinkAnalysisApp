@@ -1,5 +1,5 @@
 <script lang="js" setup>
-import { ref, provide, watch } from "vue"
+import { ref, provide, watch, computed } from "vue"
 import HeaderComponent from "./components/header/HeaderComponent.vue"
 import GraphView from "./components/GraphView.vue"
 import LeftPanelComponent from "./components/leftpanel/LeftPanelComponent.vue"
@@ -12,10 +12,32 @@ import {
 } from "./graph_constructor/file_loader"
 import RightPanelComponent from "./components/rightpanel/RightPanelComponent.vue"
 import fileStore from "./stores/fileStore"
+import TabsManager from "./components/TabsManager.vue"
 const currentLang = ref("en")
 
-const graph = ref(new Graph())
 const isLoading = ref(false)
+
+const tabs_manager = ref(null)
+const selected_tab_index = ref(0)
+const graphs = ref([])
+
+const graph = computed({
+  get() {
+    if (graphs.value.length > 0)
+      return graphs.value[selected_tab_index.value].value ?? null
+  },
+
+  set(val) {
+    if (graphs.value.length > 0)
+      if (graphs.value[selected_tab_index.value]) {
+        graphs.value[selected_tab_index.value].value = val
+      }
+  },
+})
+
+const on_new_tab = () => {
+  graphs.value.push(ref(null))
+}
 
 const currentSection = ref("overview")
 watch(
@@ -46,24 +68,6 @@ watch(graph, () => {
   graphKey.value++
 })
 
-// const get_edges_data = () => {
-//   fetch("/random_edge.csv")
-//     .then(resp => resp.text())
-//     .then(csv_r => parseCSV(csv_r))
-//     .then(csv => update_graph_edges(graph.value, csv))
-// }
-
-// const get_nodes_data = () => {
-//   fetch("/random_node.csv")
-//     .then(resp => resp.text())
-//     .then(csv_r => parseCSV(csv_r))
-//     .then(csv => update_graph_nodes(graph.value, csv))
-// }
-
-// const clear_graph = () => {
-//   graph.value.clear()
-// }
-
 provide("currentLang", currentLang)
 </script>
 
@@ -78,6 +82,11 @@ provide("currentLang", currentLang)
           </div>
           <div class="center-panel">
             <MainContent :current-section="currentSection" />
+            <TabsManager
+              v-model:selected_tab_index="selected_tab_index"
+              ref="tabs_manager"
+              @new_tab="on_new_tab"
+            />
             <GraphView v-if="graph" :key="graphKey" :graph="graph" />
             <!-- <div v-else class="graph-status-message">
               <p>{{ statusMessage }}</p>
