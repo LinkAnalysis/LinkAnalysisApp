@@ -8,6 +8,7 @@ import {
   update_graph_nodes,
 } from "./graph_constructor/file_loader"
 import RightPanelComponent from "./components/rightpanel/RightPanelComponent.vue"
+import LeftPanelComponent from "./components/leftpanel/LeftPanelComponent.vue"
 import Graph from "graphology"
 
 const currentLang = ref("en")
