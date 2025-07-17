@@ -79,9 +79,6 @@ provide("currentLang", currentLang)
           <div class="center-panel">
             <MainContent :current-section="currentSection" />
             <GraphView v-if="graph" :key="graphKey" :graph="graph" />
-            <!-- <div v-else class="graph-status-message">
-              <p>{{ statusMessage }}</p>
-            </div> -->
           </div>
           <div class="right-panel">
             <RightPanelComponent :graph="graph" />

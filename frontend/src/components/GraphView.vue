@@ -1,13 +1,16 @@
 <script setup>
 import Graph from "graphology"
 import Sigma from "sigma"
+import VertexEdgeWindow from "./detailswindow/VertexEdgeWindow.vue"
 
 import { onBeforeUnmount, onMounted, ref, watch } from "vue"
-
 const props = defineProps({
   graph: Graph,
 })
 
+const clickedNodeData = ref(null)
+const popupPosition = ref({ x: 0, y: 0 })
+const clickedNodeId = ref(null)
 const container = ref(null)
 let renderer = null
 
@@ -45,6 +48,18 @@ onMounted(() => {
     event.original.preventDefault()
     event.original.stopPropagation()
   })
+  renderer.on("clickNode", ({ node }) => {
+    const attrs = props.graph.getNodeAttributes(node)
+    console.log("Clicked node:", node, attrs)
+    clickedNodeId.value = node
+    clickedNodeData.value = {
+      id: node,
+      Description: attrs.label,
+      numOfNeighbors: props.graph.neighbors(node).length,
+    }
+
+    updatePopupPosition()
+  })
 
   // On mouse up, we reset the dragging mode
   const handleUp = () => {
@@ -56,11 +71,22 @@ onMounted(() => {
   }
   renderer.on("upNode", handleUp)
   renderer.on("upStage", handleUp)
+
+  renderer.getCamera().on("updated", () => {
+    updatePopupPosition()
+  })
 })
 
 onBeforeUnmount(() => {
   if (renderer) renderer.kill()
 })
+
+function updatePopupPosition() {
+  if (!clickedNodeId.value) return
+  const attrs = props.graph.getNodeAttributes(clickedNodeId.value)
+  const screenPos = renderer.graphToViewport({ x: attrs.x, y: attrs.y })
+  popupPosition.value = { x: screenPos.x, y: screenPos.y }
+}
 </script>
 
 <template>
@@ -71,6 +97,19 @@ onBeforeUnmount(() => {
       <button @click="zoomOut">Zoom Out</button>
       <button @click="resetZoom">Reset</button>
     </div>
+    <VertexEdgeWindow
+      v-if="clickedNodeData"
+      :visible="true"
+      :position="popupPosition"
+      @close="
+        clickedNodeData = null
+        clickedNodeId = null
+      "
+    >
+      ID: {{ clickedNodeData.id }}<br />
+      Name: {{ clickedNodeData.Description }}<br />
+      Number of Neighbors: {{ clickedNodeData.numOfNeighbors }}<br />
+    </VertexEdgeWindow>
   </div>
 </template>
 
@@ -112,5 +151,16 @@ onBeforeUnmount(() => {
 .controls button {
   cursor: pointer;
   width: 100%;
+}
+
+.popup {
+  position: absolute;
+  background: white;
+  border: 1px solid black;
+  padding: 8px;
+  z-index: 20;
+  transform: translate(10px, -50%);
+  pointer-events: auto;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 </style>
