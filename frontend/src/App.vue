@@ -8,12 +8,13 @@ import {
   parseCSV,
   update_graph_edges,
   update_graph_nodes,
+  load_graph,
 } from "./graph_constructor/file_loader"
 import RightPanelComponent from "./components/rightpanel/RightPanelComponent.vue"
 import fileStore from "./stores/fileStore"
 const currentLang = ref("en")
 
-const graph = ref(null)
+const graph = ref(new Graph())
 const isLoading = ref(false)
 
 const currentSection = ref("overview")
@@ -30,6 +31,7 @@ watch(
     } else if (edgeFile) {
       isLoading.value = true
       graph.value = await load_graph(null, edgeFile)
+      console.log(graph.value)
       isLoading.value = false
     } else {
       graph.value = null
