@@ -29,8 +29,8 @@
 
       <div class="search-row" v-if="selectedFilter === 'Search by id'">
         <input v-model="searchTerm" placeholder="(e.g. 1234)" />
-        <button class="search-button" @click="performSearch">Search</button>
-        <button class="reset-button" @click="resetSearch">Reset</button>
+        <button class="search-button" @click="performSearch">🔍</button>
+        <button class="reset-button" @click="resetSearch">🔄️</button>
       </div>
     </div>
   </div>
@@ -69,14 +69,15 @@ export default {
 <style scoped>
 .panel-section {
   border: 2px solid black;
-  padding: 16px;
-  width: 300px;
+  padding: 8px;
+  width: 100%;
   font-family: sans-serif;
 }
 
 h2 {
+  margin-top: 0;
   text-align: center;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
 }
 
 button {
@@ -89,9 +90,9 @@ button {
   background-color: white;
   cursor: pointer;
 }
-
 button.active {
   background-color: lightgray;
+  font-weight: bold;
 }
 
 .search-area {
@@ -102,6 +103,7 @@ button.active {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  overflow: auto;
 }
 
 .search-row {
@@ -127,7 +129,8 @@ input {
 
 .search-button,
 .reset-button {
-  padding: 6px 12px;
+  margin: auto;
+  padding: 6px 6px;
   font-size: 16px;
   border: 2px solid black;
   border-radius: 8px;
