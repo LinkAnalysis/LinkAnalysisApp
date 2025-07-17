@@ -15,12 +15,12 @@
               onClick: () => console.log('Upload Graph'),
               children: [
                 {
-                  label: 'Upload nodes configuration',
-                  onClick: () => console.log('Upload Graph nodes'),
+                  label: 'Upload edges configuration',
+                  onClick: () => uploadEdgesConfiguration(),
                 },
                 {
-                  label: 'Upload edges configuration',
-                  onClick: () => console.log('Upload Graph edges'),
+                  label: 'Upload nodes configuration',
+                  onClick: () => uploadNodesConfiguration(),
                 },
               ],
             },
@@ -48,14 +48,35 @@
 
 <script setup>
 import HeaderButtonComponent from "./HeaderButtonComponent.vue"
+import fileStore from "../../stores/fileStore"
 import { useTranslations } from "@/i18n/useTranslations"
+import { OpenFileExplorer } from "../../../wailsjs/go/main/App"
 
 const emit = defineEmits(["change-section"])
 
 const { currentLang, labels } = useTranslations()
-
 const emitChange = section => {
   emit("change-section", section)
+}
+
+const uploadNodesConfiguration = async () => {
+  const filePath = await OpenFileExplorer()
+  if (filePath) {
+    fileStore.setNodeFilePath(filePath)
+    console.log("Selected nodes file:", filePath)
+  } else {
+    console.log("No file selected")
+  }
+}
+
+const uploadEdgesConfiguration = async () => {
+  const filePath = await OpenFileExplorer()
+  if (filePath) {
+    fileStore.setEdgeFilePath(filePath)
+    console.log("Selected nodes file:", filePath)
+  } else {
+    console.log("No file selected")
+  }
 }
 </script>
 

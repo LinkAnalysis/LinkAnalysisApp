@@ -1,19 +1,50 @@
 <script lang="js" setup>
-import { ref, provide } from "vue"
+import { ref, provide, watch } from "vue"
 import HeaderComponent from "./components/header/HeaderComponent.vue"
 import GraphView from "./components/GraphView.vue"
+import LeftPanelComponent from "./components/leftpanel/LeftPanelComponent.vue"
+import Graph from "graphology"
 import {
   parseCSV,
   update_graph_edges,
   update_graph_nodes,
+  load_graph,
 } from "./graph_constructor/file_loader"
 import RightPanelComponent from "./components/rightpanel/RightPanelComponent.vue"
-import LeftPanelComponent from "./components/leftpanel/LeftPanelComponent.vue"
-import Graph from "graphology"
-
+import fileStore from "./stores/fileStore"
 const currentLang = ref("en")
 
 const graph = ref(new Graph())
+const isLoading = ref(false)
+
+const currentSection = ref("overview")
+watch(
+  () => [
+    fileStore.selectedNodeFilePath.value,
+    fileStore.selectedEdgeFilePath.value,
+  ],
+  async ([nodeFile, edgeFile]) => {
+    if (nodeFile && edgeFile) {
+      isLoading.value = true
+      graph.value = await load_graph(nodeFile, edgeFile)
+      isLoading.value = false
+    } else if (edgeFile) {
+      isLoading.value = true
+      graph.value = await load_graph(null, edgeFile)
+      console.log(graph.value)
+      isLoading.value = false
+    } else {
+      graph.value = null
+    }
+  },
+  { immediate: true },
+)
+
+const graphKey = ref(0)
+
+watch(graph, () => {
+  graphKey.value++
+})
 
 // const get_edges_data = () => {
 //   fetch("/random_edge.csv")
@@ -46,8 +77,11 @@ provide("currentLang", currentLang)
             <LeftPanelComponent :graph="graph" />
           </div>
           <div class="center-panel">
-            <MainContent :currentSection="currentSection" />
-            <GraphView v-if="graph" :graph="graph" />
+            <MainContent :current-section="currentSection" />
+            <GraphView v-if="graph" :key="graphKey" :graph="graph" />
+            <!-- <div v-else class="graph-status-message">
+              <p>{{ statusMessage }}</p>
+            </div> -->
           </div>
           <div class="right-panel">
             <RightPanelComponent :graph="graph" />

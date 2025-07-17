@@ -8,6 +8,8 @@ export const translations = {
     num_of_nodes: "Liczba wierzchołków",
     num_of_edges: "Liczba krawędzi",
     graph_type: "Typ grafu",
+    edge_file: "Konfiguracja krawędzi",
+    node_file: "Konfiguracja wierzchołków",
   },
   en: {
     file: "File",
@@ -18,5 +20,7 @@ export const translations = {
     num_of_nodes: "Number of nodes",
     num_of_edges: "Number of edges",
     graph_type: "Graph type",
+    edge_file: "Edges configuration",
+    node_file: "Nodes configuration",
   },
 }
