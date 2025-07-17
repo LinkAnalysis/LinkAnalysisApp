@@ -2,7 +2,7 @@ import Papa from "papaparse"
 import Graph from "graphology"
 //import fs from "fs"
 import circular from "graphology-layout/circular"
-
+import { ReadTextFile } from "../../wailsjs/go/main/App"
 export function parseCSV(filename) {
   return new Promise((resolve, reject) => {
     //const file = fs.readFileSync(filename, "utf8")
@@ -20,11 +20,8 @@ export function parseCSV(filename) {
 export async function load_graph(node_file, edge_file) {
   const graph = new Graph()
 
-  const resp_n = await fetch(node_file)
-  const csv_n = await resp_n.text()
-
-  const resp_e = await fetch(edge_file)
-  const csv_e = await resp_e.text()
+  const csv_n = await ReadTextFile(node_file)
+  const csv_e = await ReadTextFile(edge_file)
 
   const nodes = await parseCSV(csv_n)
   const edges = await parseCSV(csv_e)

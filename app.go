@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
@@ -15,6 +16,14 @@ type App struct {
 // NewApp creates a new App application struct
 func NewApp() *App {
 	return &App{}
+}
+
+func (a *App) ReadTextFile(path string) (string, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
 }
 
 func (a *App) OpenFileExplorer() (string, error) {

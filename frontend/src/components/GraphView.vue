@@ -7,6 +7,7 @@ import { onBeforeUnmount, onMounted, ref, watch } from "vue"
 const props = defineProps({
   graph: Graph,
 })
+
 const container = ref(null)
 let renderer = null
 
