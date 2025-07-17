@@ -60,7 +60,7 @@ const getFileName = fullPath => {
   overflow-y: auto;
 }
 .table-wrapper::-webkit-scrollbar {
-  height: 8px; /* wysokość poziomego paska */
+  height: 8px;
 }
 table {
   border-collapse: collapse;
