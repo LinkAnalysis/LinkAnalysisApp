@@ -8,13 +8,8 @@ import Panel from "@/components/panels/Panel.vue"
 import Graph from "graphology"
 import { useFileStore } from "@/stores/fileStore"
 import { storeToRefs } from "pinia"
-import {
-  parseCSV,
-  update_graph_edges,
-  update_graph_nodes,
-  load_graph,
-} from "./graph_constructor/file_loader"
 import TabsManager from "./components/TabsManager.vue"
+import { load_graph } from "@/composables/file_loader"
 
 const currentLang = ref("en")
 
@@ -23,18 +18,23 @@ const isLoading = ref(false)
 const graphKey = ref(0)
 
 const fileStore = useFileStore()
-const { nodePath, edgePath } = storeToRefs(fileStore)
+const { nodePath, edgePath, layoutType, layoutParams } = storeToRefs(fileStore)
 
 watch(
-  () => [nodePath.value, edgePath.value],
-  async ([nodeFile, edgeFile]) => {
+  () => [nodePath.value, edgePath.value, layoutType.value, layoutParams.value],
+  async ([nodeFile, edgeFile, layoutType, layoutParams]) => {
     if (nodeFile && edgeFile) {
       isLoading.value = true
-      graph.value = await load_graph(nodeFile, edgeFile)
+      graph.value = await load_graph(
+        nodeFile,
+        edgeFile,
+        layoutType,
+        layoutParams,
+      )
       isLoading.value = false
     } else if (edgeFile) {
       isLoading.value = true
-      graph.value = await load_graph(null, edgeFile)
+      graph.value = await load_graph(null, edgeFile, layoutType, layoutParams)
       isLoading.value = false
     } else {
       graph.value = null
