@@ -65,7 +65,7 @@ const close_tab = id => {
     add_new_tab()
   }
 
-  selected_tab_id.value = 0
+  selected_tab_id.value = tabs.value[0].id
 }
 
 const start_editing = id => {
@@ -78,10 +78,6 @@ const start_editing = id => {
 const stop_editing = () => {
   edit_id.value = null
 }
-
-// defineExpose({
-//   add_new_tab: () => add_new_tab(),
-// })
 
 onMounted(() => {
   if (tabs.value.length == 0) {
