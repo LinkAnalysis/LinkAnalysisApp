@@ -1,32 +1,18 @@
 <script setup>
-import { ref, watch } from "vue"
-import EdgesNodesComponent from "./EdgesNodesComponent.vue"
-import LayoutComponent from "./LayoutComponent.vue"
-import VisualizationComponent from "./VisualizationComponent.vue"
+import { toRef } from "vue"
+import EdgesNodesComponent from "./leftpanelcontent/EdgesNodesComponent.vue"
+import LayoutComponent from "./leftpanelcontent/LayoutComponent.vue"
+import VisualizationComponent from "./leftpanelcontent/VisualizationComponent.vue"
 import Graph from "graphology"
+
+import { useGraphElements } from "../../composables/useGraphElements"
 
 const props = defineProps({
   graph: Graph,
 })
+const graphRef = toRef(props, "graph")
 
-const nodes = ref([])
-const edges = ref([])
-
-watch(
-  () => props.graph,
-  newGraph => {
-    if (newGraph) {
-      nodes.value = newGraph.nodes()
-      edges.value = newGraph.edges()
-    } else {
-      nodes.value = []
-      edges.value = []
-    }
-  },
-  { immediate: true },
-)
-console.log("Nodes:", nodes)
-console.log("Edges:", edges)
+const { nodes, edges } = useGraphElements(graphRef)
 </script>
 
 <template>
@@ -49,17 +35,15 @@ console.log("Edges:", edges)
 
 <style scoped>
 .panel-content {
-  max-height: 92vh;
-  overflow-y: auto;
-  padding: 8px;
+  padding: 4px;
   display: flex;
   flex-direction: column;
 }
 
 .panel-wrapper {
   flex: 1;
-  margin: 8px 0;
-  padding: 0 8px;
+  margin: 4px 0;
+  padding: 0 4px;
 }
 
 .panel-section {

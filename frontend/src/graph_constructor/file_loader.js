@@ -22,7 +22,6 @@ export async function load_graph(node_file, edge_file) {
 
   const csv_e = await ReadTextFile(edge_file)
   const edges = await parseCSV(csv_e)
-  console.log("edges: " + edges.Description)
   if (node_file) {
     const csv_n = await ReadTextFile(node_file)
     const nodes = await parseCSV(csv_n)
@@ -36,7 +35,6 @@ export async function load_graph(node_file, edge_file) {
     edges.forEach(line => {
       const first_vertex = line.x
       const second_vertex = line.y
-      console.log(line.edgeLabel)
       if (!added.has(first_vertex)) {
         graph.addNode(first_vertex, { size: 20 })
         added.add(first_vertex)
@@ -58,7 +56,6 @@ export async function load_graph(node_file, edge_file) {
   })
 
   circular.assign(graph)
-
   return graph
 }
 

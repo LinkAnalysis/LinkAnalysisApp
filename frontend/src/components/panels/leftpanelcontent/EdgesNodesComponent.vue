@@ -54,7 +54,9 @@ const editEdge = edge => {
               <td>{{ node }}</td>
               <td></td>
               <td>
-                <button class="edit-button" @click="editNode(node)">✏️</button>
+                <button class="edit-button" @click="editNode(node)">
+                  Edit
+                </button>
               </td>
             </tr>
           </template>
@@ -63,7 +65,9 @@ const editEdge = edge => {
               <td>{{ edge }}</td>
               <td></td>
               <td>
-                <button class="edit-button" @click="editEdge(edge)">✏️</button>
+                <button class="edit-button" @click="editEdge(edge)">
+                  Edit
+                </button>
               </td>
             </tr>
           </template>
@@ -76,8 +80,8 @@ const editEdge = edge => {
 <style scoped>
 .panel-section {
   border: 2px solid black;
-  padding: 16px;
-  width: 600px;
+  padding: 8px;
+  width: 100%;
   font-family: sans-serif;
 }
 
@@ -86,6 +90,7 @@ const editEdge = edge => {
   gap: 8px;
   margin-bottom: 8px;
   justify-content: flex-start;
+  flex-wrap: wrap;
 }
 
 .tab-buttons button {
@@ -106,6 +111,9 @@ const editEdge = edge => {
   border: 2px solid black;
   max-height: 300px;
   overflow-y: auto;
+}
+.table-wrapper::-webkit-scrollbar {
+  height: 8px;
 }
 
 table {
@@ -129,9 +137,11 @@ thead th {
 }
 
 .edit-button {
-  font-size: 20px;
-  background: none;
-  border: none;
+  padding: 2px 3px;
+  font-size: 16px;
+  border: 2px solid black;
+  background-color: white;
+  border-radius: 4px;
   cursor: pointer;
 }
 </style>

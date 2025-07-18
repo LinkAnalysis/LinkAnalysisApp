@@ -1,16 +1,21 @@
 <script setup>
 import Graph from "graphology"
 import Sigma from "sigma"
+import VertexWindow from "./VertexWindow.vue"
+import { useI18n } from "vue-i18n"
 
-import { onBeforeUnmount, onMounted, ref, watch } from "vue"
-
+import { onBeforeUnmount, onMounted, ref } from "vue"
 const props = defineProps({
   graph: Graph,
 })
 
+const clickedNodeData = ref(null)
+const popupPosition = ref({ x: 0, y: 0 })
+const clickedNodeId = ref(null)
 const container = ref(null)
-let renderer = null
+const { t } = useI18n()
 
+let renderer = null
 let draggedNode = null
 let isDragging = false
 
@@ -45,10 +50,13 @@ onMounted(() => {
     event.original.preventDefault()
     event.original.stopPropagation()
   })
+  renderer.on("clickNode", ({ node }) => {
+    selectNode(node)
+  })
 
   // On mouse up, we reset the dragging mode
   const handleUp = () => {
-    if (draggedNode) {
+    if (draggedNode && draggedNode !== clickedNodeId.value) {
       props.graph.removeNodeAttribute(draggedNode, "highlighted")
     }
     isDragging = false
@@ -56,11 +64,46 @@ onMounted(() => {
   }
   renderer.on("upNode", handleUp)
   renderer.on("upStage", handleUp)
+
+  renderer.getCamera().on("updated", () => {
+    updatePopupPosition()
+  })
 })
 
 onBeforeUnmount(() => {
   if (renderer) renderer.kill()
 })
+
+function updatePopupPosition() {
+  if (!clickedNodeId.value) return
+  const attrs = props.graph.getNodeAttributes(clickedNodeId.value)
+  const screenPos = renderer.graphToViewport({ x: attrs.x, y: attrs.y })
+  popupPosition.value = { x: screenPos.x, y: screenPos.y }
+}
+
+function selectNode(nodeId) {
+  if (clickedNodeId.value && clickedNodeId.value !== nodeId) {
+    props.graph.removeNodeAttribute(clickedNodeId.value, "highlighted")
+  }
+  clickedNodeId.value = nodeId
+  props.graph.setNodeAttribute(nodeId, "highlighted", true)
+
+  const attrs = props.graph.getNodeAttributes(nodeId)
+  clickedNodeData.value = {
+    id: nodeId,
+    Description: attrs.label,
+    numOfNeighbors: props.graph.neighbors(nodeId).length,
+  }
+  updatePopupPosition()
+}
+
+function clearSelection() {
+  if (clickedNodeId.value) {
+    props.graph.removeNodeAttribute(clickedNodeId.value, "highlighted")
+  }
+  clickedNodeId.value = null
+  clickedNodeData.value = null
+}
 </script>
 
 <template>
@@ -71,6 +114,23 @@ onBeforeUnmount(() => {
       <button @click="zoomOut">Zoom Out</button>
       <button @click="resetZoom">Reset</button>
     </div>
+    <VertexWindow
+      v-if="clickedNodeData"
+      :visible="true"
+      :position="popupPosition"
+      @close="clearSelection"
+    >
+      ID: {{ clickedNodeData.id }}<br />
+      <span v-if="clickedNodeData.Description">
+        {{ t("vertex_window.name") }}: {{ clickedNodeData.Description }}<br />
+      </span>
+      <span v-else>
+        {{ t("vertex_window.name") }}: {{ t("vertex_window.no_description")
+        }}<br />
+      </span>
+      {{ t("vertex_window.number_of_neighbors") }}:
+      {{ clickedNodeData.numOfNeighbors }}<br />
+    </VertexWindow>
   </div>
 </template>
 
@@ -112,5 +172,16 @@ onBeforeUnmount(() => {
 .controls button {
   cursor: pointer;
   width: 100%;
+}
+
+.popup {
+  position: absolute;
+  background: white;
+  border: 1px solid black;
+  padding: 8px;
+  z-index: 20;
+  transform: translate(10px, -50%);
+  pointer-events: auto;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 </style>

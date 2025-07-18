@@ -1,3 +1,27 @@
+<script setup>
+import HeaderButtonComponent from "./HeaderButtonComponent.vue"
+import { useFileStore } from "../../stores/fileStore.js"
+import { OpenFileExplorer } from "../../../wailsjs/go/main/App"
+import { useI18n } from "vue-i18n"
+
+const { t } = useI18n()
+const fileStore = useFileStore()
+
+const uploadNodesConfiguration = async () => {
+  const filePath = await OpenFileExplorer()
+  if (filePath) {
+    fileStore.setNodeFile(filePath)
+  }
+}
+
+const uploadEdgesConfiguration = async () => {
+  const filePath = await OpenFileExplorer()
+  if (filePath) {
+    fileStore.setEdgeFile(filePath)
+  }
+}
+</script>
+
 <template>
   <v-app-bar class="header-bar" flat elevation="0" app>
     <div class="branding">
@@ -7,7 +31,7 @@
     <div class="button-box">
       <div class="file-button-box">
         <HeaderButtonComponent
-          :label="labels.file"
+          :label="t('file')"
           name="file"
           :options="[
             {
@@ -28,57 +52,23 @@
         />
       </div>
       <HeaderButtonComponent
-        :label="labels.workspace"
+        :label="t('workspace')"
         name="workspace"
         @click="emitChange"
       />
       <HeaderButtonComponent
-        :label="labels.view"
+        :label="t('view')"
         name="view"
         @click="emitChange"
       />
       <HeaderButtonComponent
-        :label="labels.settings"
+        :label="t('settings')"
         name="settings"
         @click="emitChange"
       />
     </div>
   </v-app-bar>
 </template>
-
-<script setup>
-import HeaderButtonComponent from "./HeaderButtonComponent.vue"
-import fileStore from "../../stores/fileStore"
-import { useTranslations } from "@/i18n/useTranslations"
-import { OpenFileExplorer } from "../../../wailsjs/go/main/App"
-
-const emit = defineEmits(["change-section"])
-
-const { currentLang, labels } = useTranslations()
-const emitChange = section => {
-  emit("change-section", section)
-}
-
-const uploadNodesConfiguration = async () => {
-  const filePath = await OpenFileExplorer()
-  if (filePath) {
-    fileStore.setNodeFilePath(filePath)
-    console.log("Selected nodes file:", filePath)
-  } else {
-    console.log("No file selected")
-  }
-}
-
-const uploadEdgesConfiguration = async () => {
-  const filePath = await OpenFileExplorer()
-  if (filePath) {
-    fileStore.setEdgeFilePath(filePath)
-    console.log("Selected nodes file:", filePath)
-  } else {
-    console.log("No file selected")
-  }
-}
-</script>
 
 <style scoped>
 .header-bar {

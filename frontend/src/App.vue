@@ -1,9 +1,13 @@
-<script lang="js" setup>
-import { ref, provide, watch, computed, isRef } from "vue"
-import HeaderComponent from "./components/header/HeaderComponent.vue"
-import GraphView from "./components/GraphView.vue"
-import LeftPanelComponent from "./components/leftpanel/LeftPanelComponent.vue"
+<script setup lang="js">
+import { ref, watch } from "vue"
+
+import HeaderComponent from "@/components/header/HeaderComponent.vue"
+import GraphView from "@/components/graph/GraphView.vue"
+import Panel from "@/components/panels/Panel.vue"
+
 import Graph from "graphology"
+import { useFileStore } from "@/stores/fileStore"
+import { storeToRefs } from "pinia"
 import {
   parseCSV,
   update_graph_edges,
@@ -18,13 +22,13 @@ const currentLang = ref("en")
 
 const graph = ref(null)
 const isLoading = ref(false)
+const graphKey = ref(0)
 
-const currentSection = ref("overview")
+const fileStore = useFileStore()
+const { nodePath, edgePath } = storeToRefs(fileStore)
+
 watch(
-  () => [
-    fileStore.selectedNodeFilePath.value,
-    fileStore.selectedEdgeFilePath.value,
-  ],
+  () => [nodePath.value, edgePath.value],
   async ([nodeFile, edgeFile]) => {
     if (nodeFile && edgeFile) {
       isLoading.value = true
@@ -33,7 +37,6 @@ watch(
     } else if (edgeFile) {
       isLoading.value = true
       graph.value = await load_graph(null, edgeFile)
-      console.log(graph.value)
       isLoading.value = false
     } else {
       graph.value = null
@@ -42,13 +45,27 @@ watch(
   { immediate: true },
 )
 
-const graphKey = ref(0)
-
 watch(graph, () => {
   graphKey.value++
 })
 
-provide("currentLang", currentLang)
+// const get_edges_data = () => {
+//   fetch("/random_edge.csv")
+//     .then(resp => resp.text())
+//     .then(csv_r => parseCSV(csv_r))
+//     .then(csv => update_graph_edges(graph.value, csv))
+// }
+
+// const get_nodes_data = () => {
+//   fetch("/random_node.csv")
+//     .then(resp => resp.text())
+//     .then(csv_r => parseCSV(csv_r))
+//     .then(csv => update_graph_nodes(graph.value, csv))
+// }
+
+// const clear_graph = () => {
+//   graph.value.clear()
+// }
 </script>
 
 <template>
@@ -58,18 +75,15 @@ provide("currentLang", currentLang)
       <v-main class="main-area">
         <v-container fluid class="layout-grid">
           <div class="left-panel">
-            <LeftPanelComponent :graph="graph" />
+            <Panel :graph="graph" position="left" />
           </div>
           <div class="center-panel">
             <MainContent :current-section="currentSection" />
             <TabsManager v-model="graph" />
             <GraphView v-if="graph" :key="graphKey" :graph="graph" />
-            <!-- <div v-else class="graph-status-message">
-              <p>{{ statusMessage }}</p>
-            </div> -->
           </div>
           <div class="right-panel">
-            <RightPanelComponent :graph="graph" />
+            <Panel :graph="graph" position="right" />
           </div>
         </v-container>
       </v-main>
@@ -113,6 +127,11 @@ provide("currentLang", currentLang)
 .right-panel {
   background-color: #fdfdfd;
   height: 100%;
+}
+
+.left-panel,
+.right-panel {
+  overflow-y: auto;
 }
 
 .center-panel {
