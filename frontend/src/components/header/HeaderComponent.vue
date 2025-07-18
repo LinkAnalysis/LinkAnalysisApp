@@ -1,63 +1,10 @@
-<template>
-  <v-app-bar class="header-bar" flat elevation="0" app>
-    <div class="branding">
-      <img src="@/assets/images/logo.svg" alt="Logo" class="logo" />
-      <span class="app-name">LinkAnalysis</span>
-    </div>
-    <div class="button-box">
-      <div class="file-button-box">
-        <HeaderButtonComponent
-          :label="labels.file"
-          name="file"
-          :options="[
-            {
-              label: 'Upload Graph',
-              onClick: () => console.log('Upload Graph'),
-              children: [
-                {
-                  label: 'Upload edges configuration',
-                  onClick: () => uploadEdgesConfiguration(),
-                },
-                {
-                  label: 'Upload nodes configuration',
-                  onClick: () => uploadNodesConfiguration(),
-                },
-              ],
-            },
-          ]"
-        />
-      </div>
-      <HeaderButtonComponent
-        :label="labels.workspace"
-        name="workspace"
-        @click="emitChange"
-      />
-      <HeaderButtonComponent
-        :label="labels.view"
-        name="view"
-        @click="emitChange"
-      />
-      <HeaderButtonComponent
-        :label="labels.settings"
-        name="settings"
-        @click="emitChange"
-      />
-    </div>
-  </v-app-bar>
-</template>
-
 <script setup>
 import HeaderButtonComponent from "./HeaderButtonComponent.vue"
-import fileStore from "../../stores/fileStore"
-import { useTranslations } from "@/i18n/useTranslations"
+import fileStore from "../../stores/fileStore.js"
 import { OpenFileExplorer } from "../../../wailsjs/go/main/App"
+import { useI18n } from "vue-i18n"
 
-const emit = defineEmits(["change-section"])
-
-const { currentLang, labels } = useTranslations()
-const emitChange = section => {
-  emit("change-section", section)
-}
+const { t } = useI18n()
 
 const uploadNodesConfiguration = async () => {
   const filePath = await OpenFileExplorer()
@@ -79,6 +26,54 @@ const uploadEdgesConfiguration = async () => {
   }
 }
 </script>
+
+<template>
+  <v-app-bar class="header-bar" flat elevation="0" app>
+    <div class="branding">
+      <img src="@/assets/images/logo.svg" alt="Logo" class="logo" />
+      <span class="app-name">LinkAnalysis</span>
+    </div>
+    <div class="button-box">
+      <div class="file-button-box">
+        <HeaderButtonComponent
+          :label="t('file')"
+          name="file"
+          :options="[
+            {
+              label: 'Upload Graph',
+              onClick: () => console.log('Upload Graph'),
+              children: [
+                {
+                  label: 'Upload edges configuration',
+                  onClick: () => uploadEdgesConfiguration(),
+                },
+                {
+                  label: 'Upload nodes configuration',
+                  onClick: () => uploadNodesConfiguration(),
+                },
+              ],
+            },
+          ]"
+        />
+      </div>
+      <HeaderButtonComponent
+        :label="t('workspace')"
+        name="workspace"
+        @click="emitChange"
+      />
+      <HeaderButtonComponent
+        :label="t('view')"
+        name="view"
+        @click="emitChange"
+      />
+      <HeaderButtonComponent
+        :label="t('settings')"
+        name="settings"
+        @click="emitChange"
+      />
+    </div>
+  </v-app-bar>
+</template>
 
 <style scoped>
 .header-bar {
