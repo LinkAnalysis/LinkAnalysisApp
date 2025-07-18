@@ -8,11 +8,14 @@ export const useFileStore = defineStore("files", {
   state: () => ({
     nodePath: null,
     edgePath: null,
+    layoutType: "circular",
+    layoutParams: {},
   }),
 
   getters: {
     nodeFileName: state => getFileName(state.nodePath),
     edgeFileName: state => getFileName(state.edgePath),
+    layoutName: state => state.layoutName,
   },
 
   actions: {
@@ -21,6 +24,10 @@ export const useFileStore = defineStore("files", {
     },
     setEdgeFile(path) {
       this.edgePath = path
+    },
+    setLayout(type, params = {}) {
+      this.layoutType = type
+      this.layoutParams = params
     },
   },
 })

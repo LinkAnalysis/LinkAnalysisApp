@@ -1,11 +1,12 @@
 import Papa from "papaparse"
 import Graph from "graphology"
-//import fs from "fs"
 import circular from "graphology-layout/circular"
+import forceAtlas2 from "graphology-layout-forceatlas2"
 import { ReadTextFile } from "../../wailsjs/go/main/App"
+import { layouts } from "./layouts"
+
 export function parseCSV(filename) {
   return new Promise((resolve, reject) => {
-    //const file = fs.readFileSync(filename, "utf8")
     Papa.parse(filename, {
       header: true,
       delimiter: ",",
@@ -17,7 +18,12 @@ export function parseCSV(filename) {
 }
 
 // constructs the graphology Graph from the node and edge files
-export async function load_graph(node_file, edge_file) {
+export async function load_graph(
+  node_file,
+  edge_file,
+  layout = "circular",
+  layoutParams = {},
+) {
   const graph = new Graph()
 
   const csv_e = await ReadTextFile(edge_file)
@@ -28,7 +34,7 @@ export async function load_graph(node_file, edge_file) {
     nodes.forEach(line => {
       const id = line.id
       const description = line.Description
-      graph.addNode(id, { label: description, size: 20 })
+      graph.addNode(id, { label: description, size: 20, x: 0, y: 0 })
     })
   } else {
     const added = new Set()
@@ -36,11 +42,11 @@ export async function load_graph(node_file, edge_file) {
       const first_vertex = line.x
       const second_vertex = line.y
       if (!added.has(first_vertex)) {
-        graph.addNode(first_vertex, { size: 20 })
+        graph.addNode(first_vertex, { size: 20, x: 0, y: 0 })
         added.add(first_vertex)
       }
       if (!added.has(second_vertex)) {
-        graph.addNode(second_vertex, { size: 20 })
+        graph.addNode(second_vertex, { size: 20, x: 0, y: 0 })
         added.add(second_vertex)
       }
     })
@@ -55,7 +61,16 @@ export async function load_graph(node_file, edge_file) {
     })
   })
 
-  circular.assign(graph)
+  let layoutEntry = layouts[layout]
+  if (!layoutEntry) {
+    layoutEntry = layouts.circular
+  }
+  const params = {
+    ...layoutEntry.defaultParams,
+    ...(layoutParams || {}),
+  }
+  layoutEntry.apply(graph, params)
+
   return graph
 }
 
