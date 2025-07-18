@@ -19,8 +19,8 @@ const { nodeCount, edgeCount } = useGraphStats(graphRef)
     <div class="panel-wrapper">
       <OverviewComponent
         class="panel-section"
-        :nodeCount="nodeCount"
-        :edgesCount="edgeCount"
+        :node-count="nodeCount"
+        :edges-count="edgeCount"
       />
     </div>
     <div class="panel-wrapper">

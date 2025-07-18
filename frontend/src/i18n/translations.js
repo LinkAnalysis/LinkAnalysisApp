@@ -12,6 +12,10 @@ export default {
       edge_file: "Plik krawędzi",
       node_file: "Plik wierzchołków",
     },
+    name: "Nazwa",
+    no_description: "Brak opisu",
+    number_of_neighbors: "Liczba sąsiadów",
+    no_file_selected: "Nie wybrano pliku",
   },
   en: {
     file: "File",
@@ -26,5 +30,9 @@ export default {
       edge_file: "Edges configuration",
       node_file: "Nodes configuration",
     },
+    name: "Name",
+    no_description: "No description available",
+    number_of_neighbors: "Number of neighbors",
+    no_file_selected: "No file selected",
   },
 }

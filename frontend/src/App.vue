@@ -74,9 +74,6 @@ watch(graph, () => {
           </div>
           <div class="center-panel">
             <GraphView v-if="graph" :key="graphKey" :graph="graph" />
-            <!-- <div v-else class="graph-status-message">
-              <p>{{ statusMessage }}</p>
-            </div> -->
           </div>
           <div class="right-panel">
             <Panel :graph="graph" position="right" />
