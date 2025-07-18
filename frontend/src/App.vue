@@ -1,5 +1,5 @@
 <script lang="js" setup>
-import { ref, provide, watch, computed } from "vue"
+import { ref, provide, watch, computed, isRef } from "vue"
 import HeaderComponent from "./components/header/HeaderComponent.vue"
 import GraphView from "./components/GraphView.vue"
 import LeftPanelComponent from "./components/leftpanel/LeftPanelComponent.vue"
@@ -13,30 +13,41 @@ import {
 import RightPanelComponent from "./components/rightpanel/RightPanelComponent.vue"
 import fileStore from "./stores/fileStore"
 import TabsManager from "./components/TabsManager.vue"
+
 const currentLang = ref("en")
 
 const isLoading = ref(false)
 
 const tabs_manager = ref(null)
-const selected_tab_index = ref(0)
+const selected_tab_id = ref(0)
 const graphs = ref([])
+const tabs_ids = ref([])
 
 const graph = computed({
   get() {
     if (graphs.value.length > 0)
-      return graphs.value[selected_tab_index.value].value ?? null
+      return graphs.value[selected_tab_id.value].value ?? null
   },
 
   set(val) {
     if (graphs.value.length > 0)
-      if (graphs.value[selected_tab_index.value]) {
-        graphs.value[selected_tab_index.value].value = val
+      if (graphs.value[selected_tab_id.value]) {
+        graphs.value[selected_tab_id.value].value = val
       }
   },
 })
 
-const on_new_tab = () => {
+const on_new_tab = id => {
   graphs.value.push(ref(null))
+  tabs_ids.value.push(id)
+}
+
+const on_remove_tab = id => {
+  const index_to_remove = tabs_ids.value.findIndex(el => el == id)
+  if (el >= 0) {
+    graphs.value.splice(index_to_remove, 1)
+    tabs_ids.value.splice(index_to_remove, 1)
+  }
 }
 
 const currentSection = ref("overview")
@@ -83,9 +94,10 @@ provide("currentLang", currentLang)
           <div class="center-panel">
             <MainContent :current-section="currentSection" />
             <TabsManager
-              v-model:selected_tab_index="selected_tab_index"
+              v-model:selected_tab_id="selected_tab_id"
               ref="tabs_manager"
               @new_tab="on_new_tab"
+              @tab_closed="on_remove_tab"
             />
             <GraphView v-if="graph" :key="graphKey" :graph="graph" />
             <!-- <div v-else class="graph-status-message">
