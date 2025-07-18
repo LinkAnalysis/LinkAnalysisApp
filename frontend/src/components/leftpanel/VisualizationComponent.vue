@@ -127,21 +127,24 @@ const settings = reactive({
 <style scoped>
 .panel-section {
   border: 2px solid black;
-  padding: 16px;
-  width: 420px;
+  padding: 8px;
+  width: 100%;
   font-family: sans-serif;
 }
 
 h2 {
   margin-top: 0;
   text-align: center;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
 }
 
 .table-wrapper {
   border: 2px solid black;
   max-height: 400px;
   overflow-y: auto;
+}
+.table-wrapper::-webkit-scrollbar {
+  height: 8px;
 }
 
 .settings-table {

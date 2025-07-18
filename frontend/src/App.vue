@@ -127,6 +127,11 @@ provide("currentLang", currentLang)
   height: 100%;
 }
 
+.left-panel,
+.right-panel {
+  overflow-y: auto;
+}
+
 .center-panel {
   background-color: #fff;
 }
