@@ -16,39 +16,8 @@ import TabsManager from "./components/TabsManager.vue"
 
 const currentLang = ref("en")
 
+const graph = ref(null)
 const isLoading = ref(false)
-
-const tabs_manager = ref(null)
-const selected_tab_id = ref(0)
-const graphs = ref([])
-const tabs_ids = ref([])
-
-const graph = computed({
-  get() {
-    if (graphs.value.length > 0)
-      return graphs.value[selected_tab_id.value].value ?? null
-  },
-
-  set(val) {
-    if (graphs.value.length > 0)
-      if (graphs.value[selected_tab_id.value]) {
-        graphs.value[selected_tab_id.value].value = val
-      }
-  },
-})
-
-const on_new_tab = id => {
-  graphs.value.push(ref(null))
-  tabs_ids.value.push(id)
-}
-
-const on_remove_tab = id => {
-  const index_to_remove = tabs_ids.value.findIndex(el => el == id)
-  if (el >= 0) {
-    graphs.value.splice(index_to_remove, 1)
-    tabs_ids.value.splice(index_to_remove, 1)
-  }
-}
 
 const currentSection = ref("overview")
 watch(
@@ -93,12 +62,7 @@ provide("currentLang", currentLang)
           </div>
           <div class="center-panel">
             <MainContent :current-section="currentSection" />
-            <TabsManager
-              v-model:selected_tab_id="selected_tab_id"
-              ref="tabs_manager"
-              @new_tab="on_new_tab"
-              @tab_closed="on_remove_tab"
-            />
+            <TabsManager v-model="graph" />
             <GraphView v-if="graph" :key="graphKey" :graph="graph" />
             <!-- <div v-else class="graph-status-message">
               <p>{{ statusMessage }}</p>
