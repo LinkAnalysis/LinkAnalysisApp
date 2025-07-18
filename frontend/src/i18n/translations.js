@@ -10,6 +10,10 @@ export const translations = {
     graph_type: "Typ grafu",
     edge_file: "Konfiguracja krawędzi",
     node_file: "Konfiguracja wierzchołków",
+    name: "Nazwa",
+    no_description: "Brak opisu",
+    number_of_neighbors: "Liczba sąsiadów",
+    no_file_selected: "Nie wybrano pliku",
   },
   en: {
     file: "File",
@@ -22,5 +26,9 @@ export const translations = {
     graph_type: "Graph type",
     edge_file: "Edges configuration",
     node_file: "Nodes configuration",
+    name: "Name",
+    no_description: "No description available",
+    number_of_neighbors: "Number of neighbors",
+    no_file_selected: "No file selected",
   },
 }
