@@ -123,12 +123,13 @@ onMounted(() => {
 <style scoped>
 .wrapper {
   padding: 0;
+  margin: 0;
 }
 
 .tabs-container {
   display: flex;
   gap: 0;
-  margin-bottom: 1rem;
+  margin-bottom: 0;
   background-color: aquamarine;
 }
 

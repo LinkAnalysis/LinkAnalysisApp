@@ -14,8 +14,6 @@ import {
   update_graph_nodes,
   load_graph,
 } from "./graph_constructor/file_loader"
-import RightPanelComponent from "./components/rightpanel/RightPanelComponent.vue"
-import fileStore from "./stores/fileStore"
 import TabsManager from "./components/TabsManager.vue"
 
 const currentLang = ref("en")
