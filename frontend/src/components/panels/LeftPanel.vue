@@ -4,7 +4,6 @@ import EdgesNodesComponent from "./leftpanelcontent/EdgesNodesComponent.vue"
 import LayoutComponent from "./leftpanelcontent/LayoutComponent.vue"
 import VisualizationComponent from "./leftpanelcontent/VisualizationComponent.vue"
 import Graph from "graphology"
-
 import { useGraphElements } from "../../composables/useGraphElements"
 
 const props = defineProps({
@@ -13,6 +12,28 @@ const props = defineProps({
 const graphRef = toRef(props, "graph")
 
 const { nodes, edges } = useGraphElements(graphRef)
+
+function handleEditNode(updated) {
+  graphRef.value.updateNodeAttributes(updated.id, old => ({
+    ...old,
+    label: updated.label,
+  }))
+}
+
+function handleEditEdge(updated) {
+  graphRef.value.updateEdgeAttributes(updated.id, old => ({
+    ...old,
+    label: updated.label,
+  }))
+}
+
+function handleDeleteItem(type, id) {
+  if (type === "node") {
+    graphRef.value.dropNode(id)
+  } else if (type === "edge") {
+    graphRef.value.dropEdge(id)
+  }
+}
 </script>
 
 <template>
@@ -22,6 +43,10 @@ const { nodes, edges } = useGraphElements(graphRef)
         class="panel-section"
         :nodes="nodes"
         :edges="edges"
+        @edit-node="handleEditNode"
+        @edit-edge="handleEditEdge"
+        @delete-node="id => handleDeleteItem('node', id)"
+        @delete-edge="id => handleDeleteItem('edge', id)"
       />
     </div>
     <div class="panel-wrapper">

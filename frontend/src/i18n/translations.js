@@ -1,9 +1,11 @@
 export default {
   pl: {
-    file: "Plik",
-    workspace: "Projekt",
-    view: "Widok",
-    settings: "Ustawienia",
+    header: {
+      file: "Plik",
+      workspace: "Projekt",
+      view: "Widok",
+      settings: "Ustawienia",
+    },
     overview: {
       title: "Podstawowe informacje",
       num_of_edges: "Liczba krawędzi",
@@ -20,10 +22,12 @@ export default {
     },
   },
   en: {
-    file: "File",
-    workspace: "Workspace",
-    view: "View",
-    settings: "Settings",
+    header: {
+      file: "File",
+      workspace: "Workspace",
+      view: "View",
+      settings: "Settings",
+    },
     overview: {
       title: "Overview",
       num_of_edges: "Number of edges",
