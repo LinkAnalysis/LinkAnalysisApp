@@ -1,10 +1,10 @@
 <script setup>
 import Graph from "graphology"
 import Sigma from "sigma"
-import VertexWindow from "./detailswindow/VertexWindow.vue"
+import VertexWindow from "./VertexWindow.vue"
+import { useI18n } from "vue-i18n"
 
-import { onBeforeUnmount, onMounted, ref, watch } from "vue"
-import { useTranslations } from "@/i18n/useTranslations"
+import { onBeforeUnmount, onMounted, ref } from "vue"
 const props = defineProps({
   graph: Graph,
 })
@@ -13,7 +13,7 @@ const clickedNodeData = ref(null)
 const popupPosition = ref({ x: 0, y: 0 })
 const clickedNodeId = ref(null)
 const container = ref(null)
-const { labels } = useTranslations()
+const { t } = useI18n()
 
 let renderer = null
 let draggedNode = null
@@ -122,11 +122,14 @@ function clearSelection() {
     >
       ID: {{ clickedNodeData.id }}<br />
       <span v-if="clickedNodeData.Description">
-        {{ labels.name }}: {{ clickedNodeData.Description }}<br />
+        {{ t("vertex_window.name") }}: {{ clickedNodeData.Description }}<br />
       </span>
-      <span v-else> {{ labels.name }}: {{ labels.no_description }}<br /> </span>
-      {{ labels.number_of_neighbors }}: {{ clickedNodeData.numOfNeighbors
-      }}<br />
+      <span v-else>
+        {{ t("vertex_window.name") }}: {{ t("vertex_window.no_description")
+        }}<br />
+      </span>
+      {{ t("vertex_window.number_of_neighbors") }}:
+      {{ clickedNodeData.numOfNeighbors }}<br />
     </VertexWindow>
   </div>
 </template>

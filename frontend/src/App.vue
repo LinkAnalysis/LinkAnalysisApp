@@ -1,28 +1,29 @@
-<script lang="js" setup>
-import { ref, provide, watch } from "vue"
-import HeaderComponent from "./components/header/HeaderComponent.vue"
-import GraphView from "./components/GraphView.vue"
-import LeftPanelComponent from "./components/leftpanel/LeftPanelComponent.vue"
+<script setup lang="js">
+import { ref, watch } from "vue"
+
+import HeaderComponent from "@/components/header/HeaderComponent.vue"
+import GraphView from "@/components/graph/GraphView.vue"
+import Panel from "@/components/panels/Panel.vue"
+
 import Graph from "graphology"
+import { useFileStore } from "@/stores/fileStore"
+import { storeToRefs } from "pinia"
 import {
   parseCSV,
   update_graph_edges,
   update_graph_nodes,
   load_graph,
-} from "./graph_constructor/file_loader"
-import RightPanelComponent from "./components/rightpanel/RightPanelComponent.vue"
-import fileStore from "./stores/fileStore"
-const currentLang = ref("en")
+} from "@/graph_constructor/file_loader"
 
 const graph = ref(new Graph())
 const isLoading = ref(false)
+const graphKey = ref(0)
 
-const currentSection = ref("overview")
+const fileStore = useFileStore()
+const { nodePath, edgePath } = storeToRefs(fileStore)
+
 watch(
-  () => [
-    fileStore.selectedNodeFilePath.value,
-    fileStore.selectedEdgeFilePath.value,
-  ],
+  () => [nodePath.value, edgePath.value],
   async ([nodeFile, edgeFile]) => {
     if (nodeFile && edgeFile) {
       isLoading.value = true
@@ -31,7 +32,6 @@ watch(
     } else if (edgeFile) {
       isLoading.value = true
       graph.value = await load_graph(null, edgeFile)
-      console.log(graph.value)
       isLoading.value = false
     } else {
       graph.value = null
@@ -39,8 +39,6 @@ watch(
   },
   { immediate: true },
 )
-
-const graphKey = ref(0)
 
 watch(graph, () => {
   graphKey.value++
@@ -63,8 +61,6 @@ watch(graph, () => {
 // const clear_graph = () => {
 //   graph.value.clear()
 // }
-
-provide("currentLang", currentLang)
 </script>
 
 <template>
@@ -74,14 +70,13 @@ provide("currentLang", currentLang)
       <v-main class="main-area">
         <v-container fluid class="layout-grid">
           <div class="left-panel">
-            <LeftPanelComponent :graph="graph" />
+            <Panel :graph="graph" position="left" />
           </div>
           <div class="center-panel">
-            <MainContent :current-section="currentSection" />
             <GraphView v-if="graph" :key="graphKey" :graph="graph" />
           </div>
           <div class="right-panel">
-            <RightPanelComponent :graph="graph" />
+            <Panel :graph="graph" position="right" />
           </div>
         </v-container>
       </v-main>
