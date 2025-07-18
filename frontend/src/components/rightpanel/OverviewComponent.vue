@@ -35,11 +35,21 @@ const getFileName = fullPath => {
           </tr>
           <tr>
             <td>{{ labels.edge_file }}</td>
-            <td>{{ getFileName(fileStore.selectedEdgeFilePath.value) }}</td>
+            <td v-if="fileStore.selectedEdgeFilePath.value">
+              {{ getFileName(fileStore.selectedEdgeFilePath.value) }}
+            </td>
+            <td v-else>
+              {{ labels.no_file_selected }}
+            </td>
           </tr>
           <tr>
             <td>{{ labels.node_file }}</td>
-            <td>{{ getFileName(fileStore.selectedNodeFilePath.value) }}</td>
+            <td v-if="fileStore.selectedNodeFilePath.value">
+              {{ getFileName(fileStore.selectedNodeFilePath.value) }}
+            </td>
+            <td v-else>
+              {{ labels.no_file_selected }}
+            </td>
           </tr>
         </tbody>
       </table>
