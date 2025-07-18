@@ -1,61 +1,55 @@
 <template>
   <div class="layout-settings">
     <h2>Layout</h2>
-
     <select v-model="selectedLayout" class="dropdown">
-      <option v-for="layout in layouts" :key="layout" :value="layout">
-        {{ layout }}
+      <option v-for="l in layouts" :key="l.key" :value="l.key">
+        {{ l.label }}
       </option>
     </select>
 
-    <table class="settings-table">
-      <tbody>
-        <tr v-for="(value, key) in currentParams" :key="key">
-          <td>{{ formatLabel(key) }}</td>
-          <td v-if="typeof value === 'boolean'">
-            <input
-              type="checkbox"
-              v-model="layoutParams[selectedLayout][key]"
-            />
-          </td>
-          <td v-else>
-            <input
-              type="number"
-              v-model.number="layoutParams[selectedLayout][key]"
-            />
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div>
+      <table v-if="hasParams" class="settings-table">
+        <tbody>
+          <tr v-for="(value, key) in currentParams" :key="key">
+            <td>{{ formatLabel(key) }}</td>
+            <td v-if="typeof value === 'boolean'">
+              <input
+                type="checkbox"
+                v-model="layoutParams[selectedLayout][key]"
+              />
+            </td>
+            <td v-else>
+              <input
+                type="number"
+                v-model.number="layoutParams[selectedLayout][key]"
+              />
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
-    <button class="apply-button" @click="applySettings">Apply</button>
+      <button class="apply-button" @click="applySettings">Apply</button>
+    </div>
   </div>
 </template>
 
 <script>
+import { useFileStore } from "@/stores/fileStore"
+import { layouts as layoutsMap } from "@/composables/layouts"
+
 export default {
   name: "LayoutSettings",
   data() {
     return {
-      selectedLayout: "Force Atlas 2",
-      layouts: ["Force Atlas 2", "Fruchterman-Reingold", "Yifan Hu"],
+      fileStore: useFileStore(),
+      selectedLayout: "circular",
+      layouts: [
+        { key: "circular", label: "Circular" },
+        { key: "forceAtlas2", label: "Force Atlas 2" },
+      ],
       layoutParams: {
-        "Force Atlas 2": {
-          iterations: 1000,
-          gravity: 1.0,
-          scalingRatio: 10,
-          strongGravityMode: true,
-        },
-        "Fruchterman-Reingold": {
-          area: 10000,
-          gravity: 5,
-          speed: 0.1,
-        },
-        "Yifan Hu": {
-          optimalDistance: 30,
-          relativeStrength: 0.2,
-          stepRatio: 0.95,
-        },
+        circular: { ...layoutsMap.circular.defaultParams },
+        forceAtlas2: { ...layoutsMap.forceAtlas2.defaultParams },
       },
     }
   },
@@ -63,9 +57,13 @@ export default {
     currentParams() {
       return this.layoutParams[this.selectedLayout]
     },
+    hasParams() {
+      return Object.keys(this.currentParams).length > 0
+    },
   },
   methods: {
     applySettings() {
+      this.fileStore.setLayout(this.selectedLayout, this.currentParams)
       console.log("Applied layout config:", {
         layout: this.selectedLayout,
         parameters: this.currentParams,
