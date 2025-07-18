@@ -6,7 +6,8 @@ import GraphView from "@/components/graph/GraphView.vue"
 import Panel from "@/components/panels/Panel.vue"
 
 import Graph from "graphology"
-import fileStore from "@/stores/fileStore.js"
+import { useFileStore } from "@/stores/fileStore"
+import { storeToRefs } from "pinia"
 import {
   parseCSV,
   update_graph_edges,
@@ -18,11 +19,11 @@ const graph = ref(new Graph())
 const isLoading = ref(false)
 const graphKey = ref(0)
 
+const fileStore = useFileStore()
+const { nodePath, edgePath } = storeToRefs(fileStore)
+
 watch(
-  () => [
-    fileStore.selectedNodeFilePath.value,
-    fileStore.selectedEdgeFilePath.value,
-  ],
+  () => [nodePath.value, edgePath.value],
   async ([nodeFile, edgeFile]) => {
     if (nodeFile && edgeFile) {
       isLoading.value = true
@@ -31,7 +32,6 @@ watch(
     } else if (edgeFile) {
       isLoading.value = true
       graph.value = await load_graph(null, edgeFile)
-      console.log(graph.value)
       isLoading.value = false
     } else {
       graph.value = null

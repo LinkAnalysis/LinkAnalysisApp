@@ -3,7 +3,7 @@ import messages from "./translations"
 
 export const i18n = createI18n({
   legacy: false,
-  locale: "en",
-  fallbackLocale: "en",
+  locale: "pl",
+  fallbackLocale: "pl",
   messages,
 })

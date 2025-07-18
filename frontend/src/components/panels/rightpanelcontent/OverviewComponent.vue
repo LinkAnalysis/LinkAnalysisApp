@@ -1,6 +1,7 @@
 <script setup>
 import { useI18n } from "vue-i18n"
-import fileStore from "../../../stores/fileStore.js"
+import { useFileStore } from "@/stores/fileStore"
+import { storeToRefs } from "pinia"
 
 const props = defineProps({
   nodeCount: Number,
@@ -10,10 +11,8 @@ const props = defineProps({
 const { t } = useI18n()
 const graphType = "Undirected"
 
-const getFileName = fullPath => {
-  return fullPath ? fullPath.split(/[/\\]/).pop() : ""
-}
-console.log("overview.title →", t("overview.title"))
+const fileStore = useFileStore()
+const { nodeFileName, edgeFileName } = storeToRefs(fileStore)
 </script>
 
 <template>
@@ -36,11 +35,11 @@ console.log("overview.title →", t("overview.title"))
           </tr>
           <tr>
             <td>{{ t("overview.edge_file") }}</td>
-            <td>{{ getFileName(selectedEdgeFilePath) }}</td>
+            <td>{{ edgeFileName || t("overview.no_file_selected") }}</td>
           </tr>
           <tr>
             <td>{{ t("overview.node_file") }}</td>
-            <td>{{ getFileName(selectedNodeFilePath) }}</td>
+            <td>{{ nodeFileName || t("overview.no_file_selected") }}</td>
           </tr>
         </tbody>
       </table>

@@ -1,28 +1,23 @@
 <script setup>
 import HeaderButtonComponent from "./HeaderButtonComponent.vue"
-import fileStore from "../../stores/fileStore.js"
+import { useFileStore } from "../../stores/fileStore.js"
 import { OpenFileExplorer } from "../../../wailsjs/go/main/App"
 import { useI18n } from "vue-i18n"
 
 const { t } = useI18n()
+const fileStore = useFileStore()
 
 const uploadNodesConfiguration = async () => {
   const filePath = await OpenFileExplorer()
   if (filePath) {
-    fileStore.setNodeFilePath(filePath)
-    console.log("Selected nodes file:", filePath)
-  } else {
-    console.log("No file selected")
+    fileStore.setNodeFile(filePath)
   }
 }
 
 const uploadEdgesConfiguration = async () => {
   const filePath = await OpenFileExplorer()
   if (filePath) {
-    fileStore.setEdgeFilePath(filePath)
-    console.log("Selected nodes file:", filePath)
-  } else {
-    console.log("No file selected")
+    fileStore.setEdgeFile(filePath)
   }
 }
 </script>
