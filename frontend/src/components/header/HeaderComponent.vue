@@ -31,7 +31,7 @@ const uploadEdgesConfiguration = async () => {
     <div class="button-box">
       <div class="file-button-box">
         <HeaderButtonComponent
-          :label="t('file')"
+          :label="t('header.file')"
           name="file"
           :options="[
             {
@@ -52,17 +52,17 @@ const uploadEdgesConfiguration = async () => {
         />
       </div>
       <HeaderButtonComponent
-        :label="t('workspace')"
+        :label="t('header.workspace')"
         name="workspace"
         @click="emitChange"
       />
       <HeaderButtonComponent
-        :label="t('view')"
+        :label="t('header.view')"
         name="view"
         @click="emitChange"
       />
       <HeaderButtonComponent
-        :label="t('settings')"
+        :label="t('header.settings')"
         name="settings"
         @click="emitChange"
       />

@@ -1,9 +1,23 @@
 export default {
   pl: {
-    file: "Plik",
-    workspace: "Projekt",
-    view: "Widok",
-    settings: "Ustawienia",
+    header: {
+      file: "Plik",
+      workspace: "Projekt",
+      view: "Widok",
+      settings: "Ustawienia",
+    },
+    editor: {
+      nodes: "Wierzchołki",
+      edges: "Krawędzie",
+      id: "ID",
+      label: "Etykieta",
+      edit: "Edytuj",
+      edit_node: "Edytuj wierzchołek",
+      edit_edge: "Edytuj krawędź",
+      save: "Zapisz",
+      delete: "Usuń",
+      cancel: "Anuluj",
+    },
     overview: {
       title: "Podstawowe informacje",
       num_of_edges: "Liczba krawędzi",
@@ -20,10 +34,24 @@ export default {
     },
   },
   en: {
-    file: "File",
-    workspace: "Workspace",
-    view: "View",
-    settings: "Settings",
+    header: {
+      file: "File",
+      workspace: "Workspace",
+      view: "View",
+      settings: "Settings",
+    },
+    editor: {
+      nodes: "Nodes",
+      edges: "Edges",
+      id: "ID",
+      label: "Label",
+      edit: "Edit",
+      edit_node: "Edit Node",
+      edit_edge: "Edit Edge",
+      save: "Save",
+      delete: "Delete",
+      cancel: "Cancel",
+    },
     overview: {
       title: "Overview",
       num_of_edges: "Number of edges",

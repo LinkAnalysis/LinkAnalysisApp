@@ -1,7 +1,6 @@
 import Papa from "papaparse"
 import Graph from "graphology"
 import circular from "graphology-layout/circular"
-import forceAtlas2 from "graphology-layout-forceatlas2"
 import { ReadTextFile } from "../../wailsjs/go/main/App"
 import { layouts } from "./layouts"
 
@@ -18,60 +17,47 @@ export function parseCSV(filename) {
 }
 
 // constructs the graphology Graph from the node and edge files
-export async function load_graph(
-  node_file,
-  edge_file,
-  layout = "circular",
-  layoutParams = {},
-) {
+export async function load_graph(node_file, edge_file) {
   const graph = new Graph()
 
-  const csv_e = await ReadTextFile(edge_file)
-  const edges = await parseCSV(csv_e)
+  const edges = await parseCSV(await ReadTextFile(edge_file))
+
   if (node_file) {
-    const csv_n = await ReadTextFile(node_file)
-    const nodes = await parseCSV(csv_n)
-    nodes.forEach(line => {
-      const id = line.id
-      const description = line.Description
-      graph.addNode(id, { label: description, size: 20, x: 0, y: 0 })
-    })
+    const nodes = await parseCSV(await ReadTextFile(node_file))
+    nodes.forEach(({ id, Description }) =>
+      graph.addNode(id, { label: Description, size: 20, x: 0, y: 0 }),
+    )
   } else {
     const added = new Set()
-    edges.forEach(line => {
-      const first_vertex = line.x
-      const second_vertex = line.y
-      if (!added.has(first_vertex)) {
-        graph.addNode(first_vertex, { size: 20, x: 0, y: 0 })
-        added.add(first_vertex)
+    edges.forEach(({ x, y }) => {
+      if (!added.has(x)) {
+        graph.addNode(x, { size: 20, x: 0, y: 0 })
+        added.add(x)
       }
-      if (!added.has(second_vertex)) {
-        graph.addNode(second_vertex, { size: 20, x: 0, y: 0 })
-        added.add(second_vertex)
+      if (!added.has(y)) {
+        graph.addNode(y, { size: 20, x: 0, y: 0 })
+        added.add(y)
       }
     })
   }
-  edges.forEach(line => {
-    const w = parseInt(line.edgeWeight)
-    graph.addEdge(line.x, line.y, {
-      label: line.edgeLabel,
+
+  edges.forEach(({ x, y, edgeWeight, edgeLabel }) => {
+    const w = parseInt(edgeWeight)
+    graph.addEdge(x, y, {
+      label: edgeLabel,
       weight: w,
       size: w,
       color: "#000000",
     })
   })
 
-  let layoutEntry = layouts[layout]
-  if (!layoutEntry) {
-    layoutEntry = layouts.circular
-  }
-  const params = {
-    ...layoutEntry.defaultParams,
-    ...(layoutParams || {}),
-  }
-  layoutEntry.apply(graph, params)
-
   return graph
+}
+
+export function apply_layout(graph, layout = "circular", layoutParams = {}) {
+  let entry = layouts[layout] ?? layouts.circular
+  const params = { ...entry.defaultParams, ...layoutParams }
+  entry.apply(graph, params)
 }
 
 export function update_graph_nodes(graph, nodes_csv) {
