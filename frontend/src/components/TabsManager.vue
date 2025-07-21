@@ -1,7 +1,5 @@
 <script setup>
-import Graph from "graphology"
 import { ref, onMounted, computed, watch } from "vue"
-import { LogPrint } from "../../wailsjs/runtime/runtime"
 
 const next_tab_id = ref(0)
 const selected_tab_id = ref(0)

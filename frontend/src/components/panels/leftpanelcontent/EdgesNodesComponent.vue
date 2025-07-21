@@ -8,23 +8,6 @@ const props = defineProps({
   edges: { type: Array, default: () => [] },
 })
 
-const activeTab = ref("nodes")
-const isNodeTab = computed(() => activeTab.value === "nodes")
-
-const rawItems = computed(() => (isNodeTab.value ? props.nodes : props.edges))
-const items = computed(() =>
-  rawItems.value.map((it, idx) =>
-    typeof it === "object" && it !== null
-      ? { ...it, __key: it.id ?? it.key ?? idx }
-      : { value: it, __key: it },
-  ),
-)
-
-const editingItem = ref(null)
-const editItem = item => {
-  editingItem.value = { ...item }
-}
-
 const emit = defineEmits([
   "edit-node",
   "edit-edge",
@@ -32,21 +15,32 @@ const emit = defineEmits([
   "delete-edge",
 ])
 
+const activeTab = ref("nodes")
+const editingItem = ref(null)
+
+const items = computed(() => {
+  const src = activeTab.value === "nodes" ? props.nodes : props.edges
+  return src.map((it, idx) => ({
+    ...(typeof it === "object" && it !== null ? it : { value: it }),
+    __key: it.id ?? it.key ?? idx,
+  }))
+})
+
+const isNodeTab = computed(() => activeTab.value === "nodes")
+const tabPrefix = computed(() => (isNodeTab.value ? "node" : "edge"))
+const editItem = item => {
+  editingItem.value = { ...item }
+}
+
 const saveEdit = () => {
-  if (isNodeTab.value) {
-    emit("edit-node", editingItem.value)
-  } else {
-    emit("edit-edge", editingItem.value)
-  }
+  if (!editingItem.value) return
+  emit(`edit-${tabPrefix.value}`, editingItem.value)
   editingItem.value = null
 }
 
 const deleteEdit = () => {
-  if (isNodeTab.value) {
-    emit("delete-node", editingItem.value.id)
-  } else {
-    emit("delete-edge", editingItem.value.id)
-  }
+  if (!editingItem.value) return
+  emit(`delete-${tabPrefix.value}`, editingItem.value.id)
   editingItem.value = null
 }
 
@@ -58,17 +52,23 @@ const cancelEdit = () => {
 <template>
   <div class="panel-section">
     <div class="tab-buttons" v-if="!editingItem">
-      <button :class="{ active: isNodeTab }" @click="activeTab = 'nodes'">
+      <button
+        :class="{ active: activeTab === 'nodes' }"
+        @click="activeTab = 'nodes'"
+      >
         Nodes
       </button>
-      <button :class="{ active: !isNodeTab }" @click="activeTab = 'edges'">
+      <button
+        :class="{ active: activeTab === 'edges' }"
+        @click="activeTab = 'edges'"
+      >
         Edges
       </button>
     </div>
 
     <div class="list-wrapper">
       <template v-if="!editingItem">
-        <div class="header-row" v-once>
+        <div class="header-row">
           <span>Id</span>
           <span>Label</span>
           <span>Edit</span>
@@ -80,7 +80,6 @@ const cancelEdit = () => {
           :item-size="24"
           key-field="__key"
           :min-item-size="24"
-          style="height: 100%"
         >
           <template #default="{ item }">
             <div class="row" :key="item.__key">
@@ -96,33 +95,48 @@ const cancelEdit = () => {
         </RecycleScroller>
       </template>
 
-      <div v-else class="edit-form">
-        <h3>Edit {{ isNodeTab ? "Node" : "Edge" }}</h3>
-        <label>
-          ID:
-          <input v-model="editingItem.id" disabled />
-        </label>
-        <label>
-          Label:
-          <input v-model="editingItem.label" />
-        </label>
-        <div class="form-buttons">
-          <button @click="saveEdit">Save</button>
-          <button @click="deleteEdit" class="delete-button">Delete</button>
-          <button @click="cancelEdit">Cancel</button>
+      <template v-else>
+        <div class="edit-form">
+          <h3>Edit {{ activeTab === "nodes" ? "Node" : "Edge" }}</h3>
+
+          <div class="form-row">
+            <label>ID:</label>
+            <input v-model="editingItem.id" disabled />
+          </div>
+
+          <div class="form-row">
+            <label>Label:</label>
+            <input v-model="editingItem.label" />
+          </div>
+
+          <div class="form-buttons">
+            <button @click="saveEdit">Save</button>
+            <button class="delete-button" @click="deleteEdit">Delete</button>
+            <button @click="cancelEdit">Cancel</button>
+          </div>
         </div>
-      </div>
+      </template>
     </div>
   </div>
 </template>
 
 <style scoped>
+.panel-section,
+.list-wrapper {
+  border: 2px solid #000;
+  box-sizing: border-box;
+}
+
 .panel-section {
-  border: 2px solid black;
   padding: 8px;
   width: 100%;
   font-family: sans-serif;
-  box-sizing: border-box;
+}
+
+.list-wrapper {
+  height: 220px;
+  display: flex;
+  flex-direction: column;
 }
 
 .tab-buttons {
@@ -131,42 +145,21 @@ const cancelEdit = () => {
   margin-bottom: 8px;
   flex-wrap: wrap;
 }
+
 .tab-buttons button {
-  font-size: 18px;
+  font: 600 18px/1 sans-serif;
   padding: 6px 16px;
-  border: 2px solid black;
+  border: 2px solid #000;
   border-radius: 10px;
   background: #fff;
   cursor: pointer;
 }
+
 .tab-buttons button.active {
   background: #dcdcdc;
-  font-weight: 600;
 }
 
-.list-wrapper {
-  border: 2px solid black;
-  height: 220px;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
-.header-row {
-  flex: 0 0 auto;
-  display: grid;
-  grid-template-columns: 90px 1fr 60px auto;
-  align-items: center;
-  border-bottom: 1px solid #000000;
-  font-size: 16px;
-  line-height: 24px;
-  margin-right: 8px;
-}
-.virtual-list {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-  scrollbar-gutter: stable;
-}
+.header-row,
 .row {
   display: grid;
   grid-template-columns: 90px 1fr 60px auto;
@@ -174,7 +167,19 @@ const cancelEdit = () => {
   border-bottom: 1px solid #414141;
   font-size: 14px;
   height: 24px;
-  box-sizing: border-box;
+}
+
+.header-row {
+  font-size: 16px;
+  border-color: #000;
+  margin-right: 8px;
+}
+
+.virtual-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
 }
 
 .header-row span,
@@ -186,27 +191,22 @@ const cancelEdit = () => {
   border-right: 1px solid #414141;
 }
 
-.scrollbar-spacer {
-  width: 8px;
-  height: 100%;
-  pointer-events: none;
-  background: transparent;
-}
-
 .id-cell {
   overflow-x: auto;
-  overflow-y: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
   max-width: 100%;
 }
+
 .id-cell::-webkit-scrollbar {
   height: 4px;
 }
+
 .id-cell::-webkit-scrollbar-thumb {
-  background-color: #888;
+  background: #888;
   border-radius: 2px;
 }
+
 .id-cell::-webkit-scrollbar-track {
   background: transparent;
 }
@@ -221,93 +221,105 @@ const cancelEdit = () => {
 }
 
 .edit-form {
-  height: 100%;
-  width: 100%;
-  box-sizing: border-box;
-  padding: 8px;
-
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-
-  background-color: #ffffff;
+  gap: 12px;
+  padding: 8px;
+  background: #fff;
   border-radius: 12px;
   font-family: "Segoe UI", sans-serif;
-
+  height: 100%;
   overflow: hidden;
 }
+
 .edit-form h3 {
-  margin-top: 0;
-  /* margin-bottom: 20px; */
+  margin: 0;
   font-size: 1.4rem;
-  color: #333;
+  color: #000000;
   text-align: center;
+  margin-bottom: 12px;
 }
 
-.edit-form label {
-  display: block;
-  /* margin-bottom: 15px; */
-  font-weight: 500;
-  color: #444;
+.form-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
 }
 
-.edit-form input {
-  display: block;
-  width: 100%;
-  /* padding: 8px 10px; */
-  /* margin-top: 5px; */
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  transition: border-color 0.2s;
+.form-row label {
+  width: 60px;
+  font-weight: 700;
+  font-size: 16px;
+  color: #000;
 }
 
-.edit-form input:focus {
-  border-color: #3b82f6;
-  outline: none;
+.form-row input {
+  flex: 1;
+  padding: 4px 8px;
+  font-size: 14px;
+  border: 2px solid #000;
+  border-radius: 4px;
+  background: #fdfdfd;
+  color: #000;
+}
+
+.form-row input:disabled {
+  background: #e5e5e5;
+  color: #777;
+  border-color: #999;
+  cursor: not-allowed;
+}
+
+.form-row input:not(:disabled):hover {
+  background: #eef6ff;
+  transition: background-color 0.2s;
 }
 
 .form-buttons {
   display: flex;
-  justify-content: space-between;
-  /* gap: 10px; */
-  /* margin-top: 20px; */
+  justify-content: flex-end;
+  gap: 8px;
 }
 
 .form-buttons button {
-  flex: 1;
-  padding: 10px 0;
-  font-size: 0.95rem;
-  border: none;
-  border-radius: 6px;
+  font-size: 14px;
+  padding: 6px 16px;
+  border: 2px solid #000;
+  background: #f5f5f5;
+  color: #000;
+  border-radius: 4px;
+  font-weight: 700;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
 }
 
-.form-buttons button:nth-child(1) {
-  background-color: #3b82f6;
-  color: white;
+.form-buttons button:first-child {
+  background: #d0e3ff;
+  border-color: #2563eb;
 }
 
-.form-buttons button:nth-child(1):hover {
-  background-color: #2563eb;
-}
-
-.form-buttons button:nth-child(3) {
-  background-color: #f3f4f6;
-  color: #333;
-}
-
-.form-buttons button:nth-child(3):hover {
-  background-color: #e5e7eb;
+.form-buttons button:first-child:hover {
+  background: #a8caff;
 }
 
 .form-buttons .delete-button {
-  background-color: #ef4444;
-  color: white;
+  background: #ffd5d5;
+  border-color: #dc2626;
 }
 
 .form-buttons .delete-button:hover {
-  background-color: #dc2626;
+  background: #fca5a5;
+}
+
+.form-buttons button:last-child {
+  background: #e5e5e5;
+  border-color: #999;
+}
+
+.form-buttons button:last-child:hover {
+  background: #d4d4d4;
 }
 </style>
