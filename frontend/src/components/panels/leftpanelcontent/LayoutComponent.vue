@@ -46,10 +46,20 @@ export default {
       layouts: [
         { key: "circular", label: "Circular" },
         { key: "forceAtlas2", label: "Force Atlas 2" },
+        { key: "d3tree", label: "Tree D3" },
+        { key: "radial", label: "Radial" },
+        { key: "force", label: "Force" },
+        { key: "random", label: "Random" },
+        { key: "circlepack", label: "Circle Pack" },
       ],
       layoutParams: {
         circular: { ...layoutsMap.circular.defaultParams },
         forceAtlas2: { ...layoutsMap.forceAtlas2.defaultParams },
+        d3tree: { ...layoutsMap.d3tree.defaultParams },
+        radial: { ...layoutsMap.radial.defaultParams },
+        force: { ...layoutsMap.force.defaultParams },
+        random: { ...layoutsMap.random.defaultParams },
+        circlepack: { ...layoutsMap.circlepack.defaultParams },
       },
     }
   },
