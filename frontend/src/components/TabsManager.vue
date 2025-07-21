@@ -1,69 +1,32 @@
 <script setup>
 import { ref, onMounted, computed, watch } from "vue"
+import { useTabsStore } from "@/stores/tabsStore"
+import { storeToRefs } from "pinia"
+
+const tabs = useTabsStore()
+const { selectedTabId, tabsCount, tabsData } = storeToRefs(tabs)
+const { removeTab, addTab, resetSelectedTab } = tabs
 
 const next_tab_id = ref(0)
-const selected_tab_id = ref(0)
-const tabs = ref([])
 const edit_id = ref(null)
 const edit_input = ref(null)
 
-const props = defineProps(["modelValue"])
-const emit = defineEmits(["update:modelValue"])
-
-const graphs = ref([])
-const graph = computed({
-  get() {
-    if (graphs.value.length > 0)
-      return graphs.value[selected_tab_id.value].value ?? null
-    return null
-  },
-
-  set(val) {
-    if (graphs.value.length > 0 && graphs.value[selected_tab_id.value])
-      graphs.value[selected_tab_id.value].value = val
-  },
-})
-
-let updating = false
-watch(
-  () => props.modelValue,
-  val => {
-    updating = true
-    graph.value = val
-    updating = false
-  },
-)
-
-watch(graph, val => {
-  if (updating) return
-  emit("update:modelValue", val)
-})
-
 const select_tab = id => {
-  selected_tab_id.value = id
+  selectedTabId.value = id
 }
 
 const add_tab = () => {
-  tabs.value.push({ title: `Tab ${next_tab_id.value}`, id: next_tab_id.value })
-  graphs.value.push(ref(null))
+  addTab({ title: `Tab ${next_tab_id.value}`, id: next_tab_id.value })
   next_tab_id.value++
+  console.log(tabsData.value)
 }
 
 const close_tab = id => {
-  let index_to_remove = tabs.value.findIndex(el => el.id == id)
-  let selected_index = tabs.value.findIndex(
-    el => el.id == selected_tab_id.value,
-  )
-  if (selected_index == index_to_remove) {
-    graph.value = null
+  removeTab(id)
+  if (tabsCount.value == 0) {
+    add_tab()
   }
-  tabs.value.splice(index_to_remove, 1)
-
-  if (tabs.value.length == 0) {
-    add_new_tab()
-  }
-
-  selected_tab_id.value = tabs.value[0].id
+  resetSelectedTab()
 }
 
 const start_editing = id => {
@@ -78,9 +41,9 @@ const stop_editing = () => {
 }
 
 onMounted(() => {
-  if (tabs.value.length == 0) {
-    selected_tab_id.value = 0
+  if (tabsCount.value == 0) {
     add_tab()
+    resetSelectedTab()
   }
 })
 </script>
@@ -89,8 +52,8 @@ onMounted(() => {
   <div class="wrapper">
     <div class="tabs-container">
       <div
-        :class="`tab ${selected_tab_id == tab.id ? 'selected' : ''}`"
-        v-for="tab in tabs"
+        v-for="tab in tabsData"
+        :class="`tab ${selectedTabId == tab.id ? 'selected' : ''}`"
         :key="tab.id"
         @click="select_tab(tab.id)"
         @dblclick="start_editing(tab.id)"
