@@ -13,7 +13,7 @@
 
     <div class="search-area">
       <div class="search-row">
-        <template v-if="selectedFilter === 'Search by id'">
+        <template v-if="selectedFilter === 'Search by name'">
           <label>Search in:</label>
           <select v-model="searchIn">
             <option>Nodes</option>
@@ -26,9 +26,9 @@
         </template>
       </div>
 
-      <div class="search-row" v-if="selectedFilter === 'Search by id'">
+      <div class="search-row" v-if="selectedFilter === 'Search by name'">
         <label v-if="searchIn === 'Nodes'">
-          <input v-model="searchTerm" placeholder="(e.g. 1234)" />
+          <input v-model="searchTerm" placeholder="(e.g. computer)" />
         </label>
         <label v-else
           >Edge (source, target):
@@ -48,7 +48,7 @@ import { useFileStore } from "@/stores/fileStore"
 const fileStore = useFileStore()
 
 const filters = [
-  "Search by id",
+  "Search by name",
   "Edge Weight",
   "Edge Type",
   "Degree Range",
@@ -56,20 +56,14 @@ const filters = [
   "Group by",
   "LLM",
 ]
-const selectedFilter = ref("Search by id")
+const selectedFilter = ref("Search by name")
 const searchTerm = ref("")
 const searchIn = ref("Nodes")
 
 function performSearch() {
-  if (selectedFilter.value !== "Search by id" || !searchTerm.value) return
+  if (selectedFilter.value !== "Search by name" || !searchTerm.value) return
   console.log("[panel] click!", searchTerm.value)
   const id = searchTerm.value.trim()
-  // try {
-  //   fileStore.focusNode(id)
-  //   console.log("[panel] after call")
-  // } catch (err) {
-  //   console.log("focusNode threw!", err)
-  // }
   try {
     if (searchIn.value === "Nodes") {
       fileStore.focusNode(id)
@@ -80,12 +74,12 @@ function performSearch() {
   } catch (err) {
     console.log("focusNode/Edge threw!", err)
   }
-
-  searchTerm.value = ""
 }
 
 function resetSearch() {
   searchTerm.value = ""
+  fileStore.focusNode(null)
+  fileStore.focusEdgeEndpoints(null, null)
 }
 </script>
 

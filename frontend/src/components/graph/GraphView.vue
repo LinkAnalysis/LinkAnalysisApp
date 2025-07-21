@@ -24,32 +24,90 @@ const zoomOut = () => renderer?.getCamera().animatedUnzoom({ duration: 600 })
 const resetZoom = () => renderer?.getCamera().animatedReset({ duration: 600 })
 
 const fileStore = useFileStore()
+const searchHighlighted = ref([])
+const edgesNodesHighlighted = ref([])
 watch(
-  () => fileStore.$state.focusedNodeId,
-  nodeId => {
-    if (nodeId && props.graph.hasNode(nodeId)) {
-      zoomToNode(nodeId)
+  () => fileStore.focusedNodeId,
+  query => {
+    searchHighlighted.value.forEach(id =>
+      props.graph.removeNodeAttribute(id, "highlighted"),
+    )
+    renderer.refresh()
+    searchHighlighted.value = []
+    if (!query || !renderer) {
       fileStore.focusNode(null)
+      return
     }
+
+    let ids = []
+    if (props.graph.hasNode(query)) {
+      ids = [query]
+    } else {
+      ids = findNodesByLabelPrefix(query)
+    }
+
+    if (!ids.length) {
+      fileStore.focusNode(null)
+      return
+    }
+
+    ids.forEach(id => props.graph.setNodeAttribute(id, "highlighted", true))
+    searchHighlighted.value = ids
+    renderer.refresh()
+    let sx = 0,
+      sy = 0
+    ids.forEach(id => {
+      const target = renderer.getNodeDisplayData(id)
+      sx += target.x
+      sy += target.y
+    })
+    const cx = sx / ids.length
+    const cy = sy / ids.length
+
+    const cam = renderer.getCamera()
+    const ratio = cam.getState().ratio
+
+    cam.animate({ x: cx, y: cy, ratio }, { duration: 600 })
+
+    props.graph.forEachNode((id, attrs) => {
+      if (attrs.highlighted) {
+        console.log("[highlighted]", id, attrs)
+      }
+    })
   },
 )
+
 watch(
   () => [fileStore.focusedEdgeSource, fileStore.focusedEdgeTarget],
   ([source, target]) => {
+    edgesNodesHighlighted.value.forEach(id =>
+      props.graph.removeNodeAttribute(id, "highlighted"),
+    )
+    console.log("edges: ", props.graph)
+    edgesNodesHighlighted.value = []
+    renderer?.refresh()
     if (!source || !target || !renderer || !props.graph) return
 
     const edgeKey = props.graph.edge(source, target)
     if (!edgeKey) return
+    edgesNodesHighlighted.value = [source, target]
+    renderer.refresh()
 
-    const ed = renderer.getEdgeDisplayData(edgeKey)
-    if (!ed) return
+    const node1 = renderer.getNodeDisplayData(source)
+    const node2 = renderer.getNodeDisplayData(target)
+    props.graph.setNodeAttribute(target, "highlighted", true)
+    props.graph.setNodeAttribute(source, "highlighted", true)
+    const x = (node1.x + node2.x) / 2
+    const y = (node1.y + node2.y) / 2
 
-    const x = (ed.x1 + ed.x2) / 2
-    const y = (ed.y1 + ed.y2) / 2
     renderer
       .getCamera()
       .animate({ x, y }, { duration: 600, easing: "quadraticInOut" })
-    fileStore.focusEdgeEndpoints(null, null)
+    props.graph.forEachNode((id, attrs) => {
+      if (attrs.highlighted) {
+        console.log("[highlighted]", id, attrs)
+      }
+    })
   },
 )
 
@@ -59,7 +117,20 @@ onMounted(() => {
     maxCameraRatio: 3,
     renderEdgeLabels: true,
     labelRenderedSizeThreshold: 6,
+
+    nodeReducer: (node, data) => {
+      if (data.highlighted) {
+        return {
+          ...data,
+          color: "#ff3333",
+          size: data.size * 1.5,
+          zIndex: 10,
+        }
+      }
+      return data
+    },
   })
+
   renderer.setCustomBBox(renderer.getBBox())
   renderer.on("clickStage", ({ event }) => {
     const pos = renderer.viewportToGraph(event)
@@ -138,53 +209,17 @@ function clearSelection() {
   clickedNodeData.value = null
 }
 
-function zoomToNode(id) {
-  if (!renderer) return
+function findNodesByLabelPrefix(query) {
+  if (!query) return []
+  const q = query.toLowerCase()
+  const matches = []
 
-  const target = renderer.getNodeDisplayData(id)
-  if (!target) return
-
-  const cam = renderer.getCamera()
-
-  cam.animate(
-    { x: target.x, y: target.y },
-    { duration: 600, easing: "quadraticInOut" },
-  )
-
-  selectNode(id)
-}
-
-function findNodeByLabel(label) {
-  let foundId = null
-  props.graph.forEachNode((nodeId, attrs) => {
-    if (attrs.label?.toLowerCase() === label.toLowerCase()) {
-      foundId = nodeId
-    }
+  props.graph.forEachNode((id, attrs) => {
+    const label = (attrs.label || "").toString().toLowerCase()
+    if (label.startsWith(q)) matches.push(id)
   })
-  return foundId
-}
 
-function zoomToEdge(edgeId) {
-  if (!renderer) return
-
-  const ed = renderer.getEdgeDisplayData(edgeId)
-  if (!ed) return
-
-  // const cx = (ed.x1 + ed.x2) / 2;
-  // const cy = (ed.y1 + ed.y2) / 2;
-
-  // renderer.getCamera().animate(
-  //   { x: cx, y: cy },
-  //   { duration: 600, easing: "quadraticInOut" }
-  // );
-  const vx = (ed.x1 + ed.x2) / 2
-  const vy = (ed.y1 + ed.y2) / 2
-
-  const { x, y } = renderer.viewportToGraph({ x: vx, y: vy })
-
-  renderer.getCamera().animate({ x, y }, { duration: 600 })
-
-  selectEdge(edgeId)
+  return matches
 }
 </script>
 
