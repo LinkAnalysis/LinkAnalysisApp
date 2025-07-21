@@ -3,8 +3,8 @@ import Graph from "graphology"
 import Sigma from "sigma"
 import VertexWindow from "./VertexWindow.vue"
 import { useI18n } from "vue-i18n"
-
-import { onBeforeUnmount, onMounted, ref } from "vue"
+import { useFileStore } from "../../stores/fileStore"
+import { onBeforeUnmount, onMounted, ref, watch } from "vue"
 const props = defineProps({
   graph: Graph,
 })
@@ -23,6 +23,36 @@ const zoomIn = () => renderer?.getCamera().animatedZoom({ duration: 600 })
 const zoomOut = () => renderer?.getCamera().animatedUnzoom({ duration: 600 })
 const resetZoom = () => renderer?.getCamera().animatedReset({ duration: 600 })
 
+const fileStore = useFileStore()
+watch(
+  () => fileStore.$state.focusedNodeId,
+  nodeId => {
+    if (nodeId && props.graph.hasNode(nodeId)) {
+      zoomToNode(nodeId)
+      fileStore.focusNode(null)
+    }
+  },
+)
+watch(
+  () => [fileStore.focusedEdgeSource, fileStore.focusedEdgeTarget],
+  ([source, target]) => {
+    if (!source || !target || !renderer || !props.graph) return
+
+    const edgeKey = props.graph.edge(source, target)
+    if (!edgeKey) return
+
+    const ed = renderer.getEdgeDisplayData(edgeKey)
+    if (!ed) return
+
+    const x = (ed.x1 + ed.x2) / 2
+    const y = (ed.y1 + ed.y2) / 2
+    renderer
+      .getCamera()
+      .animate({ x, y }, { duration: 600, easing: "quadraticInOut" })
+    fileStore.focusEdgeEndpoints(null, null)
+  },
+)
+
 onMounted(() => {
   renderer = new Sigma(props.graph, container.value, {
     minCameraRatio: 0.08,
@@ -30,22 +60,25 @@ onMounted(() => {
     renderEdgeLabels: true,
     labelRenderedSizeThreshold: 6,
   })
+  renderer.setCustomBBox(renderer.getBBox())
+  renderer.on("clickStage", ({ event }) => {
+    const pos = renderer.viewportToGraph(event)
+    console.log("[clickStage] graph coords:", pos)
+  })
+
   renderer.on("downNode", e => {
     isDragging = true
     draggedNode = e.node
     props.graph.setNodeAttribute(draggedNode, "highlighted", true)
-    if (!renderer.getCustomBBox()) renderer.setCustomBBox(renderer.getBBox())
   })
   renderer.on("moveBody", ({ event }) => {
     if (!isDragging || !draggedNode) return
 
-    // Get new position of node
     const pos = renderer.viewportToGraph(event)
 
     props.graph.setNodeAttribute(draggedNode, "x", pos.x)
     props.graph.setNodeAttribute(draggedNode, "y", pos.y)
 
-    // Prevent sigma to move camera:
     event.preventSigmaDefault()
     event.original.preventDefault()
     event.original.stopPropagation()
@@ -54,7 +87,6 @@ onMounted(() => {
     selectNode(node)
   })
 
-  // On mouse up, we reset the dragging mode
   const handleUp = () => {
     if (draggedNode && draggedNode !== clickedNodeId.value) {
       props.graph.removeNodeAttribute(draggedNode, "highlighted")
@@ -94,6 +126,7 @@ function selectNode(nodeId) {
     Description: attrs.label,
     numOfNeighbors: props.graph.neighbors(nodeId).length,
   }
+  console.log("krawedzie: ", props.graph.edges())
   updatePopupPosition()
 }
 
@@ -103,6 +136,55 @@ function clearSelection() {
   }
   clickedNodeId.value = null
   clickedNodeData.value = null
+}
+
+function zoomToNode(id) {
+  if (!renderer) return
+
+  const target = renderer.getNodeDisplayData(id)
+  if (!target) return
+
+  const cam = renderer.getCamera()
+
+  cam.animate(
+    { x: target.x, y: target.y },
+    { duration: 600, easing: "quadraticInOut" },
+  )
+
+  selectNode(id)
+}
+
+function findNodeByLabel(label) {
+  let foundId = null
+  props.graph.forEachNode((nodeId, attrs) => {
+    if (attrs.label?.toLowerCase() === label.toLowerCase()) {
+      foundId = nodeId
+    }
+  })
+  return foundId
+}
+
+function zoomToEdge(edgeId) {
+  if (!renderer) return
+
+  const ed = renderer.getEdgeDisplayData(edgeId)
+  if (!ed) return
+
+  // const cx = (ed.x1 + ed.x2) / 2;
+  // const cy = (ed.y1 + ed.y2) / 2;
+
+  // renderer.getCamera().animate(
+  //   { x: cx, y: cy },
+  //   { duration: 600, easing: "quadraticInOut" }
+  // );
+  const vx = (ed.x1 + ed.x2) / 2
+  const vy = (ed.y1 + ed.y2) / 2
+
+  const { x, y } = renderer.viewportToGraph({ x: vx, y: vy })
+
+  renderer.getCamera().animate({ x, y }, { duration: 600 })
+
+  selectEdge(edgeId)
 }
 </script>
 

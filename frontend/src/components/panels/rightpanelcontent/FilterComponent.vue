@@ -13,7 +13,6 @@
 
     <div class="search-area">
       <div class="search-row">
-        <!-- Dynamiczna zawartość -->
         <template v-if="selectedFilter === 'Search by id'">
           <label>Search in:</label>
           <select v-model="searchIn">
@@ -28,7 +27,13 @@
       </div>
 
       <div class="search-row" v-if="selectedFilter === 'Search by id'">
-        <input v-model="searchTerm" placeholder="(e.g. 1234)" />
+        <label v-if="searchIn === 'Nodes'">
+          <input v-model="searchTerm" placeholder="(e.g. 1234)" />
+        </label>
+        <label v-else
+          >Edge (source, target):
+          <input v-model="searchTerm" placeholder="(e.g. 1234,5678)"
+        /></label>
         <button class="search-button" @click="performSearch">🔍</button>
         <button class="reset-button" @click="resetSearch">🔄️</button>
       </div>
@@ -36,33 +41,51 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "FiltersQueries",
-  data() {
-    return {
-      filters: [
-        "Search by id",
-        "Edge Weight",
-        "Edge Type",
-        "Degree Range",
-        "Neighbors Network",
-        "Group by",
-        "LLM",
-      ],
-      selectedFilter: "Search by id",
-      searchTerm: "",
-      searchIn: "Nodes",
+<script setup>
+import { ref } from "vue"
+import { useFileStore } from "@/stores/fileStore"
+
+const fileStore = useFileStore()
+
+const filters = [
+  "Search by id",
+  "Edge Weight",
+  "Edge Type",
+  "Degree Range",
+  "Neighbors Network",
+  "Group by",
+  "LLM",
+]
+const selectedFilter = ref("Search by id")
+const searchTerm = ref("")
+const searchIn = ref("Nodes")
+
+function performSearch() {
+  if (selectedFilter.value !== "Search by id" || !searchTerm.value) return
+  console.log("[panel] click!", searchTerm.value)
+  const id = searchTerm.value.trim()
+  // try {
+  //   fileStore.focusNode(id)
+  //   console.log("[panel] after call")
+  // } catch (err) {
+  //   console.log("focusNode threw!", err)
+  // }
+  try {
+    if (searchIn.value === "Nodes") {
+      fileStore.focusNode(id)
+    } else {
+      const [source, target] = id.split(",").map(s => s.trim())
+      fileStore.focusEdgeEndpoints(source, target)
     }
-  },
-  methods: {
-    performSearch() {
-      console.log(`Searching ${this.searchIn} for "${this.searchTerm}"`)
-    },
-    resetSearch() {
-      this.searchTerm = ""
-    },
-  },
+  } catch (err) {
+    console.log("focusNode/Edge threw!", err)
+  }
+
+  searchTerm.value = ""
+}
+
+function resetSearch() {
+  searchTerm.value = ""
 }
 </script>
 
