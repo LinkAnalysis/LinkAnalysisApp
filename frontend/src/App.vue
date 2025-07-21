@@ -5,13 +5,10 @@ import HeaderComponent from "@/components/header/HeaderComponent.vue"
 import GraphView from "@/components/graph/GraphView.vue"
 import Panel from "@/components/panels/Panel.vue"
 
-import Graph from "graphology"
 import { useFileStore } from "@/stores/fileStore"
 import { storeToRefs } from "pinia"
 import TabsManager from "./components/TabsManager.vue"
-import { load_graph } from "@/composables/file_loader"
-
-const currentLang = ref("en")
+import { load_graph, apply_layout } from "@/composables/file_loader"
 
 const graph = ref(null)
 const isLoading = ref(false)
@@ -21,27 +18,24 @@ const fileStore = useFileStore()
 const { nodePath, edgePath, layoutType, layoutParams } = storeToRefs(fileStore)
 
 watch(
-  () => [nodePath.value, edgePath.value, layoutType.value, layoutParams.value],
-  async ([nodeFile, edgeFile, layoutType, layoutParams]) => {
-    if (nodeFile && edgeFile) {
-      isLoading.value = true
-      graph.value = await load_graph(
-        nodeFile,
-        edgeFile,
-        layoutType,
-        layoutParams,
-      )
-      isLoading.value = false
-    } else if (edgeFile) {
-      isLoading.value = true
-      graph.value = await load_graph(null, edgeFile, layoutType, layoutParams)
-      isLoading.value = false
-    } else {
+  [nodePath, edgePath],
+  async ([nodeFile, edgeFile]) => {
+    if (!edgeFile) {
       graph.value = null
+      return
     }
+
+    isLoading.value = true
+    graph.value = await load_graph(nodeFile ?? null, edgeFile)
+    apply_layout(graph.value, layoutType.value, layoutParams.value)
+    isLoading.value = false
   },
   { immediate: true },
 )
+
+watch([layoutType, layoutParams], ([type, params]) => {
+  if (graph.value) apply_layout(graph.value, type, params)
+})
 
 watch(graph, () => {
   graphKey.value++
