@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed } from "vue"
+import { useI18n } from "vue-i18n"
 import { RecycleScroller } from "vue3-virtual-scroller"
 import "vue3-virtual-scroller/dist/vue3-virtual-scroller.css"
 
@@ -7,6 +8,8 @@ const props = defineProps({
   nodes: { type: Array, default: () => [] },
   edges: { type: Array, default: () => [] },
 })
+
+const { t } = useI18n()
 
 const emit = defineEmits([
   "edit-node",
@@ -56,22 +59,22 @@ const cancelEdit = () => {
         :class="{ active: activeTab === 'nodes' }"
         @click="activeTab = 'nodes'"
       >
-        Nodes
+        {{ t("editor.nodes") }}
       </button>
       <button
         :class="{ active: activeTab === 'edges' }"
         @click="activeTab = 'edges'"
       >
-        Edges
+        {{ t("editor.edges") }}
       </button>
     </div>
 
     <div class="list-wrapper">
       <template v-if="!editingItem">
         <div class="header-row">
-          <span>Id</span>
-          <span>Label</span>
-          <span>Edit</span>
+          <span>{{ t("editor.id") }}</span>
+          <span>{{ t("editor.label") }}</span>
+          <span>{{ t("editor.edit") }}</span>
         </div>
 
         <RecycleScroller
@@ -87,7 +90,7 @@ const cancelEdit = () => {
               <span>{{ item.label ?? "" }}</span>
               <span>
                 <button class="edit-button" @click="editItem(item)">
-                  Edit
+                  {{ t("editor.edit") }}
                 </button>
               </span>
             </div>
@@ -97,22 +100,30 @@ const cancelEdit = () => {
 
       <template v-else>
         <div class="edit-form">
-          <h3>Edit {{ activeTab === "nodes" ? "Node" : "Edge" }}</h3>
+          <h3>
+            {{
+              activeTab === "nodes"
+                ? t("editor.edit_node")
+                : t("editor.edit_edge")
+            }}
+          </h3>
 
           <div class="form-row">
-            <label>ID:</label>
+            <label>{{ t("editor.id") }}:</label>
             <input v-model="editingItem.id" disabled />
           </div>
 
           <div class="form-row">
-            <label>Label:</label>
+            <label>{{ t("editor.label") }}:</label>
             <input v-model="editingItem.label" />
           </div>
 
           <div class="form-buttons">
-            <button @click="saveEdit">Save</button>
-            <button class="delete-button" @click="deleteEdit">Delete</button>
-            <button @click="cancelEdit">Cancel</button>
+            <button @click="saveEdit">{{ t("editor.save") }}</button>
+            <button class="delete-button" @click="deleteEdit">
+              {{ t("editor.delete") }}
+            </button>
+            <button @click="cancelEdit">{{ t("editor.cancel") }}</button>
           </div>
         </div>
       </template>

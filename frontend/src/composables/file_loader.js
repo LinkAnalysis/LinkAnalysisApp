@@ -51,7 +51,6 @@ export async function load_graph(node_file, edge_file) {
     })
   })
 
-  console.log("graph built")
   return graph
 }
 
