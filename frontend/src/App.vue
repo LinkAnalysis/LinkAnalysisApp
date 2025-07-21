@@ -8,9 +8,12 @@ import Panel from "@/components/panels/Panel.vue"
 import Graph from "graphology"
 import { useFileStore } from "@/stores/fileStore"
 import { storeToRefs } from "pinia"
+import TabsManager from "./components/TabsManager.vue"
 import { load_graph } from "@/composables/file_loader"
 
-const graph = ref(new Graph())
+const currentLang = ref("en")
+
+const graph = ref(null)
 const isLoading = ref(false)
 const graphKey = ref(0)
 
@@ -73,6 +76,8 @@ watch(graph, () => {
             <Panel :graph="graph" position="left" />
           </div>
           <div class="center-panel">
+            <MainContent :current-section="currentSection" />
+            <TabsManager v-model="graph" />
             <GraphView v-if="graph" :key="graphKey" :graph="graph" />
           </div>
           <div class="right-panel">
