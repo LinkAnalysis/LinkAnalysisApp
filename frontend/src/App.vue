@@ -9,8 +9,12 @@ import { useFileStore } from "@/stores/fileStore"
 import { storeToRefs } from "pinia"
 import TabsManager from "./components/TabsManager.vue"
 import { load_graph, apply_layout } from "@/composables/file_loader"
+import { useTabsStore } from "./stores/tabsStore"
 
-const graph = ref(null)
+const tabs = useTabsStore()
+const { selectedGraph } = storeToRefs(tabs)
+
+const graph = selectedGraph
 const isLoading = ref(false)
 const graphKey = ref(0)
 
