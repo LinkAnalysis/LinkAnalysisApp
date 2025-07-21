@@ -2,6 +2,7 @@
 import { useI18n } from "vue-i18n"
 import { useFileStore } from "@/stores/fileStore"
 import { storeToRefs } from "pinia"
+import { useTabsStore } from "../../../stores/tabsStore"
 
 const props = defineProps({
   nodeCount: Number,
@@ -11,8 +12,14 @@ const props = defineProps({
 const { t } = useI18n()
 const graphType = "Undirected"
 
-const fileStore = useFileStore()
-const { nodeFileName, edgeFileName } = storeToRefs(fileStore)
+//const fileStore = useFileStore()
+//const { nodeFileName, edgeFileName } = storeToRefs(fileStore)
+
+const tabsStore = useTabsStore()
+const { getSelectedNodeFileName, getSelectedEdgeFileName } =
+  storeToRefs(tabsStore)
+const nodeFileName = getSelectedNodeFileName
+const edgeFileName = getSelectedEdgeFileName
 </script>
 
 <template>
