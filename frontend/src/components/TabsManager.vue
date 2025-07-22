@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed, watch } from "vue"
+import { ref, onMounted } from "vue"
 import { useTabsStore } from "@/stores/tabsStore"
 import { storeToRefs } from "pinia"
 
