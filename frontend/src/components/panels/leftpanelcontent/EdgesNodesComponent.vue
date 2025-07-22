@@ -221,6 +221,7 @@ const cancelEdit = () => {
   border-bottom: 1px solid #414141;
   font-size: 14px;
   height: 24px;
+  box-sizing: border-box;
 }
 
 .header-row {
