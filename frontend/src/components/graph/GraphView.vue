@@ -3,8 +3,8 @@ import Graph from "graphology"
 import Sigma from "sigma"
 import VertexWindow from "./VertexWindow.vue"
 import { useI18n } from "vue-i18n"
-
-import { onBeforeUnmount, onMounted, ref } from "vue"
+import { useFileStore } from "../../stores/fileStore"
+import { onBeforeUnmount, onMounted, ref, watch } from "vue"
 const props = defineProps({
   graph: Graph,
 })
@@ -23,29 +23,133 @@ const zoomIn = () => renderer?.getCamera().animatedZoom({ duration: 600 })
 const zoomOut = () => renderer?.getCamera().animatedUnzoom({ duration: 600 })
 const resetZoom = () => renderer?.getCamera().animatedReset({ duration: 600 })
 
+const fileStore = useFileStore()
+const searchHighlighted = ref([])
+const edgesNodesHighlighted = ref([])
+watch(
+  () => fileStore.focusedNodeId,
+  query => {
+    searchHighlighted.value.forEach(id =>
+      props.graph.removeNodeAttribute(id, "highlighted"),
+    )
+    renderer.refresh()
+    searchHighlighted.value = []
+    if (!query || !renderer) {
+      fileStore.focusNode(null)
+      return
+    }
+
+    let ids = []
+    if (props.graph.hasNode(query)) {
+      ids = [query]
+    } else {
+      ids = findNodesByLabelPrefix(query)
+    }
+
+    if (!ids.length) {
+      fileStore.focusNode(null)
+      return
+    }
+
+    ids.forEach(id => props.graph.setNodeAttribute(id, "highlighted", true))
+    searchHighlighted.value = ids
+    renderer.refresh()
+    let sx = 0,
+      sy = 0
+    ids.forEach(id => {
+      const target = renderer.getNodeDisplayData(id)
+      sx += target.x
+      sy += target.y
+    })
+    const cx = sx / ids.length
+    const cy = sy / ids.length
+
+    const cam = renderer.getCamera()
+    const ratio = cam.getState().ratio
+
+    cam.animate({ x: cx, y: cy, ratio }, { duration: 600 })
+
+    props.graph.forEachNode((id, attrs) => {
+      if (attrs.highlighted) {
+        console.log("[highlighted]", id, attrs)
+      }
+    })
+  },
+)
+
+watch(
+  () => [fileStore.focusedEdgeSource, fileStore.focusedEdgeTarget],
+  ([source, target]) => {
+    edgesNodesHighlighted.value.forEach(id =>
+      props.graph.removeNodeAttribute(id, "highlighted"),
+    )
+    console.log("edges: ", props.graph)
+    edgesNodesHighlighted.value = []
+    renderer?.refresh()
+    if (!source || !target || !renderer || !props.graph) return
+
+    const edgeKey = props.graph.edge(source, target)
+    if (!edgeKey) return
+    edgesNodesHighlighted.value = [source, target]
+    renderer.refresh()
+
+    const node1 = renderer.getNodeDisplayData(source)
+    const node2 = renderer.getNodeDisplayData(target)
+    props.graph.setNodeAttribute(target, "highlighted", true)
+    props.graph.setNodeAttribute(source, "highlighted", true)
+    const x = (node1.x + node2.x) / 2
+    const y = (node1.y + node2.y) / 2
+
+    renderer
+      .getCamera()
+      .animate({ x, y }, { duration: 600, easing: "quadraticInOut" })
+    props.graph.forEachNode((id, attrs) => {
+      if (attrs.highlighted) {
+        console.log("[highlighted]", id, attrs)
+      }
+    })
+  },
+)
+
 onMounted(() => {
   renderer = new Sigma(props.graph, container.value, {
     minCameraRatio: 0.08,
     maxCameraRatio: 3,
     renderEdgeLabels: true,
     labelRenderedSizeThreshold: 6,
+
+    nodeReducer: (node, data) => {
+      if (data.highlighted) {
+        return {
+          ...data,
+          color: "#ff3333",
+          size: data.size * 1.5,
+          zIndex: 10,
+        }
+      }
+      return data
+    },
   })
+
+  renderer.setCustomBBox(renderer.getBBox())
+  renderer.on("clickStage", ({ event }) => {
+    const pos = renderer.viewportToGraph(event)
+    console.log("[clickStage] graph coords:", pos)
+  })
+
   renderer.on("downNode", e => {
     isDragging = true
     draggedNode = e.node
     props.graph.setNodeAttribute(draggedNode, "highlighted", true)
-    if (!renderer.getCustomBBox()) renderer.setCustomBBox(renderer.getBBox())
   })
   renderer.on("moveBody", ({ event }) => {
     if (!isDragging || !draggedNode) return
 
-    // Get new position of node
     const pos = renderer.viewportToGraph(event)
 
     props.graph.setNodeAttribute(draggedNode, "x", pos.x)
     props.graph.setNodeAttribute(draggedNode, "y", pos.y)
 
-    // Prevent sigma to move camera:
     event.preventSigmaDefault()
     event.original.preventDefault()
     event.original.stopPropagation()
@@ -54,7 +158,6 @@ onMounted(() => {
     selectNode(node)
   })
 
-  // On mouse up, we reset the dragging mode
   const handleUp = () => {
     if (draggedNode && draggedNode !== clickedNodeId.value) {
       props.graph.removeNodeAttribute(draggedNode, "highlighted")
@@ -94,6 +197,7 @@ function selectNode(nodeId) {
     Description: attrs.label,
     numOfNeighbors: props.graph.neighbors(nodeId).length,
   }
+  console.log("krawedzie: ", props.graph.edges())
   updatePopupPosition()
 }
 
@@ -103,6 +207,19 @@ function clearSelection() {
   }
   clickedNodeId.value = null
   clickedNodeData.value = null
+}
+
+function findNodesByLabelPrefix(query) {
+  if (!query) return []
+  const q = query.toLowerCase()
+  const matches = []
+
+  props.graph.forEachNode((id, attrs) => {
+    const label = (attrs.label || "").toString().toLowerCase()
+    if (label.startsWith(q)) matches.push(id)
+  })
+
+  return matches
 }
 </script>
 
