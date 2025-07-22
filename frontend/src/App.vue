@@ -9,8 +9,20 @@ import { useFileStore } from "@/stores/fileStore"
 import { storeToRefs } from "pinia"
 import TabsManager from "./components/TabsManager.vue"
 import { load_graph, apply_layout } from "@/composables/file_loader"
+import { useTabsStore } from "./stores/tabsStore"
+import { LogPrint } from "../wailsjs/runtime/runtime"
 
-const graph = ref(null)
+const tabs = useTabsStore()
+const {
+  selectedGraph,
+  selectedNodeFile,
+  selectedEdgeFile,
+  selectedTabId,
+  tabsData,
+} = storeToRefs(tabs)
+
+const graph = selectedGraph
+
 const isLoading = ref(false)
 const graphKey = ref(0)
 
@@ -18,15 +30,22 @@ const fileStore = useFileStore()
 const { nodePath, edgePath, layoutType, layoutParams } = storeToRefs(fileStore)
 
 watch(
-  [nodePath, edgePath],
-  async ([nodeFile, edgeFile]) => {
-    if (!edgeFile) {
+  [selectedNodeFile, selectedEdgeFile, selectedTabId],
+  async (
+    [newNodeFile, newEdgeFile, newTabId],
+    [oldNodeFile, oldEdgeFile, oldTabId],
+  ) => {
+    if (oldTabId != newTabId) {
+      return
+    }
+
+    if (!newEdgeFile) {
       graph.value = null
       return
     }
 
     isLoading.value = true
-    graph.value = await load_graph(nodeFile ?? null, edgeFile)
+    graph.value = await load_graph(newNodeFile ?? null, newEdgeFile)
     apply_layout(graph.value, layoutType.value, layoutParams.value)
     isLoading.value = false
   },
@@ -71,7 +90,7 @@ watch(graph, () => {
           </div>
           <div class="center-panel">
             <MainContent :current-section="currentSection" />
-            <TabsManager v-model="graph" />
+            <TabsManager />
             <GraphView v-if="graph" :key="graphKey" :graph="graph" />
           </div>
           <div class="right-panel">

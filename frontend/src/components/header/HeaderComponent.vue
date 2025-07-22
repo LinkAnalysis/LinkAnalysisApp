@@ -3,21 +3,30 @@ import HeaderButtonComponent from "./HeaderButtonComponent.vue"
 import { useFileStore } from "../../stores/fileStore.js"
 import { OpenFileExplorer } from "../../../wailsjs/go/main/App"
 import { useI18n } from "vue-i18n"
+import { useTabsStore } from "../../stores/tabsStore.js"
+import { storeToRefs } from "pinia"
 
 const { t } = useI18n()
-const fileStore = useFileStore()
+//const fileStore = useFileStore()
+
+const tabsStore = useTabsStore()
+const { selectedNodeFile, selectedEdgeFile } = storeToRefs(tabsStore)
 
 const uploadNodesConfiguration = async () => {
   const filePath = await OpenFileExplorer()
   if (filePath) {
-    fileStore.setNodeFile(filePath)
+    //fileStore.setNodeFile(filePath)
+    //tabsStore.getNodeFileRef(selectedTabId.value).value = filePath
+    selectedNodeFile.value = filePath
   }
 }
 
 const uploadEdgesConfiguration = async () => {
   const filePath = await OpenFileExplorer()
   if (filePath) {
-    fileStore.setEdgeFile(filePath)
+    //fileStore.setEdgeFile(filePath)
+    //tabsStore.getEdgeFileRef(selectedTabId.value).value = filePath
+    selectedEdgeFile.value = filePath
   }
 }
 </script>
