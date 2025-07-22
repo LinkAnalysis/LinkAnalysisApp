@@ -21,12 +21,22 @@ const emit = defineEmits([
 const activeTab = ref("nodes")
 const editingItem = ref(null)
 
+const searchTerm = ref("")
+
 const items = computed(() => {
   const src = activeTab.value === "nodes" ? props.nodes : props.edges
   return src.map((it, idx) => ({
     ...(typeof it === "object" && it !== null ? it : { value: it }),
     __key: it.id ?? it.key ?? idx,
   }))
+})
+
+const filteredItems = computed(() => {
+  const term = searchTerm.value.trim().toLowerCase()
+  if (!term) return items.value
+  return items.value.filter(it =>
+    (it.label ?? String(it.value ?? "")).toLowerCase().startsWith(term),
+  )
 })
 
 const isNodeTab = computed(() => activeTab.value === "nodes")
@@ -67,6 +77,18 @@ const cancelEdit = () => {
       >
         {{ t("editor.edges") }}
       </button>
+      <label v-if="activeTab === 'nodes'" class="tab-search">
+        <input
+          v-model="searchTerm"
+          placeholder="Search by label (e.g. Node 1)"
+        />
+      </label>
+      <label v-else class="tab-search">
+        <input
+          v-model="searchTerm"
+          placeholder="Search by label (e.g. Edge 1,2)"
+        />
+      </label>
     </div>
 
     <div class="list-wrapper">
@@ -79,13 +101,13 @@ const cancelEdit = () => {
 
         <RecycleScroller
           class="virtual-list"
-          :items="items"
+          :items="filteredItems"
           :item-size="24"
           key-field="__key"
           :min-item-size="24"
         >
           <template #default="{ item }">
-            <div class="row" :key="item.__key">
+            <div :key="item.__key" class="row">
               <span class="id-cell">{{ item.id ?? item.value }}</span>
               <span>{{ item.label ?? "" }}</span>
               <span>
@@ -142,12 +164,14 @@ const cancelEdit = () => {
   padding: 8px;
   width: 100%;
   font-family: sans-serif;
+  overflow: auto;
 }
 
 .list-wrapper {
   height: 220px;
   display: flex;
   flex-direction: column;
+  overflow: auto;
 }
 
 .tab-buttons {
@@ -170,6 +194,25 @@ const cancelEdit = () => {
   background: #dcdcdc;
 }
 
+.tab-buttons .tab-search {
+  font: 600 18px/1 sans-serif;
+  padding: 6px 16px;
+  border: 2px solid #000;
+  border-radius: 10px;
+  background: #fff;
+  cursor: text;
+  display: flex;
+  align-items: center;
+}
+
+.tab-buttons .tab-search input {
+  all: unset;
+  width: 100%;
+  font: inherit;
+  background: transparent;
+  cursor: text;
+}
+
 .header-row,
 .row {
   display: grid;
@@ -178,6 +221,7 @@ const cancelEdit = () => {
   border-bottom: 1px solid #414141;
   font-size: 14px;
   height: 24px;
+  box-sizing: border-box;
 }
 
 .header-row {
@@ -191,6 +235,7 @@ const cancelEdit = () => {
   min-height: 0;
   overflow-y: auto;
   scrollbar-gutter: stable;
+  padding-bottom: 1px;
 }
 
 .header-row span,
@@ -332,5 +377,11 @@ const cancelEdit = () => {
 
 .form-buttons button:last-child:hover {
   background: #d4d4d4;
+}
+
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 </style>

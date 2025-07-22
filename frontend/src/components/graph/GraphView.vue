@@ -68,12 +68,6 @@ watch(
     const ratio = cam.getState().ratio
 
     cam.animate({ x: cx, y: cy, ratio }, { duration: 600 })
-
-    props.graph.forEachNode((id, attrs) => {
-      if (attrs.highlighted) {
-        console.log("[highlighted]", id, attrs)
-      }
-    })
   },
 )
 
@@ -83,7 +77,6 @@ watch(
     edgesNodesHighlighted.value.forEach(id =>
       props.graph.removeNodeAttribute(id, "highlighted"),
     )
-    console.log("edges: ", props.graph)
     edgesNodesHighlighted.value = []
     renderer?.refresh()
     if (!source || !target || !renderer || !props.graph) return
@@ -103,11 +96,6 @@ watch(
     renderer
       .getCamera()
       .animate({ x, y }, { duration: 600, easing: "quadraticInOut" })
-    props.graph.forEachNode((id, attrs) => {
-      if (attrs.highlighted) {
-        console.log("[highlighted]", id, attrs)
-      }
-    })
   },
 )
 
@@ -129,13 +117,58 @@ onMounted(() => {
       }
       return data
     },
+
+    defaultDrawNodeLabel: (ctx, d, s) => {
+      if (!d.label) return
+      ctx.font = `${s.labelSize}px ${s.labelFont}`
+      ctx.textAlign = "center"
+      ctx.textBaseline = "top"
+      ctx.fillStyle = s.labelColor === "node" ? d.color : s.labelColor
+      ctx.fillText(d.label, d.x, d.y + d.size)
+    },
+    defaultDrawNodeHover: (ctx, d, s) => {
+      if (!d.label) return
+
+      ctx.save()
+
+      const outlineSize = d.size + 3
+      ctx.beginPath()
+      ctx.arc(d.x, d.y, outlineSize, 0, Math.PI * 2, true)
+      ctx.fillStyle = "#fff"
+      ctx.fill()
+
+      ctx.beginPath()
+      ctx.arc(d.x, d.y, d.size, 0, Math.PI * 2, true)
+      ctx.fillStyle = d.color || "#999"
+      ctx.fill()
+
+      const fontSize = s.labelSize || 12
+      ctx.font = `${s.labelWeight || ""} ${fontSize}px ${s.labelFont || "Arial"}`
+
+      const padding = 2
+      const margin = 0
+      const textW = ctx.measureText(d.label).width
+      const boxW = textW + padding * 2 + 1
+      const boxH = fontSize + padding * 2 + 1
+
+      const boxX = d.x - boxW / 2
+      const boxY = d.y + d.size + margin
+
+      ctx.fillStyle = "#fff"
+      ctx.fillRect(boxX, boxY, boxW, boxH)
+
+      ctx.lineWidth = 1
+
+      ctx.fillStyle = "#000"
+      ctx.textAlign = "center"
+      ctx.textBaseline = "top"
+      ctx.fillText(d.label, d.x, boxY + padding)
+
+      ctx.restore()
+    },
   })
 
   renderer.setCustomBBox(renderer.getBBox())
-  renderer.on("clickStage", ({ event }) => {
-    const pos = renderer.viewportToGraph(event)
-    console.log("[clickStage] graph coords:", pos)
-  })
 
   renderer.on("downNode", e => {
     isDragging = true
@@ -197,7 +230,6 @@ function selectNode(nodeId) {
     Description: attrs.label,
     numOfNeighbors: props.graph.neighbors(nodeId).length,
   }
-  console.log("krawedzie: ", props.graph.edges())
   updatePopupPosition()
 }
 
