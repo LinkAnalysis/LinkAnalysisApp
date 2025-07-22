@@ -77,11 +77,17 @@ const cancelEdit = () => {
       >
         {{ t("editor.edges") }}
       </button>
-      <label v-if="activeTab === 'nodes'">
-        <input v-model="searchTerm" placeholder="e.g. Node 1" />
+      <label v-if="activeTab === 'nodes'" class="tab-search">
+        <input
+          v-model="searchTerm"
+          placeholder="Search by label (e.g. Node 1)"
+        />
       </label>
-      <label v-else>
-        <input v-model="searchTerm" placeholder="e.g. Edge 1,2" />
+      <label v-else class="tab-search">
+        <input
+          v-model="searchTerm"
+          placeholder="Search by label (e.g. Edge 1,2)"
+        />
       </label>
     </div>
 
@@ -158,12 +164,14 @@ const cancelEdit = () => {
   padding: 8px;
   width: 100%;
   font-family: sans-serif;
+  overflow: auto;
 }
 
 .list-wrapper {
   height: 220px;
   display: flex;
   flex-direction: column;
+  overflow: auto;
 }
 
 .tab-buttons {
@@ -184,6 +192,25 @@ const cancelEdit = () => {
 
 .tab-buttons button.active {
   background: #dcdcdc;
+}
+
+.tab-buttons .tab-search {
+  font: 600 18px/1 sans-serif;
+  padding: 6px 16px;
+  border: 2px solid #000;
+  border-radius: 10px;
+  background: #fff;
+  cursor: text;
+  display: flex;
+  align-items: center;
+}
+
+.tab-buttons .tab-search input {
+  all: unset;
+  width: 100%;
+  font: inherit;
+  background: transparent;
+  cursor: text;
 }
 
 .header-row,
@@ -207,6 +234,7 @@ const cancelEdit = () => {
   min-height: 0;
   overflow-y: auto;
   scrollbar-gutter: stable;
+  padding-bottom: 1px;
 }
 
 .header-row span,
