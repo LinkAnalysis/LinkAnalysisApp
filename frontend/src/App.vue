@@ -5,7 +5,6 @@ import HeaderComponent from "@/components/header/HeaderComponent.vue"
 import GraphView from "@/components/graph/GraphView.vue"
 import Panel from "@/components/panels/Panel.vue"
 
-import { useFileStore } from "@/stores/fileStore"
 import { storeToRefs } from "pinia"
 import TabsManager from "./components/TabsManager.vue"
 import { load_graph, apply_layout } from "@/composables/file_loader"
@@ -18,6 +17,8 @@ const {
   selectedNodeFile,
   selectedEdgeFile,
   selectedTabId,
+  selectedLayout,
+  selectedLayoutParams,
   tabsData,
 } = storeToRefs(tabs)
 
@@ -26,8 +27,7 @@ const graph = selectedGraph
 const isLoading = ref(false)
 const graphKey = ref(0)
 
-const fileStore = useFileStore()
-const { nodePath, edgePath, layoutType, layoutParams } = storeToRefs(fileStore)
+//const { nodePath, edgePath, layoutType, layoutParams } = storeToRefs(fileStore)
 
 watch(
   [selectedNodeFile, selectedEdgeFile, selectedTabId],
@@ -46,15 +46,11 @@ watch(
 
     isLoading.value = true
     graph.value = await load_graph(newNodeFile ?? null, newEdgeFile)
-    apply_layout(graph.value, layoutType.value, layoutParams.value)
+    apply_layout(graph.value)
     isLoading.value = false
   },
   { immediate: true },
 )
-
-watch([layoutType, layoutParams], ([type, params]) => {
-  if (graph.value) apply_layout(graph.value, type, params)
-})
 
 watch(graph, () => {
   graphKey.value++
@@ -73,7 +69,12 @@ watch(graph, () => {
           <div class="center-panel">
             <MainContent :current-section="currentSection" />
             <TabsManager />
-            <GraphView v-if="graph" :key="graphKey" :graph="graph" />
+            <GraphView
+              v-if="graph"
+              :key="graphKey"
+              :graph="graph"
+              :changed="gC"
+            />
           </div>
           <div class="right-panel">
             <Panel :graph="graph" position="right" />

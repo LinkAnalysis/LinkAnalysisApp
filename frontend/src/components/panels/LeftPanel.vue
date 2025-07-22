@@ -5,6 +5,9 @@ import LayoutComponent from "./leftpanelcontent/LayoutComponent.vue"
 import VisualizationComponent from "./leftpanelcontent/VisualizationComponent.vue"
 import Graph from "graphology"
 import { useGraphElements } from "../../composables/useGraphElements"
+import { useTabsStore } from "../../stores/tabsStore"
+import { apply_layout } from "../../composables/file_loader"
+import { storeToRefs } from "pinia"
 
 const props = defineProps({
   graph: Graph,
@@ -12,6 +15,22 @@ const props = defineProps({
 const graphRef = toRef(props, "graph")
 
 const { nodes, edges } = useGraphElements(graphRef)
+
+const tabsStore = useTabsStore()
+const { markSelectedGraphChange } = tabsStore
+const { selectedGraph, selectedLayout, selectedLayoutParams } =
+  storeToRefs(tabsStore)
+
+const onApplyLayout = () => {
+  if (selectedGraph.value) {
+    apply_layout(
+      selectedGraph.value,
+      selectedLayout.value,
+      selectedLayoutParams.value,
+    )
+    markSelectedGraphChange()
+  }
+}
 
 function handleEditNode(updated) {
   graphRef.value.updateNodeAttributes(updated.id, old => ({
@@ -50,7 +69,7 @@ function handleDeleteItem(type, id) {
       />
     </div>
     <div class="panel-wrapper">
-      <LayoutComponent class="panel-section" />
+      <LayoutComponent class="panel-section" @apply-layout="onApplyLayout" />
     </div>
     <div class="panel-wrapper">
       <VisualizationComponent class="panel-section" />

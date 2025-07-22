@@ -1,13 +1,24 @@
 <script setup>
 import Graph from "graphology"
 import Sigma from "sigma"
+import ForceSupervisor from "graphology-layout-force/worker"
 import VertexWindow from "./VertexWindow.vue"
 import { useI18n } from "vue-i18n"
 import { useFileStore } from "../../stores/fileStore"
+import { useTabsStore } from "../../stores/tabsStore"
 import { onBeforeUnmount, onMounted, ref, watch } from "vue"
+import { LogPrint } from "../../../wailsjs/runtime/runtime"
+import { storeToRefs } from "pinia"
+import { animateNodes, graphExtent } from "sigma/utils"
+import { normalizeGraphCoordinates } from "../../composables/layouts"
+
 const props = defineProps({
   graph: Graph,
+  changed: Number,
 })
+
+const tabsStore = useTabsStore()
+const { selectedGraphChangedMarker } = storeToRefs(tabsStore)
 
 const clickedNodeData = ref(null)
 const popupPosition = ref({ x: 0, y: 0 })
@@ -16,12 +27,29 @@ const container = ref(null)
 const { t } = useI18n()
 
 let renderer = null
+
+watch(selectedGraphChangedMarker, _ => {
+  resetCamera()
+})
+
+const allowDragging = ref(false)
+//const forceLayout = new ForceSupervisor(props.graph, { isNodeFixed: (_, attr) => attr.highlighted, })
+//forceLayout.stop()
 let draggedNode = null
 let isDragging = false
 
 const zoomIn = () => renderer?.getCamera().animatedZoom({ duration: 600 })
 const zoomOut = () => renderer?.getCamera().animatedUnzoom({ duration: 600 })
-const resetZoom = () => renderer?.getCamera().animatedReset({ duration: 600 })
+const resetCamera = (resetZoom = false) => {
+  if (renderer != null) {
+    renderer.refresh()
+    normalizeGraphCoordinates(props.graph)
+    renderer.setCustomBBox({ x: [0, 1], y: [0, 1] })
+    if (resetZoom) renderer.getCamera().animatedReset()
+    else renderer.getCamera().animate({ x: 0.5, y: 0.5 })
+  }
+}
+const toggleDragging = () => (allowDragging.value = !allowDragging.value)
 
 const fileStore = useFileStore()
 const searchHighlighted = ref([])
@@ -102,7 +130,7 @@ watch(
 onMounted(() => {
   renderer = new Sigma(props.graph, container.value, {
     minCameraRatio: 0.08,
-    maxCameraRatio: 3,
+    maxCameraRatio: 20,
     renderEdgeLabels: true,
     labelRenderedSizeThreshold: 6,
 
@@ -171,13 +199,15 @@ onMounted(() => {
   renderer.setCustomBBox(renderer.getBBox())
 
   renderer.on("downNode", e => {
-    isDragging = true
-    draggedNode = e.node
-    props.graph.setNodeAttribute(draggedNode, "highlighted", true)
+    if (allowDragging.value) {
+      isDragging = true
+      //forceLayout.start()
+      draggedNode = e.node
+      props.graph.setNodeAttribute(draggedNode, "highlighted", true)
+    }
   })
   renderer.on("moveBody", ({ event }) => {
     if (!isDragging || !draggedNode) return
-
     const pos = renderer.viewportToGraph(event)
 
     props.graph.setNodeAttribute(draggedNode, "x", pos.x)
@@ -195,6 +225,7 @@ onMounted(() => {
     if (draggedNode && draggedNode !== clickedNodeId.value) {
       props.graph.removeNodeAttribute(draggedNode, "highlighted")
     }
+    //forceLayout.stop()
     isDragging = false
     draggedNode = null
   }
@@ -208,6 +239,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   if (renderer) renderer.kill()
+  //forceLayout.kill()
 })
 
 function updatePopupPosition() {
@@ -261,7 +293,11 @@ function findNodesByLabelPrefix(query) {
     <div class="controls">
       <button @click="zoomIn">Zoom In</button>
       <button @click="zoomOut">Zoom Out</button>
-      <button @click="resetZoom">Reset</button>
+      <button @click="() => resetCamera(true)">Reset</button>
+      <label class="checkbox-container">
+        Dragging
+        <input type="checkbox" @click="toggleDragging" />
+      </label>
     </div>
     <VertexWindow
       v-if="clickedNodeData"
