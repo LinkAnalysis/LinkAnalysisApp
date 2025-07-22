@@ -5,7 +5,6 @@ import HeaderComponent from "@/components/header/HeaderComponent.vue"
 import GraphView from "@/components/graph/GraphView.vue"
 import Panel from "@/components/panels/Panel.vue"
 
-import { useFileStore } from "@/stores/fileStore"
 import { storeToRefs } from "pinia"
 import TabsManager from "./components/TabsManager.vue"
 import { load_graph, apply_layout } from "@/composables/file_loader"
@@ -28,7 +27,6 @@ const graph = selectedGraph
 const isLoading = ref(false)
 const graphKey = ref(0)
 
-const fileStore = useFileStore()
 //const { nodePath, edgePath, layoutType, layoutParams } = storeToRefs(fileStore)
 
 watch(
