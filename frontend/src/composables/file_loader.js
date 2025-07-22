@@ -50,7 +50,7 @@ export async function load_graph(node_file, edge_file) {
       color: "#000000",
     })
   })
-  
+
   return graph
 }
 
