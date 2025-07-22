@@ -63,13 +63,13 @@ onMounted(() => {
           v-model="tab.title"
           ref="edit_input"
           @blur="stop_editing"
-          @keyup.enter="stop_editing"
           style="
             font-size: 0.875rem;
             padding: 0.25rem;
             border: 1px solid #ccc;
             border-radius: 0.25rem;
           "
+          @keyup.enter="stop_editing"
         />
         <span class="tab-cnt" v-else style="font-size: 0.875rem">{{
           tab.title

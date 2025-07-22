@@ -21,12 +21,22 @@ const emit = defineEmits([
 const activeTab = ref("nodes")
 const editingItem = ref(null)
 
+const searchTerm = ref("")
+
 const items = computed(() => {
   const src = activeTab.value === "nodes" ? props.nodes : props.edges
   return src.map((it, idx) => ({
     ...(typeof it === "object" && it !== null ? it : { value: it }),
     __key: it.id ?? it.key ?? idx,
   }))
+})
+
+const filteredItems = computed(() => {
+  const term = searchTerm.value.trim().toLowerCase()
+  if (!term) return items.value
+  return items.value.filter(it =>
+    (it.label ?? String(it.value ?? "")).toLowerCase().startsWith(term),
+  )
 })
 
 const isNodeTab = computed(() => activeTab.value === "nodes")
@@ -67,6 +77,12 @@ const cancelEdit = () => {
       >
         {{ t("editor.edges") }}
       </button>
+      <label v-if="activeTab === 'nodes'">
+        <input v-model="searchTerm" placeholder="e.g. Node 1" />
+      </label>
+      <label v-else>
+        <input v-model="searchTerm" placeholder="e.g. Edge 1,2" />
+      </label>
     </div>
 
     <div class="list-wrapper">
@@ -79,13 +95,13 @@ const cancelEdit = () => {
 
         <RecycleScroller
           class="virtual-list"
-          :items="items"
+          :items="filteredItems"
           :item-size="24"
           key-field="__key"
           :min-item-size="24"
         >
           <template #default="{ item }">
-            <div class="row" :key="item.__key">
+            <div :key="item.__key" class="row">
               <span class="id-cell">{{ item.id ?? item.value }}</span>
               <span>{{ item.label ?? "" }}</span>
               <span>
@@ -332,5 +348,11 @@ const cancelEdit = () => {
 
 .form-buttons button:last-child:hover {
   background: #d4d4d4;
+}
+
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 </style>
