@@ -59,24 +59,6 @@ watch([layoutType, layoutParams], ([type, params]) => {
 watch(graph, () => {
   graphKey.value++
 })
-
-// const get_edges_data = () => {
-//   fetch("/random_edge.csv")
-//     .then(resp => resp.text())
-//     .then(csv_r => parseCSV(csv_r))
-//     .then(csv => update_graph_edges(graph.value, csv))
-// }
-
-// const get_nodes_data = () => {
-//   fetch("/random_node.csv")
-//     .then(resp => resp.text())
-//     .then(csv_r => parseCSV(csv_r))
-//     .then(csv => update_graph_nodes(graph.value, csv))
-// }
-
-// const clear_graph = () => {
-//   graph.value.clear()
-// }
 </script>
 
 <template>

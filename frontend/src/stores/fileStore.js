@@ -10,6 +10,9 @@ export const useFileStore = defineStore("files", {
     edgePath: null,
     layoutType: "circular",
     layoutParams: {},
+    focusedNodeId: null,
+    focusedEdgeSource: null,
+    focusedEdgeTarget: null,
   }),
 
   getters: {
@@ -28,6 +31,13 @@ export const useFileStore = defineStore("files", {
     setLayout(type, params = {}) {
       this.layoutType = type
       this.layoutParams = params
+    },
+    focusNode(id) {
+      this.focusedNodeId = id
+    },
+    focusEdgeEndpoints(source, target) {
+      this.focusedEdgeSource = source
+      this.focusedEdgeTarget = target
     },
   },
 })
