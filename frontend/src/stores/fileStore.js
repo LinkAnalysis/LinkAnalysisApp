@@ -13,6 +13,7 @@ export const useFileStore = defineStore("files", {
     focusedNodeId: null,
     focusedEdgeSource: null,
     focusedEdgeTarget: null,
+    searchingEditNode: null,
   }),
 
   getters: {
@@ -38,6 +39,9 @@ export const useFileStore = defineStore("files", {
     focusEdgeEndpoints(source, target) {
       this.focusedEdgeSource = source
       this.focusedEdgeTarget = target
+    },
+    searchEditNode(nodeLabel) {
+      this.searchingEditNode = nodeLabel
     },
   },
 })
