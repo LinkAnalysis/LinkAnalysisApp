@@ -21,14 +21,15 @@
           </tr>
         </tbody>
       </table>
-
       <button class="apply-button" @click="applySettings">Apply</button>
+      <button v-if="hasParams" class="reset-button" @click="resetSettings">
+        Reset
+      </button>
     </div>
   </div>
 </template>
 
 <script setup>
-//import { useFileStore } from "@/stores/fileStore"
 import { useTabsStore } from "@/stores/tabsStore"
 import { layouts as layoutsMap } from "@/composables/layouts"
 import { storeToRefs } from "pinia"
@@ -56,10 +57,11 @@ watch(
     if (oldTabId != newTabId) {
       return
     }
-    selectedLayoutParams.value = defaultLayoutParams[newLayout]
+    selectedLayoutParams.value = { ...defaultLayoutParams[newLayout] }
   },
 )
 
+// when tab is changed, initialize its layout and layout params to defaults
 watch(
   selectedTabId,
   newVal => {
@@ -68,7 +70,9 @@ watch(
         selectedLayout.value = layoutsNames[0].key
       }
       if (!selectedLayoutParams.value) {
-        selectedLayoutParams.value = defaultLayoutParams[selectedLayout.value]
+        selectedLayoutParams.value = {
+          ...defaultLayoutParams[selectedLayout.value],
+        }
       }
     }
   },
@@ -80,6 +84,11 @@ const emit = defineEmits(["applyLayout"])
 const applySettings = () => {
   emit("applyLayout")
 }
+
+const resetSettings = () => {
+  selectedLayoutParams.value = { ...defaultLayoutParams[selectedLayout.value] }
+}
+
 const formatLabel = key => {
   return key.replace(/([A-Z])/g, " $1").replace(/^./, str => str.toUpperCase())
 }
@@ -132,11 +141,13 @@ input[type="number"] {
   padding: 4px;
 }
 
-.apply-button {
+.apply-button,
+.reset-button {
   width: 100%;
   padding: 8px;
   font-size: 16px;
   border: 2px solid black;
+  margin-bottom: 2px;
   border-radius: 8px;
   background-color: white;
   cursor: pointer;

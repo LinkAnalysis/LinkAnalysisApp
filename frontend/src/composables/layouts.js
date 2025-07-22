@@ -19,7 +19,7 @@ export const layouts = {
   },
   forceAtlas2: {
     apply: (graph, params = {}) => {
-      circular.assign(graph)
+      //circular.assign(graph)
       forceAtlas2.assign(graph, params)
     },
     defaultParams: {
