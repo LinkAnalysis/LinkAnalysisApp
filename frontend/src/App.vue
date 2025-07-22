@@ -69,7 +69,12 @@ watch(graph, () => {
           <div class="center-panel">
             <MainContent :current-section="currentSection" />
             <TabsManager />
-            <GraphView v-if="graph" :key="graphKey" :graph="graph" />
+            <GraphView
+              v-if="graph"
+              :key="graphKey"
+              :graph="graph"
+              :changed="gC"
+            />
           </div>
           <div class="right-panel">
             <Panel :graph="graph" position="right" />

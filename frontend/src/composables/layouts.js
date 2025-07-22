@@ -6,6 +6,30 @@ import * as d3 from "d3-hierarchy"
 import * as d3f from "d3-force-3d"
 import { LogPrint } from "../../wailsjs/runtime/runtime"
 
+export function normalizeGraphCoordinates(graph) {
+  let xMin = Infinity,
+    xMax = -Infinity
+  let yMin = Infinity,
+    yMax = -Infinity
+
+  graph.forEachNode((_, attrs) => {
+    const x = attrs.x
+    const y = attrs.y
+
+    if (x < xMin) xMin = x
+    if (x > xMax) xMax = x
+    if (y < yMin) yMin = y
+    if (y > yMax) yMax = y
+  })
+
+  graph.forEachNode(n => {
+    const attrs = graph.getNodeAttributes(n)
+    const newX = (attrs.x - xMin) / (xMax - xMin)
+    const newY = (attrs.y - yMin) / (yMax - yMin)
+    graph.mergeNodeAttributes(n, { x: newX, y: newY })
+  })
+}
+
 export const layouts = {
   random: {
     apply: (graph, params = {}) => {
@@ -14,7 +38,9 @@ export const layouts = {
     defaultParams: {},
   },
   circular: {
-    apply: (graph, params = {}) => circular.assign(graph),
+    apply: (graph, params = {}) => {
+      circular.assign(graph)
+    },
     defaultParams: {},
   },
   forceAtlas2: {
@@ -101,7 +127,7 @@ export const layouts = {
         simulation.tick()
       }
       nodes.forEach(({ id, x, y, z }) => {
-        graph.mergeNodeAttributes(id, { x, y, z, size: 5 })
+        graph.mergeNodeAttributes(id, { x, y, z })
       })
     },
     defaultParams: {},

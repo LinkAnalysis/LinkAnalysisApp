@@ -17,16 +17,19 @@ const graphRef = toRef(props, "graph")
 const { nodes, edges } = useGraphElements(graphRef)
 
 const tabsStore = useTabsStore()
+const { markSelectedGraphChange } = tabsStore
 const { selectedGraph, selectedLayout, selectedLayoutParams } =
   storeToRefs(tabsStore)
 
 const onApplyLayout = () => {
-  if (selectedGraph.value)
+  if (selectedGraph.value) {
     apply_layout(
       selectedGraph.value,
       selectedLayout.value,
       selectedLayoutParams.value,
     )
+    markSelectedGraphChange()
+  }
 }
 
 function handleEditNode(updated) {

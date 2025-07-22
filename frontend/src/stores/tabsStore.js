@@ -32,6 +32,11 @@ export const useTabsStore = defineStore("tabs", () => {
     },
   })
 
+  const selectedGraphChangedMarker = ref(false)
+  function markSelectedGraphChange() {
+    selectedGraphChangedMarker.value = !selectedGraphChangedMarker.value
+  }
+
   function removeTab(id) {
     const index = idToIndex(id)
     tabsData.value.splice(index, 1)
@@ -138,5 +143,7 @@ export const useTabsStore = defineStore("tabs", () => {
     selectedTabId,
     tabsCount,
     tabsData,
+    selectedGraphChangedMarker,
+    markSelectedGraphChange,
   }
 })
