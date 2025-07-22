@@ -1,8 +1,8 @@
 <template>
-  <div class="layout-settings">
+  <div v-if="selectedLayout && selectedLayoutParams" class="layout-settings">
     <h2>Layout</h2>
     <select v-model="selectedLayout" class="dropdown">
-      <option v-for="l in layouts" :key="l.key" :value="l.key">
+      <option v-for="l in layoutsNames" :key="l.key" :value="l.key">
         {{ l.label }}
       </option>
     </select>
@@ -13,16 +13,10 @@
           <tr v-for="(value, key) in currentParams" :key="key">
             <td>{{ formatLabel(key) }}</td>
             <td v-if="typeof value === 'boolean'">
-              <input
-                type="checkbox"
-                v-model="layoutParams[selectedLayout][key]"
-              />
+              <input type="checkbox" v-model="selectedLayoutParams[key]" />
             </td>
             <td v-else>
-              <input
-                type="number"
-                v-model.number="layoutParams[selectedLayout][key]"
-              />
+              <input type="number" v-model.number="selectedLayoutParams[key]" />
             </td>
           </tr>
         </tbody>
@@ -33,59 +27,61 @@
   </div>
 </template>
 
-<script>
-import { useFileStore } from "@/stores/fileStore"
+<script setup>
+//import { useFileStore } from "@/stores/fileStore"
+import { useTabsStore } from "@/stores/tabsStore"
 import { layouts as layoutsMap } from "@/composables/layouts"
+import { storeToRefs } from "pinia"
+import { computed, onMounted, ref, watch } from "vue"
+import { LogPrint } from "../../../../wailsjs/runtime/runtime"
 
-export default {
-  name: "LayoutSettings",
-  data() {
-    return {
-      fileStore: useFileStore(),
-      selectedLayout: "circular",
-      layouts: [
-        { key: "circular", label: "Circular" },
-        { key: "forceAtlas2", label: "Force Atlas 2" },
-        { key: "d3tree", label: "Tree D3" },
-        { key: "radial", label: "Radial" },
-        { key: "force", label: "Force" },
-        { key: "random", label: "Random" },
-        { key: "circlepack", label: "Circle Pack" },
-      ],
-      layoutParams: {
-        circular: { ...layoutsMap.circular.defaultParams },
-        forceAtlas2: { ...layoutsMap.forceAtlas2.defaultParams },
-        d3tree: { ...layoutsMap.d3tree.defaultParams },
-        radial: { ...layoutsMap.radial.defaultParams },
-        force: { ...layoutsMap.force.defaultParams },
-        random: { ...layoutsMap.random.defaultParams },
-        circlepack: { ...layoutsMap.circlepack.defaultParams },
-      },
+const tabsStore = useTabsStore()
+const { selectedLayout, selectedLayoutParams, selectedTabId } =
+  storeToRefs(tabsStore)
+
+const layoutsNames = Object.keys(layoutsMap).map(k => ({ key: k, label: k }))
+const defaultLayoutParams = Object.keys(layoutsMap).reduce(
+  (acc, k) => ({ ...acc, [k]: { ...layoutsMap[k].defaultParams } }),
+  {},
+)
+
+const currentParams = computed(() => selectedLayoutParams.value)
+const hasParams = computed(
+  () => (Object.keys(selectedLayoutParams.value).length ?? 0) > 0,
+)
+
+watch(
+  [selectedLayout, selectedTabId],
+  ([newLayout, newTabId], [oldLayout, oldTabId]) => {
+    if (oldTabId != newTabId) {
+      return
+    }
+    selectedLayoutParams.value = defaultLayoutParams[newLayout]
+  },
+)
+
+watch(
+  selectedTabId,
+  newVal => {
+    if (newVal != null) {
+      if (!selectedLayout.value) {
+        selectedLayout.value = layoutsNames[0].key
+      }
+      if (!selectedLayoutParams.value) {
+        selectedLayoutParams.value = defaultLayoutParams[selectedLayout.value]
+      }
     }
   },
-  computed: {
-    currentParams() {
-      return this.layoutParams[this.selectedLayout]
-    },
-    hasParams() {
-      return Object.keys(this.currentParams).length > 0
-    },
-  },
-  methods: {
-    applySettings() {
-      this.fileStore.setLayout(this.selectedLayout, this.currentParams)
-      console.log("Applied layout config:", {
-        layout: this.selectedLayout,
-        parameters: this.currentParams,
-      })
-    },
-    formatLabel(key) {
-      // np. strongGravityMode → Strong Gravity Mode
-      return key
-        .replace(/([A-Z])/g, " $1")
-        .replace(/^./, str => str.toUpperCase())
-    },
-  },
+  { immediate: true },
+)
+
+const emit = defineEmits(["applyLayout"])
+
+const applySettings = () => {
+  emit("applyLayout")
+}
+const formatLabel = key => {
+  return key.replace(/([A-Z])/g, " $1").replace(/^./, str => str.toUpperCase())
 }
 </script>
 

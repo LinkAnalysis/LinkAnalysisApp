@@ -18,6 +18,8 @@ const {
   selectedNodeFile,
   selectedEdgeFile,
   selectedTabId,
+  selectedLayout,
+  selectedLayoutParams,
   tabsData,
 } = storeToRefs(tabs)
 
@@ -27,7 +29,7 @@ const isLoading = ref(false)
 const graphKey = ref(0)
 
 const fileStore = useFileStore()
-const { nodePath, edgePath, layoutType, layoutParams } = storeToRefs(fileStore)
+//const { nodePath, edgePath, layoutType, layoutParams } = storeToRefs(fileStore)
 
 watch(
   [selectedNodeFile, selectedEdgeFile, selectedTabId],
@@ -46,15 +48,11 @@ watch(
 
     isLoading.value = true
     graph.value = await load_graph(newNodeFile ?? null, newEdgeFile)
-    apply_layout(graph.value, layoutType.value, layoutParams.value)
+    apply_layout(graph.value)
     isLoading.value = false
   },
   { immediate: true },
 )
-
-watch([layoutType, layoutParams], ([type, params]) => {
-  if (graph.value) apply_layout(graph.value, type, params)
-})
 
 watch(graph, () => {
   graphKey.value++
