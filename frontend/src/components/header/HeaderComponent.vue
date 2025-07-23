@@ -1,20 +1,26 @@
 <script setup>
 import HeaderButtonComponent from "./HeaderButtonComponent.vue"
-import { OpenFileExplorer } from "../../../wailsjs/go/main/App"
+import {
+  OpenFileExplorer,
+  OpenSaveFileExplorer,
+  SaveStringToFile,
+} from "../../../wailsjs/go/main/App"
 import { useI18n } from "vue-i18n"
 import { useTabsStore } from "../../stores/tabsStore.js"
 import { storeToRefs } from "pinia"
+import { LogPrint } from "../../../wailsjs/runtime/runtime.js"
+import * as svg from "graphology-svg"
+import * as gexf from "graphology-gexf"
 
 const { t } = useI18n()
 
 const tabsStore = useTabsStore()
-const { selectedNodeFile, selectedEdgeFile } = storeToRefs(tabsStore)
+const { selectedNodeFile, selectedEdgeFile, selectedGraph } =
+  storeToRefs(tabsStore)
 
 const uploadNodesConfiguration = async () => {
   const filePath = await OpenFileExplorer()
   if (filePath) {
-    //fileStore.setNodeFile(filePath)
-    //tabsStore.getNodeFileRef(selectedTabId.value).value = filePath
     selectedNodeFile.value = filePath
   }
 }
@@ -22,10 +28,24 @@ const uploadNodesConfiguration = async () => {
 const uploadEdgesConfiguration = async () => {
   const filePath = await OpenFileExplorer()
   if (filePath) {
-    //fileStore.setEdgeFile(filePath)
-    //tabsStore.getEdgeFileRef(selectedTabId.value).value = filePath
     selectedEdgeFile.value = filePath
   }
+}
+
+const exportToSVG = () => {
+  LogPrint("Exporting to SVG")
+}
+
+const exportToPNG = () => {
+  LogPrint("Exporting to PNG")
+}
+
+const exportToGEXF = async () => {
+  LogPrint("Exporting to GEXF")
+}
+
+const exportToGRAPHML = () => {
+  LogPrint("Exporting to GRAPHML")
 }
 </script>
 
@@ -52,6 +72,27 @@ const uploadEdgesConfiguration = async () => {
                 {
                   label: 'Upload nodes configuration',
                   onClick: () => uploadNodesConfiguration(),
+                },
+              ],
+            },
+            {
+              label: 'Export Graph',
+              children: [
+                {
+                  label: 'SVG',
+                  onClick: () => exportToSVG(),
+                },
+                {
+                  label: 'PNG',
+                  onClick: exportToPNG,
+                },
+                {
+                  label: 'GEXF',
+                  onClick: exportToGEXF,
+                },
+                {
+                  label: 'GRAPHML',
+                  onClick: exportToGRAPHML,
                 },
               ],
             },
