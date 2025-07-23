@@ -42,6 +42,10 @@ const exportToPNG = () => {
 
 const exportToGEXF = async () => {
   LogPrint("Exporting to GEXF")
+  const gexfString = gexf.write(selectedGraph.value)
+  const filePath = await OpenSaveFileExplorer("graph", "gexf")
+  await SaveStringToFile(filePath, gexfString)
+  LogPrint("Done!")
 }
 
 const exportToGRAPHML = () => {
