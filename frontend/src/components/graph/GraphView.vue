@@ -3,13 +3,14 @@ import Graph from "graphology"
 import VertexWindow from "./VertexWindow.vue"
 import { useI18n } from "vue-i18n"
 import { watch, toRefs } from "vue"
-
 import { useSigmaRenderer } from "@/composables/useSigmaRenderer"
 import { useGraphInteractions } from "@/composables/useGraphInteractions"
 import { useGraphState } from "@/composables/useGraphState"
 import { normalizeGraphCoordinates } from "@/composables/layouts"
 import { applyStyleOptions } from "@/utils/graphUtils"
 import GraphControls from "./GraphControls.vue"
+import { toBlob } from "@sigma/export-image"
+import { SaveBytesToFile } from "../../../wailsjs/go/main/App"
 
 const props = defineProps({
   graph: Graph,
@@ -46,6 +47,18 @@ function resetCamera(full = false) {
     ? r.getCamera().animatedReset()
     : r.getCamera().animate({ x: 0.5, y: 0.5 })
 }
+
+const saveImage = async (filePath, ext) => {
+  if (!renderer.value) return
+  const blob = await toBlob(renderer.value, { format: ext })
+  const arrayBuffer = await blob.arrayBuffer()
+  const uint8Array = new Uint8Array(arrayBuffer)
+  await SaveBytesToFile(filePath, Array.from(uint8Array))
+}
+
+defineExpose({
+  saveImage,
+})
 
 useGraphState({ renderer, graph: props.graph, resetCamera })
 
