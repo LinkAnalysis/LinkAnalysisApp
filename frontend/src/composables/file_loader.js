@@ -126,6 +126,7 @@ export async function load_graph(node_file, edge_file, graphMode) {
       },
     )
   }
+  console.log(graph)
   return graph
 }
 

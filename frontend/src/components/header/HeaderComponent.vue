@@ -17,8 +17,13 @@ import enFlag from "@/assets/images/gb.png"
 const { t, locale } = useI18n()
 
 const tabsStore = useTabsStore()
-const { selectedNodeFile, selectedEdgeFile, selectedGraph, graphViewRef, selectedGraphMode } =
-  storeToRefs(tabsStore)
+const {
+  selectedNodeFile,
+  selectedEdgeFile,
+  selectedGraph,
+  graphViewRef,
+  selectedGraphMode,
+} = storeToRefs(tabsStore)
 
 const uploadNodesConfiguration = async () => {
   const filePath = await OpenFileExplorer()
@@ -34,14 +39,6 @@ const uploadAntiMoneyLaunderingGraph = async () => {
     //tabsStore.getNodeFileRef(selectedTabId.value).value = filePath
     selectedEdgeFile.value = filePath
     selectedGraphMode.value = "antiMoneyLaundering"
-    console.log(
-      "[HeaderComponents.vue]: selectedGraphMode: ",
-      selectedGraphMode.value,
-    )
-    console.log(
-      "[HeaderComponents.vue]: selectedEdgeFile: ",
-      selectedEdgeFile.value,
-    )
   }
 }
 
@@ -138,6 +135,10 @@ function setLanguage(lang) {
             },
             {
               label: t('header.file_menu.export_graph'),
+              onClick: () => uploadAntiMoneyLaunderingGraph(),
+            },
+            {
+              label: 'Export Graph',
               children: [
                 {
                   label: t('header.file_menu.export_jpg'),
@@ -152,10 +153,6 @@ function setLanguage(lang) {
                   onClick: exportToGEXF,
                 },
               ],
-            },
-            {
-              label: 'Upload Anti Money Laundering Graph',
-              onClick: () => uploadAntiMoneyLaunderingGraph(),
             },
           ]"
         />

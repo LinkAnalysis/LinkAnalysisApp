@@ -45,7 +45,6 @@ watch(
     }
 
     isLoading.value = true
-    console.log("[App.vue]: graphMode: ", newGraphMode)
     graph.value = await load_graph(
       newNodeFile ?? null,
       newEdgeFile,
