@@ -73,7 +73,6 @@ watch(graph, () => {
               v-if="graph"
               :key="graphKey"
               :graph="graph"
-              :changed="gC"
               :options="selectedVisualizationOptions"
               ref="graphViewRef"
             />

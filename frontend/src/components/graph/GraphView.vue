@@ -26,12 +26,16 @@ const { container, renderer } = useSigmaRenderer({
   optionsRef: options,
 })
 
-const { clickedNodeData, popupPosition, selectedNodeIds } =
-  useGraphInteractions({
-    renderer,
-    graph: props.graph,
-    optionsRef: options,
-  })
+const {
+  clickedNodeData,
+  popupNodePosition,
+  clickedEdgeData,
+  popupEdgePosition,
+} = useGraphInteractions({
+  renderer,
+  graph: props.graph,
+  optionsRef: options,
+})
 
 const zoomIn = () => renderer.value?.getCamera().animatedZoom({ duration: 600 })
 const zoomOut = () =>
@@ -92,7 +96,7 @@ watch(
     <VertexWindow
       v-if="clickedNodeData"
       :visible="true"
-      :position="popupPosition"
+      :position="popupNodePosition"
       @close="clearSelection"
     >
       ID: {{ clickedNodeData.id }}<br />
@@ -105,6 +109,16 @@ watch(
       </span>
       {{ t("vertex_window.number_of_neighbors") }}:
       {{ clickedNodeData.numOfNeighbors }}<br />
+    </VertexWindow>
+    <VertexWindow
+      v-if="clickedEdgeData"
+      :visible="true"
+      :position="popupEdgePosition"
+      @close="clearSelection"
+    >
+      ID: {{ clickedEdgeData.id }}<br />
+      description: {{ clickedEdgeData.description }} <br />
+      weight: {{ clickedEdgeData.weight }} <br />
     </VertexWindow>
   </div>
 </template>

@@ -15,6 +15,7 @@ export function useSigmaRenderer({ graph, optionsRef }) {
       minCameraRatio: 0.08,
       maxCameraRatio: 20,
       renderEdgeLabels: optionsRef.value.renderEdgeLabels,
+      enableEdgeEvents: true,
       labelRenderedSizeThreshold: optionsRef.value.renderNodeLabels ? 6 : 9999,
 
       nodeReducer: (node, data) => {

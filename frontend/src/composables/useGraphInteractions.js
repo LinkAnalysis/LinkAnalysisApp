@@ -4,16 +4,34 @@ export function useGraphInteractions({ renderer, graph, optionsRef }) {
   const selectedNodeId = ref(null)
   const popupNodeId = ref(null)
   const clickedNodeData = ref(null)
-  const popupPosition = ref({ x: 0, y: 0 })
+  const popupNodePosition = ref({ x: 0, y: 0 })
+
+  const selectedEdgeId = ref(null)
+  const popupEdgeId = ref(null)
+  const clickedEdgeData = ref(null)
+  const popupEdgePosition = ref({ x: 0, y: 0 })
 
   let draggedNode = null
   let isDragging = false
 
-  function updatePopupPosition() {
+  function updatePopupNodePosition() {
     if (!renderer.value || !popupNodeId.value) return
     const a = graph.getNodeAttributes(popupNodeId.value)
     const p = renderer.value.graphToViewport({ x: a.x, y: a.y })
-    popupPosition.value = { x: p.x, y: p.y }
+    popupNodePosition.value = { x: p.x, y: p.y }
+  }
+
+  function updatePopupEdgePosition() {
+    if (!renderer.value || !popupEdgeId.value) return
+    const e = popupEdgeId.value
+    const s_attrs = graph.getNodeAttributes(graph.source(e))
+    const t_attrs = graph.getNodeAttributes(graph.target(e))
+    const midPoint = {
+      x: (s_attrs.x + t_attrs.x) / 2,
+      y: (s_attrs.y + t_attrs.y) / 2,
+    }
+    const p = renderer.value.graphToViewport(midPoint)
+    popupEdgePosition.value = { x: p.x, y: p.y }
   }
 
   const highlightedEdges = new Set()
@@ -53,9 +71,35 @@ export function useGraphInteractions({ renderer, graph, optionsRef }) {
       description: a.label,
       numOfNeighbors: graph.neighbors(nodeId).length,
     }
-    updatePopupPosition()
+    updatePopupNodePosition()
 
     recomputeHighlightedEdges()
+  }
+
+  function selectSingleEdge(edgeId) {
+    if (selectedEdgeId.value === edgeId) {
+      graph.removeEdgeAttribute(edgeId, "highlighted")
+      selectedEdgeId.value = null
+      popupEdgeId.value = null
+      clickedEdgeData.value = null
+      return
+    }
+
+    if (selectedEdgeId.value) {
+      graph.removeEdgeAttribute(selectedEdgeId.value, "highlighted")
+    }
+
+    selectedEdgeId.value = edgeId
+    graph.setEdgeAttribute(edgeId, "highlighted", true)
+
+    popupEdgeId.value = edgeId
+    const attrs = graph.getEdgeAttributes(edgeId)
+    clickedEdgeData.value = {
+      id: edgeId,
+      description: attrs.label,
+      weight: attrs.weight,
+    }
+    updatePopupEdgePosition()
   }
 
   function clearSelection() {
@@ -64,11 +108,19 @@ export function useGraphInteractions({ renderer, graph, optionsRef }) {
     }
     selectedNodeId.value = null
 
+    if (selectedEdgeId.value) {
+      graph.removeEdgeAttribute(selectedEdgeId.value, "highlighted")
+    }
+    selectedEdgeId.value = null
+
     highlightedEdges.forEach(e => graph.removeEdgeAttribute(e, "highlighted"))
     highlightedEdges.clear()
 
     popupNodeId.value = null
     clickedNodeData.value = null
+
+    popupEdgeId.value = null
+    clickedEdgeData.value = null
   }
 
   function attachListeners(r) {
@@ -90,7 +142,8 @@ export function useGraphInteractions({ renderer, graph, optionsRef }) {
       event.preventSigmaDefault()
       event.original.preventDefault()
       event.original.stopPropagation()
-      updatePopupPosition()
+      updatePopupNodePosition()
+      updatePopupEdgePosition()
     })
 
     const stopDrag = () => {
@@ -100,8 +153,13 @@ export function useGraphInteractions({ renderer, graph, optionsRef }) {
     r.on("upNode", stopDrag)
     r.on("upStage", stopDrag)
 
+    r.on("clickEdge", ({ edge }) => selectSingleEdge(edge))
+
     r.getMouseCaptor().on("clickStage", () => clearSelection())
-    r.getCamera().on("updated", updatePopupPosition)
+    r.getCamera().on("updated", () => {
+      updatePopupNodePosition()
+      updatePopupEdgePosition()
+    })
   }
 
   watch(renderer, r => attachListeners(r), { immediate: true })
@@ -116,7 +174,10 @@ export function useGraphInteractions({ renderer, graph, optionsRef }) {
   return {
     selectedNodeId,
     clickedNodeData,
-    popupPosition,
+    popupNodePosition,
+    selectedEdgeId,
+    clickedEdgeData,
+    popupEdgePosition,
     clearSelection,
   }
 }
