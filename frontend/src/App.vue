@@ -17,17 +17,13 @@ const {
   selectedNodeFile,
   selectedEdgeFile,
   selectedTabId,
-  selectedLayout,
-  selectedLayoutParams,
-  tabsData,
+  graphViewRef,
 } = storeToRefs(tabs)
 
 const graph = selectedGraph
 
 const isLoading = ref(false)
 const graphKey = ref(0)
-
-//const { nodePath, edgePath, layoutType, layoutParams } = storeToRefs(fileStore)
 
 watch(
   [selectedNodeFile, selectedEdgeFile, selectedTabId],
@@ -74,6 +70,7 @@ watch(graph, () => {
               :key="graphKey"
               :graph="graph"
               :changed="gC"
+              ref="graphViewRef"
             />
           </div>
           <div class="right-panel">

@@ -1,20 +1,27 @@
 <script setup>
 import HeaderButtonComponent from "./HeaderButtonComponent.vue"
-import { OpenFileExplorer } from "../../../wailsjs/go/main/App"
+import {
+  OpenFileExplorer,
+  SaveFileExplorer,
+  SaveStringToFile,
+} from "../../../wailsjs/go/main/App"
 import { useI18n } from "vue-i18n"
 import { useTabsStore } from "../../stores/tabsStore.js"
 import { storeToRefs } from "pinia"
+import { LogPrint } from "../../../wailsjs/runtime/runtime.js"
+import svg from "graphology-svg"
+import * as gexf from "graphology-gexf"
+import * as graphml from "graphology-graphml"
 
 const { t } = useI18n()
 
 const tabsStore = useTabsStore()
-const { selectedNodeFile, selectedEdgeFile } = storeToRefs(tabsStore)
+const { selectedNodeFile, selectedEdgeFile, selectedGraph, graphViewRef } =
+  storeToRefs(tabsStore)
 
 const uploadNodesConfiguration = async () => {
   const filePath = await OpenFileExplorer()
   if (filePath) {
-    //fileStore.setNodeFile(filePath)
-    //tabsStore.getNodeFileRef(selectedTabId.value).value = filePath
     selectedNodeFile.value = filePath
   }
 }
@@ -22,10 +29,38 @@ const uploadNodesConfiguration = async () => {
 const uploadEdgesConfiguration = async () => {
   const filePath = await OpenFileExplorer()
   if (filePath) {
-    //fileStore.setEdgeFile(filePath)
-    //tabsStore.getEdgeFileRef(selectedTabId.value).value = filePath
     selectedEdgeFile.value = filePath
   }
+}
+
+const exportToPNG = async () => {
+  LogPrint("Exporting to PNG")
+  if (!graphViewRef.value) {
+    LogPrint("grapView container was null")
+    return
+  }
+  const filePath = await SaveFileExplorer("graph", "png")
+  await graphViewRef.value.saveImage(filePath, "png")
+  LogPrint("Done!")
+}
+
+const exportToJPG = async () => {
+  LogPrint("Exporting to JPG")
+  if (!graphViewRef.value) {
+    LogPrint("grapView container was null")
+    return
+  }
+  const filePath = await SaveFileExplorer("graph", "jpg")
+  await graphViewRef.value.saveImage(filePath, "jpg")
+  LogPrint("Done!")
+}
+
+const exportToGEXF = async () => {
+  LogPrint("Exporting to GEXF")
+  const gexfString = gexf.write(selectedGraph.value)
+  const filePath = await SaveFileExplorer("graph", "gexf")
+  await SaveStringToFile(filePath, gexfString)
+  LogPrint("Done!")
 }
 </script>
 
@@ -52,6 +87,23 @@ const uploadEdgesConfiguration = async () => {
                 {
                   label: 'Upload nodes configuration',
                   onClick: () => uploadNodesConfiguration(),
+                },
+              ],
+            },
+            {
+              label: 'Export Graph',
+              children: [
+                {
+                  label: 'JPG',
+                  onClick: () => exportToJPG(),
+                },
+                {
+                  label: 'PNG',
+                  onClick: exportToPNG,
+                },
+                {
+                  label: 'GEXF',
+                  onClick: exportToGEXF,
                 },
               ],
             },
