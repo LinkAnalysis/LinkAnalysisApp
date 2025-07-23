@@ -20,6 +20,7 @@ const {
   selectedLayout,
   selectedLayoutParams,
   tabsData,
+  selectedVisualizationOptions,
 } = storeToRefs(tabs)
 
 const graph = selectedGraph
@@ -74,6 +75,7 @@ watch(graph, () => {
               :key="graphKey"
               :graph="graph"
               :changed="gC"
+              :options="selectedVisualizationOptions"
             />
           </div>
           <div class="right-panel">
