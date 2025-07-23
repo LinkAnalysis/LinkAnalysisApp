@@ -77,8 +77,8 @@ export async function load_graph(node_file, edge_file, graphMode) {
       const w = parseInt(edgeWeight)
       graph.addEdge(x, y, {
         label: edgeLabel,
-        weight: 1,
-        size: 1,
+        weight: w,
+        size: w,
         color: "#000000",
       })
     })
@@ -121,8 +121,8 @@ export async function load_graph(node_file, edge_file, graphMode) {
             PaymentCurrency +
             " Is Laundering: " +
             IsLaundering,
-          weight: 1,
-          size: 1,
+          weight: w,
+          size: w,
           color: "#000000",
         })
       },
