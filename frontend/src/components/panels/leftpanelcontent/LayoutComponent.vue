@@ -1,6 +1,6 @@
 <template>
   <div v-if="selectedLayout && selectedLayoutParams" class="layout-settings">
-    <h2>Layout</h2>
+    <h2>{{ t("layout.title") }}</h2>
     <select v-model="selectedLayout" class="dropdown">
       <option v-for="l in layoutsNames" :key="l.key" :value="l.key">
         {{ l.label }}
@@ -21,9 +21,11 @@
           </tr>
         </tbody>
       </table>
-      <button class="apply-button" @click="applySettings">Apply</button>
       <button v-if="hasParams" class="reset-button" @click="resetSettings">
-        Reset
+        {{ t("layout.reset") }}
+      </button>
+      <button class="apply-button" @click="applySettings">
+        {{ t("layout.apply") }}
       </button>
     </div>
   </div>
@@ -33,14 +35,21 @@
 import { useTabsStore } from "@/stores/tabsStore"
 import { layouts as layoutsMap } from "@/composables/layouts"
 import { storeToRefs } from "pinia"
-import { computed, onMounted, ref, watch } from "vue"
-import { LogPrint } from "../../../../wailsjs/runtime/runtime"
+import { computed, watch } from "vue"
+import { useI18n } from "vue-i18n"
+
+const { t } = useI18n()
 
 const tabsStore = useTabsStore()
 const { selectedLayout, selectedLayoutParams, selectedTabId } =
   storeToRefs(tabsStore)
 
-const layoutsNames = Object.keys(layoutsMap).map(k => ({ key: k, label: k }))
+const layoutsNames = computed(() =>
+  Object.keys(layoutsMap).map(k => ({
+    key: k,
+    label: t(`layout.layouts.${k}`),
+  })),
+)
 const defaultLayoutParams = Object.keys(layoutsMap).reduce(
   (acc, k) => ({ ...acc, [k]: { ...layoutsMap[k].defaultParams } }),
   {},
@@ -67,7 +76,7 @@ watch(
   newVal => {
     if (newVal != null) {
       if (!selectedLayout.value) {
-        selectedLayout.value = layoutsNames[0].key
+        selectedLayout.value = layoutsNames.value[0]?.key
       }
       if (!selectedLayoutParams.value) {
         selectedLayoutParams.value = {
@@ -90,7 +99,10 @@ const resetSettings = () => {
 }
 
 const formatLabel = key => {
-  return key.replace(/([A-Z])/g, " $1").replace(/^./, str => str.toUpperCase())
+  const translation = t(`layout.params.${key}`)
+  return translation !== `layout.params.${key}`
+    ? translation
+    : key.replace(/([A-Z])/g, " $1").replace(/^./, str => str.toUpperCase())
 }
 </script>
 

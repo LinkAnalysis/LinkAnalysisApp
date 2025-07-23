@@ -24,7 +24,12 @@ const handleClick = () => {
     @click.stop="handleClick"
   >
     <div class="item-content">
-      <span>{{ option.label }}</span>
+      <img v-if="option.icon" :src="option.icon" class="flag-icon" />
+
+      <span class="label">{{ option.label }}</span>
+
+      <span v-if="option.active" class="checkmark">✔️</span>
+
       <span v-if="option.children" class="arrow">▶</span>
     </div>
 
@@ -73,8 +78,32 @@ const handleClick = () => {
 
 .item-content {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   width: 100%;
+  gap: 0.5rem;
+}
+
+.flag-icon {
+  width: 20px;
+  height: 14px;
+  object-fit: cover;
+  border-radius: 2px;
+}
+
+.label {
+  flex-grow: 1;
+  text-align: left;
+}
+
+.checkmark {
+  margin-left: auto;
+  color: green;
+  font-size: 1rem;
+}
+
+.arrow {
+  margin-left: 0.25rem;
+  font-size: 0.8rem;
 }
 </style>
