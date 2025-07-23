@@ -48,8 +48,6 @@ export function parseAntiMoneyLaunderingCSV(filename) {
 
 // constructs the graphology Graph from the node and edge files
 export async function load_graph(node_file, edge_file, graphMode) {
-  console.log("graph mode: ", graphMode)
-  console.log("edge file: ", edge_file)
   const graph = new Graph({ multi: true })
   if (graphMode === "normal") {
     const edges = await parseCSV(await ReadTextFile(edge_file))
