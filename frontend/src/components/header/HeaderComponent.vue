@@ -2,7 +2,7 @@
 import HeaderButtonComponent from "./HeaderButtonComponent.vue"
 import {
   OpenFileExplorer,
-  OpenSaveFileExplorer,
+  SaveFileExplorer,
   SaveStringToFile,
 } from "../../../wailsjs/go/main/App"
 import { useI18n } from "vue-i18n"
@@ -43,7 +43,7 @@ const exportToPNG = () => {
 const exportToGEXF = async () => {
   LogPrint("Exporting to GEXF")
   const gexfString = gexf.write(selectedGraph.value)
-  const filePath = await OpenSaveFileExplorer("graph", "gexf")
+  const filePath = await SaveFileExplorer("graph", "gexf")
   await SaveStringToFile(filePath, gexfString)
   LogPrint("Done!")
 }

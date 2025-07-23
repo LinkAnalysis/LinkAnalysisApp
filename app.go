@@ -40,7 +40,7 @@ func (a *App) OpenFileExplorer() (string, error) {
 	return result, err
 }
 
-func (a *App) OpenSaveFileExplorer(fileName string, fileExt string) (string, error) {
+func (a *App) SaveFileExplorer(fileName string, fileExt string) (string, error) {
 	result, err := runtime.SaveFileDialog(a.ctx, runtime.SaveDialogOptions{
 		Title:           "Save as",
 		DefaultFilename: fileName,
