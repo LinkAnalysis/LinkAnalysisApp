@@ -17,6 +17,8 @@ export const useTabsStore = defineStore("tabs", () => {
   const idToIndex = id => tabsData.value.findIndex(o => o.id == id)
   const tabsCount = computed(() => tabsData.value.length)
 
+  const graphViewRef = ref(null)
+
   const selectedTabId = ref(null)
   const selectedTabIndex = computed(() => idToIndex(selectedTabId.value))
 
@@ -145,5 +147,6 @@ export const useTabsStore = defineStore("tabs", () => {
     tabsData,
     selectedGraphChangedMarker,
     markSelectedGraphChange,
+    graphViewRef,
   }
 })

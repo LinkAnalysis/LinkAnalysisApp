@@ -70,6 +70,10 @@ func (a *App) SaveStringToFile(path string, content string) error {
 	return nil
 }
 
+func (a *App) SaveBytesToFile(path string, content []byte) error {
+	return os.WriteFile(path, content, 0644)
+}
+
 // startup is called when the app starts. The context is saved
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {

@@ -9,13 +9,14 @@ import { useI18n } from "vue-i18n"
 import { useTabsStore } from "../../stores/tabsStore.js"
 import { storeToRefs } from "pinia"
 import { LogPrint } from "../../../wailsjs/runtime/runtime.js"
-import * as svg from "graphology-svg"
+import svg from "graphology-svg"
 import * as gexf from "graphology-gexf"
+import * as graphml from "graphology-graphml"
 
 const { t } = useI18n()
 
 const tabsStore = useTabsStore()
-const { selectedNodeFile, selectedEdgeFile, selectedGraph } =
+const { selectedNodeFile, selectedEdgeFile, selectedGraph, graphViewRef } =
   storeToRefs(tabsStore)
 
 const uploadNodesConfiguration = async () => {
@@ -32,12 +33,26 @@ const uploadEdgesConfiguration = async () => {
   }
 }
 
-const exportToSVG = () => {
-  LogPrint("Exporting to SVG")
+const exportToPNG = async () => {
+  LogPrint("Exporting to PNG")
+  if (!graphViewRef.value) {
+    LogPrint("grapView container was null")
+    return
+  }
+  const filePath = await SaveFileExplorer("graph", "png")
+  await graphViewRef.value.saveImage(filePath, "png")
+  LogPrint("Done!")
 }
 
-const exportToPNG = () => {
-  LogPrint("Exporting to PNG")
+const exportToJPG = async () => {
+  LogPrint("Exporting to JPG")
+  if (!graphViewRef.value) {
+    LogPrint("grapView container was null")
+    return
+  }
+  const filePath = await SaveFileExplorer("graph", "jpg")
+  await graphViewRef.value.saveImage(filePath, "jpg")
+  LogPrint("Done!")
 }
 
 const exportToGEXF = async () => {
@@ -46,10 +61,6 @@ const exportToGEXF = async () => {
   const filePath = await SaveFileExplorer("graph", "gexf")
   await SaveStringToFile(filePath, gexfString)
   LogPrint("Done!")
-}
-
-const exportToGRAPHML = () => {
-  LogPrint("Exporting to GRAPHML")
 }
 </script>
 
@@ -83,8 +94,8 @@ const exportToGRAPHML = () => {
               label: 'Export Graph',
               children: [
                 {
-                  label: 'SVG',
-                  onClick: () => exportToSVG(),
+                  label: 'JPG',
+                  onClick: () => exportToJPG(),
                 },
                 {
                   label: 'PNG',
@@ -93,10 +104,6 @@ const exportToGRAPHML = () => {
                 {
                   label: 'GEXF',
                   onClick: exportToGEXF,
-                },
-                {
-                  label: 'GRAPHML',
-                  onClick: exportToGRAPHML,
                 },
               ],
             },

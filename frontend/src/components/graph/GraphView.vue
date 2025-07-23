@@ -11,6 +11,8 @@ import { LogPrint } from "../../../wailsjs/runtime/runtime"
 import { storeToRefs } from "pinia"
 import { animateNodes, graphExtent } from "sigma/utils"
 import { normalizeGraphCoordinates } from "../../composables/layouts"
+import { toBlob } from "@sigma/export-image"
+import { SaveBytesToFile } from "../../../wailsjs/go/main/App"
 
 const props = defineProps({
   graph: Graph,
@@ -50,6 +52,18 @@ const resetCamera = (resetZoom = false) => {
   }
 }
 const toggleDragging = () => (allowDragging.value = !allowDragging.value)
+
+const saveImage = async (filePath, ext) => {
+  if (!renderer) return
+  const blob = await toBlob(renderer, { format: ext })
+  const arrayBuffer = await blob.arrayBuffer()
+  const uint8Array = new Uint8Array(arrayBuffer)
+  await SaveBytesToFile(filePath, Array.from(uint8Array))
+}
+
+defineExpose({
+  saveImage,
+})
 
 const fileStore = useFileStore()
 const searchHighlighted = ref([])
