@@ -17,6 +17,10 @@ const {
   selectedNodeFile,
   selectedEdgeFile,
   selectedTabId,
+  selectedLayout,
+  selectedLayoutParams,
+  tabsData,
+  selectedVisualizationOptions,
   graphViewRef,
 } = storeToRefs(tabs)
 
@@ -70,6 +74,7 @@ watch(graph, () => {
               :key="graphKey"
               :graph="graph"
               :changed="gC"
+              :options="selectedVisualizationOptions"
               ref="graphViewRef"
             />
           </div>

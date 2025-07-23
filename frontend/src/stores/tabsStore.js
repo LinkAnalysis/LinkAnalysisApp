@@ -1,5 +1,6 @@
 import { defineStore } from "pinia"
-import { computed, ref, watch } from "vue"
+import { computed, ref } from "vue"
+import { visualizationDefaultOptions } from "../config/visualizationDefaults"
 
 const getFileName = fullPath => {
   return fullPath ? fullPath.split(/[/\\]/).pop() : ""
@@ -11,6 +12,7 @@ export const useTabsStore = defineStore("tabs", () => {
   const edgeFiles = ref([])
   const layoutTypes = ref([])
   const layoutParams = ref([])
+  const visualizationOptions = ref([])
 
   const tabsData = ref([])
 
@@ -47,6 +49,7 @@ export const useTabsStore = defineStore("tabs", () => {
     edgeFiles.value.splice(index, 1)
     layoutTypes.value.splice(index, 1)
     layoutParams.value.splice(index, 1)
+    visualizationOptions.value.splice(index, 1)
   }
 
   function addTab(tabData) {
@@ -57,6 +60,9 @@ export const useTabsStore = defineStore("tabs", () => {
     edgeFiles.value.push(ref(null))
     layoutTypes.value.push(ref(null))
     layoutParams.value.push(ref(null))
+    visualizationOptions.value.push(
+      ref(structuredClone(visualizationDefaultOptions)),
+    )
 
     tabsData.value.push(tabData)
   }
@@ -124,6 +130,21 @@ export const useTabsStore = defineStore("tabs", () => {
     },
   })
 
+  const selectedVisualizationOptions = computed({
+    get() {
+      if (visualizationOptions.value.length > 0)
+        return visualizationOptions.value[selectedTabIndex.value].value ?? null
+      return null
+    },
+    set(newVal) {
+      if (
+        visualizationOptions.value.length > 0 &&
+        visualizationOptions.value[selectedTabIndex.value]
+      )
+        visualizationOptions.value[selectedTabIndex.value].value = newVal
+    },
+  })
+
   const getSelectedEdgeFileName = computed(() =>
     getFileName(selectedEdgeFile.value),
   )
@@ -147,6 +168,7 @@ export const useTabsStore = defineStore("tabs", () => {
     tabsData,
     selectedGraphChangedMarker,
     markSelectedGraphChange,
+    selectedVisualizationOptions,
     graphViewRef,
   }
 })
