@@ -1,7 +1,7 @@
 import { ref, watch, onScopeDispose } from "vue"
 
 export function useGraphInteractions({ renderer, graph, optionsRef }) {
-  const selectedNodeIds = ref(new Set())
+  const selectedNodeId = ref(null)
   const popupNodeId = ref(null)
   const clickedNodeData = ref(null)
   const popupPosition = ref({ x: 0, y: 0 })
@@ -21,52 +21,48 @@ export function useGraphInteractions({ renderer, graph, optionsRef }) {
     highlightedEdges.forEach(e => graph.removeEdgeAttribute(e, "highlighted"))
     highlightedEdges.clear()
 
-    selectedNodeIds.value.forEach(id => {
-      graph.outEdges(id).forEach(e => {
+    if (selectedNodeId.value) {
+      graph.outEdges(selectedNodeId.value).forEach(e => {
         graph.setEdgeAttribute(e, "highlighted", true)
         highlightedEdges.add(e)
       })
-    })
+    }
   }
 
-  function toggleNodeSelection(nodeId) {
-    const sel = selectedNodeIds.value
-
-    if (sel.has(nodeId)) {
-      sel.delete(nodeId)
+  function selectSingleNode(nodeId) {
+    if (selectedNodeId.value === nodeId) {
       graph.removeNodeAttribute(nodeId, "highlighted")
-
-      if (popupNodeId.value === nodeId) {
-        popupNodeId.value = null
-        clickedNodeData.value = null
-      }
-    } else {
-      sel.add(nodeId)
-      graph.setNodeAttribute(nodeId, "highlighted", true)
-
-      popupNodeId.value = nodeId
-      const a = graph.getNodeAttributes(nodeId)
-      clickedNodeData.value = {
-        id: nodeId,
-        description: a.label,
-        numOfNeighbors: graph.neighbors(nodeId).length,
-      }
-      updatePopupPosition()
-    }
-
-    recomputeHighlightedEdges()
-
-    if (sel.size === 0) {
+      selectedNodeId.value = null
       popupNodeId.value = null
       clickedNodeData.value = null
+      recomputeHighlightedEdges()
+      return
     }
+
+    if (selectedNodeId.value) {
+      graph.removeNodeAttribute(selectedNodeId.value, "highlighted")
+    }
+
+    selectedNodeId.value = nodeId
+    graph.setNodeAttribute(nodeId, "highlighted", true)
+
+    popupNodeId.value = nodeId
+    const a = graph.getNodeAttributes(nodeId)
+    clickedNodeData.value = {
+      id: nodeId,
+      description: a.label,
+      numOfNeighbors: graph.neighbors(nodeId).length,
+    }
+    updatePopupPosition()
+
+    recomputeHighlightedEdges()
   }
 
   function clearSelection() {
-    selectedNodeIds.value.forEach(id =>
-      graph.removeNodeAttribute(id, "highlighted"),
-    )
-    selectedNodeIds.value.clear()
+    if (selectedNodeId.value) {
+      graph.removeNodeAttribute(selectedNodeId.value, "highlighted")
+    }
+    selectedNodeId.value = null
 
     highlightedEdges.forEach(e => graph.removeEdgeAttribute(e, "highlighted"))
     highlightedEdges.clear()
@@ -79,10 +75,10 @@ export function useGraphInteractions({ renderer, graph, optionsRef }) {
     if (!r) return
 
     r.on("downNode", ({ node }) => {
+      selectSingleNode(node)
       if (optionsRef.value.allowDragging !== false) {
         isDragging = true
         draggedNode = node
-        if (!selectedNodeIds.value.has(node)) toggleNodeSelection(node)
       }
     })
 
@@ -91,7 +87,6 @@ export function useGraphInteractions({ renderer, graph, optionsRef }) {
       const pos = renderer.value.viewportToGraph(event)
       graph.setNodeAttribute(draggedNode, "x", pos.x)
       graph.setNodeAttribute(draggedNode, "y", pos.y)
-
       event.preventSigmaDefault()
       event.original.preventDefault()
       event.original.stopPropagation()
@@ -105,14 +100,7 @@ export function useGraphInteractions({ renderer, graph, optionsRef }) {
     r.on("upNode", stopDrag)
     r.on("upStage", stopDrag)
 
-    r.on("clickNode", ({ node }) => {
-      if (!isDragging) toggleNodeSelection(node)
-    })
-
-    r.getMouseCaptor().on("clickStage", e => {
-      if (!e.original.shiftKey && !e.original.ctrlKey) clearSelection()
-    })
-
+    r.getMouseCaptor().on("clickStage", () => clearSelection())
     r.getCamera().on("updated", updatePopupPosition)
   }
 
@@ -126,7 +114,7 @@ export function useGraphInteractions({ renderer, graph, optionsRef }) {
   })
 
   return {
-    selectedNodeIds,
+    selectedNodeId,
     clickedNodeData,
     popupPosition,
     clearSelection,
