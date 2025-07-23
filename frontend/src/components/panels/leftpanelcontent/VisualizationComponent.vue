@@ -89,6 +89,13 @@
             </td>
           </tr>
           <tr>
+            <td>Highlighted Edge Color</td>
+            <td>
+              <input type="color" v-model="settings.highlightedEdgeColor" />
+              <span>{{ settings.highlightedEdgeColor }}</span>
+            </td>
+          </tr>
+          <tr>
             <td>Edge Size</td>
             <td>
               <input
@@ -186,8 +193,9 @@ const settings = reactive({
   nodeSize: 10,
   allowDragging: true,
   edgeColor: "#000000",
+  highlightedEdgeColor: "#ff9900",
   edgeSize: 1.5,
-  useEdgeWeights: true,
+  useEdgeWeights: false,
   renderEdgeLabels: true,
   hoverEffect: true,
   backgroundColor: "#ffffff",
