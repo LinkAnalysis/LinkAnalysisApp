@@ -9,7 +9,6 @@ import { storeToRefs } from "pinia"
 import TabsManager from "./components/TabsManager.vue"
 import { load_graph, apply_layout } from "@/composables/file_loader"
 import { useTabsStore } from "./stores/tabsStore"
-import { LogPrint } from "../wailsjs/runtime/runtime"
 
 const tabs = useTabsStore()
 const {
@@ -22,6 +21,7 @@ const {
   tabsData,
   selectedVisualizationOptions,
   graphViewRef,
+  selectedGraphMode,
 } = storeToRefs(tabs)
 
 const graph = selectedGraph
@@ -30,10 +30,10 @@ const isLoading = ref(false)
 const graphKey = ref(0)
 
 watch(
-  [selectedNodeFile, selectedEdgeFile, selectedTabId],
+  [selectedNodeFile, selectedEdgeFile, selectedTabId, selectedGraphMode],
   async (
-    [newNodeFile, newEdgeFile, newTabId],
-    [oldNodeFile, oldEdgeFile, oldTabId],
+    [newNodeFile, newEdgeFile, newTabId, newGraphMode],
+    [oldNodeFile, oldEdgeFile, oldTabId, oldGraphMode],
   ) => {
     if (oldTabId != newTabId) {
       return
@@ -45,7 +45,12 @@ watch(
     }
 
     isLoading.value = true
-    graph.value = await load_graph(newNodeFile ?? null, newEdgeFile)
+    console.log("[App.vue]: graphMode: ", newGraphMode)
+    graph.value = await load_graph(
+      newNodeFile ?? null,
+      newEdgeFile,
+      newGraphMode,
+    )
     apply_layout(graph.value)
     isLoading.value = false
   },
