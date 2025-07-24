@@ -11,6 +11,7 @@ import { applyStyleOptions } from "@/utils/graphUtils"
 import GraphControls from "./GraphControls.vue"
 import { toBlob } from "@sigma/export-image"
 import { SaveBytesToFile } from "../../../wailsjs/go/main/App"
+import { LogPrint } from "../../../wailsjs/runtime/runtime"
 
 const props = defineProps({
   graph: Graph,
@@ -26,7 +27,7 @@ const { container, renderer } = useSigmaRenderer({
   optionsRef: options,
 })
 
-const { clickedNodeData, popupPosition, selectedNodeIds } =
+const { clickedNodeData, popupNodePosition, popupEdgeData, popupEdgePosition } =
   useGraphInteractions({
     renderer,
     graph: props.graph,
@@ -92,8 +93,12 @@ watch(
     <VertexWindow
       v-if="clickedNodeData"
       :visible="true"
-      :position="popupPosition"
-      @close="clearSelection"
+      :position="popupNodePosition"
+      @close="
+        () => {
+          LogPrint('Node Window Close')
+        }
+      "
     >
       ID: {{ clickedNodeData.id }}<br />
       <span v-if="clickedNodeData.Description">
@@ -105,6 +110,21 @@ watch(
       </span>
       {{ t("vertex_window.number_of_neighbors") }}:
       {{ clickedNodeData.numOfNeighbors }}<br />
+    </VertexWindow>
+
+    <VertexWindow
+      v-if="popupEdgeData"
+      :visible="true"
+      :position="popupEdgePosition"
+      @close="
+        () => {
+          LogPrint('Edge Window Close')
+        }
+      "
+    >
+      ID: {{ popupEdgeData.id }}<br />
+      description: {{ popupEdgeData.description }} <br />
+      weight: {{ popupEdgeData.weight }} <br />
     </VertexWindow>
   </div>
 </template>

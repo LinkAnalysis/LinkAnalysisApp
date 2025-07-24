@@ -60,7 +60,6 @@ watch(graph, () => {
 <template>
   <div class="app-shell">
     <HeaderComponent />
-
     <div class="main-area">
       <div class="layout-grid">
         <div class="left-panel">
@@ -73,7 +72,6 @@ watch(graph, () => {
             v-if="graph"
             :key="graphKey"
             :graph="graph"
-            :changed="gC"
             :options="selectedVisualizationOptions"
             ref="graphViewRef"
           />

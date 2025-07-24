@@ -1,24 +1,44 @@
 import { ref, watch, onScopeDispose } from "vue"
+import { LogPrint } from "../../wailsjs/runtime/runtime"
 
 export function useGraphInteractions({ renderer, graph, optionsRef }) {
   const selectedNodeId = ref(null)
   const popupNodeId = ref(null)
   const clickedNodeData = ref(null)
-  const popupPosition = ref({ x: 0, y: 0 })
+  const popupNodePosition = ref({ x: 0, y: 0 })
+
+  const popupEdgeId = ref(null)
+  const popupEdgeData = ref(null)
+  const popupEdgePosition = ref({ x: 0, y: 0 })
 
   let draggedNode = null
   let isDragging = false
 
-  function updatePopupPosition() {
+  function updatePopupNodePosition() {
     if (!renderer.value || !popupNodeId.value) return
     const a = graph.getNodeAttributes(popupNodeId.value)
     const p = renderer.value.graphToViewport({ x: a.x, y: a.y })
-    popupPosition.value = { x: p.x, y: p.y }
+    popupNodePosition.value = { x: p.x, y: p.y }
+  }
+
+  function updatePopupEdgePosition() {
+    if (!renderer.value || !popupEdgeId.value) return
+    const e = popupEdgeId.value
+    const s_attrs = graph.getNodeAttributes(graph.source(e))
+    const t_attrs = graph.getNodeAttributes(graph.target(e))
+    const midPoint = {
+      x: (s_attrs.x + t_attrs.x) / 2,
+      y: (s_attrs.y + t_attrs.y) / 2,
+    }
+    const p = renderer.value.graphToViewport(midPoint)
+    popupEdgePosition.value = { x: p.x, y: p.y }
   }
 
   const highlightedEdges = new Set()
   function recomputeHighlightedEdges() {
-    highlightedEdges.forEach(e => graph.removeEdgeAttribute(e, "highlighted"))
+    highlightedEdges.forEach(e => {
+      if (e != popupEdgeId.value) graph.removeEdgeAttribute(e, "highlighted")
+    })
     highlightedEdges.clear()
 
     if (selectedNodeId.value) {
@@ -31,7 +51,8 @@ export function useGraphInteractions({ renderer, graph, optionsRef }) {
 
   function selectSingleNode(nodeId) {
     if (selectedNodeId.value === nodeId) {
-      graph.removeNodeAttribute(nodeId, "highlighted")
+      if (!graph.hasNodeAttribute(nodeId, "edgeHighlighted"))
+        graph.removeNodeAttribute(nodeId, "highlighted")
       selectedNodeId.value = null
       popupNodeId.value = null
       clickedNodeData.value = null
@@ -53,9 +74,55 @@ export function useGraphInteractions({ renderer, graph, optionsRef }) {
       description: a.label,
       numOfNeighbors: graph.neighbors(nodeId).length,
     }
-    updatePopupPosition()
+    updatePopupNodePosition()
 
     recomputeHighlightedEdges()
+  }
+
+  function clearPopupEdgeSelection() {
+    popupEdgeData.value = null
+
+    if (!popupEdgeId.value) return
+
+    const edgeId = popupEdgeId.value
+    if (!highlightedEdges.has(edgeId))
+      graph.removeEdgeAttribute(edgeId, "highlighted")
+
+    const sourceId = graph.source(popupEdgeId.value)
+    const targetId = graph.target(popupEdgeId.value)
+
+    graph.removeNodeAttribute(sourceId, "edgeHighlighted")
+    if (selectedNodeId.value != sourceId)
+      graph.removeNodeAttribute(sourceId, "highlighted")
+
+    graph.removeNodeAttribute(targetId, "edgeHighlighted")
+    if (selectedNodeId.value != targetId)
+      graph.removeNodeAttribute(targetId, "highlighted")
+
+    popupEdgeId.value = null
+  }
+
+  function selectPopupEdge(edgeId) {
+    if (popupEdgeId.value === edgeId) {
+      clearPopupEdgeSelection()
+      return
+    }
+
+    popupEdgeId.value = edgeId
+    graph.setEdgeAttribute(edgeId, "highlighted", true)
+    graph.setNodeAttribute(graph.source(edgeId), "highlighted", true)
+    graph.setNodeAttribute(graph.source(edgeId), "edgeHighlighted", true)
+
+    graph.setNodeAttribute(graph.target(edgeId), "highlighted", true)
+    graph.setNodeAttribute(graph.target(edgeId), "edgeHighlighted", true)
+
+    const attrs = graph.getEdgeAttributes(edgeId)
+    popupEdgeData.value = {
+      id: edgeId,
+      description: attrs.label,
+      weight: attrs.weight,
+    }
+    updatePopupEdgePosition()
   }
 
   function clearSelection() {
@@ -64,7 +131,9 @@ export function useGraphInteractions({ renderer, graph, optionsRef }) {
     }
     selectedNodeId.value = null
 
-    highlightedEdges.forEach(e => graph.removeEdgeAttribute(e, "highlighted"))
+    highlightedEdges.forEach(e => {
+      if (e != popupEdgeId.value) graph.removeEdgeAttribute(e, "highlighted")
+    })
     highlightedEdges.clear()
 
     popupNodeId.value = null
@@ -90,7 +159,8 @@ export function useGraphInteractions({ renderer, graph, optionsRef }) {
       event.preventSigmaDefault()
       event.original.preventDefault()
       event.original.stopPropagation()
-      updatePopupPosition()
+      updatePopupNodePosition()
+      updatePopupEdgePosition()
     })
 
     const stopDrag = () => {
@@ -100,8 +170,19 @@ export function useGraphInteractions({ renderer, graph, optionsRef }) {
     r.on("upNode", stopDrag)
     r.on("upStage", stopDrag)
 
-    r.getMouseCaptor().on("clickStage", () => clearSelection())
-    r.getCamera().on("updated", updatePopupPosition)
+    r.on("clickEdge", ({ edge }) => {
+      selectPopupEdge(edge)
+    })
+
+    r.getMouseCaptor().on("clickStage", () => {
+      clearSelection()
+      clearPopupEdgeSelection()
+    })
+
+    r.getCamera().on("updated", () => {
+      updatePopupNodePosition()
+      updatePopupEdgePosition()
+    })
   }
 
   watch(renderer, r => attachListeners(r), { immediate: true })
@@ -116,7 +197,11 @@ export function useGraphInteractions({ renderer, graph, optionsRef }) {
   return {
     selectedNodeId,
     clickedNodeData,
-    popupPosition,
+    popupNodePosition,
+    popupEdgeId,
+    popupEdgeData,
+    popupEdgePosition,
     clearSelection,
+    clearPopupEdgeSelection,
   }
 }
