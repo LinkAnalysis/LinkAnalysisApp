@@ -30,9 +30,16 @@ const {
 const amlModalOpen = ref(false)
 const amlTempRows = ref(100)
 let amlResolve = null
+const amlError = ref("")
 
 const confirmAml = () => {
-  amlResolve?.(amlTempRows.value)
+  const value = amlTempRows.value
+  if (!Number.isInteger(value) || value < 1 || value > 20000) {
+    amlError.value = t("header.wrong_range_message")
+    return
+  }
+  amlError.value = ""
+  amlResolve?.(value)
 }
 
 const uploadAntiMoneyLaunderingGraph = async () => {
@@ -198,7 +205,8 @@ function setLanguage(lang) {
   <teleport to="body">
     <div v-if="amlModalOpen" class="aml-overlay">
       <div class="aml-modal">
-        <h2>Wybierz liczbę wierszy do zwizualizowania</h2>
+        <h2>{{ t("header.window_message") }}</h2>
+        <h2>{{ t("header.available_range") }}</h2>
         <input
           type="number"
           min="1"
@@ -206,6 +214,9 @@ function setLanguage(lang) {
           class="aml-input"
           @keyup.enter="confirmAml"
         />
+        <p v-if="amlError" style="color: red; margin-top: 8px">
+          {{ amlError }}
+        </p>
         <div class="aml-actions">
           <button class="aml-btn" @click="confirmAml">OK</button>
         </div>

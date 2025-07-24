@@ -25,6 +25,9 @@ export default {
       zoomIn: "Powiększ",
       zoomOut: "Pomniejsz",
       reset: "Resetuj",
+      window_message: "Podaj liczbę wierszy do wizualizacji",
+      available_range: "Dostępny zakres: 1-20000",
+      wrong_range_message: "Zły zakres liczby wierszy",
     },
     editor: {
       nodes: "Wierzchołki",
@@ -165,6 +168,9 @@ export default {
       zoomIn: "Zoom in",
       zoomOut: "Zoom out",
       reset: "Reset",
+      window_message: "Enter number of rows to visualize",
+      available_range: "Available range: 1-20000",
+      wrong_range_message: "Wrong range of rows",
     },
     editor: {
       nodes: "Nodes",
