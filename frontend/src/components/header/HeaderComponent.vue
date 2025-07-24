@@ -35,7 +35,7 @@ const amlError = ref("")
 const confirmAml = () => {
   const value = amlTempRows.value
   if (!Number.isInteger(value) || value < 1 || value > 20000) {
-    amlError.value = t("header.wrong_range_message")
+    amlError.value = t("rowsWindow.wrong_range_message")
     return
   }
   amlError.value = ""
@@ -144,69 +144,72 @@ function setLanguage(lang) {
 
 <template>
   <v-app-bar>
-  <header class="header-bar">
-    <div class="branding">
-      <img src="@/assets/images/logo.svg" alt="Logo" class="logo" />
-      <span class="app-name">LinkAnalysis</span>
-    </div>
-    <div class="button-box">
-      <div class="file-button-box">
+    <header class="header-bar">
+      <div class="branding">
+        <img src="@/assets/images/logo.svg" alt="Logo" class="logo" />
+        <span class="app-name">LinkAnalysis</span>
+      </div>
+      <div class="button-box">
+        <div class="file-button-box">
+          <HeaderButtonComponent
+            :label="t('header.file')"
+            name="file"
+            :options="[
+              {
+                label: t('header.file_menu.upload_graph'),
+                children: [
+                  {
+                    label: t('header.file_menu.upload_edges'),
+                    onClick: () => uploadEdgesConfiguration(),
+                  },
+                  {
+                    label: t('header.file_menu.upload_nodes'),
+                    onClick: () => uploadNodesConfiguration(),
+                  },
+                ],
+              },
+              {
+                label: t('header.file_menu.upload_anti_money_graph'),
+                onClick: () => uploadAntiMoneyLaunderingGraph(),
+              },
+              {
+                label: 'Export Graph',
+                children: [
+                  {
+                    label: t('header.file_menu.export_jpg'),
+                    onClick: () => exportToJPG(),
+                  },
+                  {
+                    label: t('header.file_menu.export_png'),
+                    onClick: exportToPNG,
+                  },
+                  {
+                    label: t('header.file_menu.export_gexf'),
+                    onClick: exportToGEXF,
+                  },
+                ],
+              },
+            ]"
+          />
+        </div>
         <HeaderButtonComponent
-          :label="t('header.file')"
-          name="file"
-          :options="[
-            {
-              label: t('header.file_menu.upload_graph'),
-              children: [
-                {
-                  label: t('header.file_menu.upload_edges'),
-                  onClick: () => uploadEdgesConfiguration(),
-                },
-                {
-                  label: t('header.file_menu.upload_nodes'),
-                  onClick: () => uploadNodesConfiguration(),
-                },
-              ],
-            },
-            {
-              label: t('header.file_menu.export_graph'),
-              onClick: () => uploadAntiMoneyLaunderingGraph(),
-            },
-            {
-              label: 'Export Graph',
-              children: [
-                {
-                  label: t('header.file_menu.export_jpg'),
-                  onClick: () => exportToJPG(),
-                },
-                {
-                  label: t('header.file_menu.export_png'),
-                  onClick: exportToPNG,
-                },
-                {
-                  label: t('header.file_menu.export_gexf'),
-                  onClick: exportToGEXF,
-                },
-              ],
-            },
-          ]"
+          :label="t('header.workspace')"
+          name="workspace"
+        />
+        <HeaderButtonComponent :label="t('header.view')" name="view" />
+        <HeaderButtonComponent
+          :label="t('header.settings')"
+          name="settings"
+          :options="languageOptions"
         />
       </div>
-      <HeaderButtonComponent :label="t('header.workspace')" name="workspace" />
-      <HeaderButtonComponent :label="t('header.view')" name="view" />
-      <HeaderButtonComponent
-        :label="t('header.settings')"
-        name="settings"
-        :options="languageOptions"
-      />
-    </div>
-  </header>
+    </header>
   </v-app-bar>
   <teleport to="body">
     <div v-if="amlModalOpen" class="aml-overlay">
       <div class="aml-modal">
-        <h2>{{ t("header.window_message") }}</h2>
-        <h2>{{ t("header.available_range") }}</h2>
+        <h2>{{ t("rowsWindow.window_message") }}</h2>
+        <h2>{{ t("rowsWindow.available_range") }}</h2>
         <input
           type="number"
           min="1"
