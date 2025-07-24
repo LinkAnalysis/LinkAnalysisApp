@@ -9,7 +9,7 @@ const props = defineProps({
 })
 
 const { t } = useI18n()
-const graphType = "Undirected"
+const graphType = "undirected"
 
 const tabsStore = useTabsStore()
 const { getSelectedNodeFileName, getSelectedEdgeFileName } =
@@ -33,8 +33,8 @@ const edgeFileName = getSelectedEdgeFileName
             <td>{{ nodeCount }}</td>
           </tr>
           <tr>
-            <td>{{ t("overview.graph_type") }}</td>
-            <td>{{ graphType }}</td>
+            <td>{{ t("overview.graph") }}</td>
+            <td>{{ t(`overview.graph_type.${graphType}`) }}</td>
           </tr>
           <tr>
             <td>{{ t("overview.edge_file") }}</td>

@@ -1,41 +1,52 @@
 <template>
   <div class="panel-section">
-    <h2>Filters / Queries</h2>
+    <h2>{{ t("filters.title") }}</h2>
 
     <button
       v-for="filter in filters"
-      :key="filter"
-      :class="{ active: selectedFilter === filter }"
-      @click="selectedFilter = filter"
+      :key="filter.key"
+      :class="{ active: selectedFilter === filter.key }"
+      @click="selectedFilter = filter.key"
     >
-      {{ filter }}
+      {{ t(`filters.buttons.${filter.key}`) }}
     </button>
 
     <div class="search-area">
       <div class="search-row">
-        <template v-if="selectedFilter === 'Search by name'">
-          <label>Search in:</label>
+        <template v-if="selectedFilter === 'searchByName'">
+          <label>{{ t("filters.search.label") }}:</label>
           <select v-model="searchIn">
-            <option>Nodes</option>
-            <option>Edges</option>
+            <option value="Nodes">{{ t("filters.search.nodes") }}</option>
+            <option value="Edges">{{ t("filters.search.edges") }}</option>
           </select>
         </template>
 
         <template v-else>
-          <span>Coming soon: {{ selectedFilter }}</span>
+          <span
+            >{{ t("filters.search.comingSoon") }}:
+            {{ t(`filters.buttons.${selectedFilter}`) }}</span
+          >
         </template>
       </div>
 
-      <div class="search-row" v-if="selectedFilter === 'Search by name'">
+      <div class="search-row" v-if="selectedFilter === 'searchByName'">
         <label v-if="searchIn === 'Nodes'">
-          <input v-model="searchTerm" placeholder="(e.g. computer)" />
+          <input
+            v-model="searchTerm"
+            :placeholder="t('filters.search.placeholderNode')"
+          />
         </label>
-        <label v-else
-          >Edge (source, target):
-          <input v-model="searchTerm" placeholder="(e.g. 1234,5678)"
+        <label v-else>
+          <input
+            v-model="searchTerm"
+            :placeholder="t('filters.search.placeholderEdge')"
         /></label>
-        <button class="search-button" @click="performSearch">🔍</button>
-        <button class="reset-button" @click="resetSearch">🔄️</button>
+        <button class="search-button" @click="performSearch">
+          {{ t("filters.search.search") }}
+        </button>
+        <button class="reset-button" @click="resetSearch">
+          {{ t("filters.search.reset") }}
+        </button>
       </div>
     </div>
   </div>
@@ -44,24 +55,27 @@
 <script setup>
 import { ref } from "vue"
 import { useFileStore } from "@/stores/fileStore"
+import { useI18n } from "vue-i18n"
 
+const { t } = useI18n()
 const fileStore = useFileStore()
 
 const filters = [
-  "Search by name",
-  "Edge Weight",
-  "Edge Type",
-  "Degree Range",
-  "Neighbors Network",
-  "Group by",
-  "LLM",
+  { key: "searchByName" },
+  { key: "edgeWeight" },
+  { key: "edgeType" },
+  { key: "degreeRange" },
+  { key: "neighborsNetwork" },
+  { key: "groupBy" },
+  { key: "llm" },
 ]
-const selectedFilter = ref("Search by name")
+
+const selectedFilter = ref("searchByName")
 const searchTerm = ref("")
 const searchIn = ref("Nodes")
 
 function performSearch() {
-  if (selectedFilter.value !== "Search by name" || !searchTerm.value) return
+  if (selectedFilter.value !== "searchByName" || !searchTerm.value) return
   console.log("[panel] click!", searchTerm.value)
   const id = searchTerm.value.trim()
   try {

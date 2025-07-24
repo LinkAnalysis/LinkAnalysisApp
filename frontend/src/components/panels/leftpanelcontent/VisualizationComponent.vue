@@ -1,30 +1,32 @@
 <template>
   <div class="panel-section">
-    <h2>Visualization settings</h2>
+    <h2>{{ t("visualization.title") }}</h2>
 
     <div class="table-wrapper">
       <table class="settings-table">
         <tbody>
           <!-- === NODES === -->
           <tr class="section-header">
-            <td colspan="2"><strong>Nodes</strong></td>
+            <td colspan="2">
+              <strong>{{ t("visualization.sections.nodes") }}</strong>
+            </td>
           </tr>
           <tr>
-            <td>Node Color</td>
+            <td>{{ t("visualization.settings.nodeColor") }}</td>
             <td>
               <input type="color" v-model="settings.nodeColor" />
               <span>{{ settings.nodeColor }}</span>
             </td>
           </tr>
           <tr>
-            <td>Selected Node Color</td>
+            <td>{{ t("visualization.settings.selectedNodeColor") }}</td>
             <td>
               <input type="color" v-model="settings.selectedNodeColor" />
               <span>{{ settings.selectedNodeColor }}</span>
             </td>
           </tr>
           <tr>
-            <td>Node Size</td>
+            <td>{{ t("visualization.settings.nodeSize") }}</td>
             <td>
               <input
                 type="range"
@@ -37,7 +39,7 @@
             </td>
           </tr>
           <tr>
-            <td>Dragging</td>
+            <td>{{ t("visualization.settings.allowDragging") }}</td>
             <td>
               <input type="checkbox" v-model="settings.allowDragging" />
             </td>
@@ -79,24 +81,26 @@
 
           <!-- === EDGES === -->
           <tr class="section-header">
-            <td colspan="2"><strong>Edges</strong></td>
+            <td colspan="2">
+              <strong>{{ t("visualization.sections.edges") }}</strong>
+            </td>
           </tr>
           <tr>
-            <td>Edge Color</td>
+            <td>{{ t("visualization.settings.edgeColor") }}</td>
             <td>
               <input type="color" v-model="settings.edgeColor" />
               <span>{{ settings.edgeColor }}</span>
             </td>
           </tr>
           <tr>
-            <td>Highlighted Edge Color</td>
+            <td>{{ t("visualization.settings.highlightedEdgeColor") }}</td>
             <td>
               <input type="color" v-model="settings.highlightedEdgeColor" />
               <span>{{ settings.highlightedEdgeColor }}</span>
             </td>
           </tr>
           <tr>
-            <td>Edge Size</td>
+            <td>{{ t("visualization.settings.edgeSize") }}</td>
             <td>
               <input
                 type="range"
@@ -109,7 +113,7 @@
             </td>
           </tr>
           <tr>
-            <td>Use edge weights</td>
+            <td>{{ t("visualization.settings.useEdgeWeights") }}</td>
             <td>
               <input type="checkbox" v-model="settings.useEdgeWeights" />
             </td>
@@ -127,7 +131,7 @@
             </tr>
             -->
           <tr>
-            <td>Render Edge Labels</td>
+            <td>{{ t("visualization.settings.renderEdgeLabels") }}</td>
             <td>
               <input type="checkbox" v-model="settings.renderEdgeLabels" />
             </td>
@@ -135,7 +139,9 @@
 
           <!-- === INTERACTION === -->
           <tr class="section-header">
-            <td colspan="2"><strong>Interaction</strong></td>
+            <td colspan="2">
+              <strong>{{ t("visualization.sections.interaction") }}</strong>
+            </td>
           </tr>
           <!--
             <tr>
@@ -146,7 +152,7 @@
             </tr>
             -->
           <tr>
-            <td>Hover Effect</td>
+            <td>{{ t("visualization.settings.hoverEffect") }}</td>
             <td>
               <input type="checkbox" v-model="settings.hoverEffect" />
             </td>
@@ -154,10 +160,12 @@
 
           <!-- === BACKGROUND === -->
           <tr class="section-header">
-            <td colspan="2"><strong>Background</strong></td>
+            <td colspan="2">
+              <strong>{{ t("visualization.sections.background") }}</strong>
+            </td>
           </tr>
           <tr>
-            <td>Background color</td>
+            <td>{{ t("visualization.settings.backgroundColor") }}</td>
             <td>
               <input type="color" v-model="settings.backgroundColor" />
               <span>{{ settings.backgroundColor }}</span>
@@ -170,23 +178,15 @@
 </template>
 
 <script setup>
-/**
- * 1. Importujemy Pinia‑store i wyciągamy selectedVisualizationOptions jako ref.
- * 2. Tworzymy lokalny obiekt settings – łatwiejszy do użycia z v‑model.
- * 3. Synchronizujemy:
- *    - store ➜ settings przy przełączaniu zakładki,
- *    - settings ➜ store gdy użytkownik coś zmieni.
- */
-
 import { reactive, watch } from "vue"
 import { useTabsStore } from "@/stores/tabsStore"
 import { storeToRefs } from "pinia"
+import { useI18n } from "vue-i18n"
+const { t } = useI18n()
 
-/* --- Store -------------------------------------------------------------- */
 const tabsStore = useTabsStore()
 const { selectedVisualizationOptions } = storeToRefs(tabsStore)
 
-/* --- Lokalny stan dla v‑model ------------------------------------------ */
 const settings = reactive({
   nodeColor: "#3498db",
   selectedNodeColor: "#ff3333",
@@ -201,7 +201,6 @@ const settings = reactive({
   backgroundColor: "#ffffff",
 })
 
-/* --- store ➜ ui przy zmianie zakładki ---------------------------------- */
 watch(
   selectedVisualizationOptions,
   val => {
@@ -210,11 +209,9 @@ watch(
   { immediate: true },
 )
 
-/* --- ui ➜ store gdy coś zmienimy --------------------------------------- */
 watch(
   settings,
   val => {
-    // nadpisujemy obiekt w store, żeby wymusić re‑render grafu
     selectedVisualizationOptions.value = { ...val }
   },
   { deep: true },
@@ -222,7 +219,6 @@ watch(
 </script>
 
 <style scoped>
-/* oryginalne style – bez zmian */
 .panel-section {
   border: 2px solid black;
   padding: 8px;

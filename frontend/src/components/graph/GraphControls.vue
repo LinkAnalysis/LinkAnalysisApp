@@ -1,13 +1,21 @@
 <template>
   <div class="controls">
-    <button class="zoom-in" @click="$emit('zoomIn')">Zoom in</button>
-    <button class="zoom-out" @click="$emit('zoomOut')">Zoom out</button>
-    <button class="reset" @click="$emit('resetView')">Reset</button>
+    <button class="zoom-in" @click="$emit('zoomIn')">
+      {{ t("controls.zoomIn") }}
+    </button>
+    <button class="zoom-out" @click="$emit('zoomOut')">
+      {{ t("controls.zoomOut") }}
+    </button>
+    <button class="reset" @click="$emit('resetView')">
+      {{ t("controls.reset") }}
+    </button>
   </div>
 </template>
 
 <script setup>
+import { useI18n } from "vue-i18n"
 defineEmits(["zoomIn", "zoomOut", "resetView"])
+const { t } = useI18n()
 </script>
 
 <style scoped>
