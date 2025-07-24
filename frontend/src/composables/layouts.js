@@ -5,30 +5,8 @@ import forceAtlas2 from "graphology-layout-forceatlas2"
 import * as d3 from "d3-hierarchy"
 import * as d3f from "d3-force-3d"
 import { LogPrint } from "../../wailsjs/runtime/runtime"
-
-export function normalizeGraphCoordinates(graph) {
-  let xMin = Infinity,
-    xMax = -Infinity
-  let yMin = Infinity,
-    yMax = -Infinity
-
-  graph.forEachNode((_, attrs) => {
-    const x = attrs.x
-    const y = attrs.y
-
-    if (x < xMin) xMin = x
-    if (x > xMax) xMax = x
-    if (y < yMin) yMin = y
-    if (y > yMax) yMax = y
-  })
-
-  graph.forEachNode(n => {
-    const attrs = graph.getNodeAttributes(n)
-    const newX = (attrs.x - xMin) / (xMax - xMin)
-    const newY = (attrs.y - yMin) / (yMax - yMin)
-    graph.mergeNodeAttributes(n, { x: newX, y: newY })
-  })
-}
+import { SpectralLayout } from "../../wailsjs/go/main/App"
+import { assignLayout, collectLayout } from "graphology-layout/utils"
 
 export const layouts = {
   random: {
@@ -132,6 +110,15 @@ export const layouts = {
     },
     defaultParams: {},
   },
+  spectral: {
+    apply: (graph, params = {}) => {
+      createSpectralLayout(graph, params).then(l => {
+        assignLayout(graph, l)
+        normalizeGraphCoordinates(graph)
+      })
+    },
+    defaultParams: {},
+  },
 }
 
 function buildD3Hierarchy(graph, rootId) {
@@ -146,4 +133,51 @@ function buildD3Hierarchy(graph, rootId) {
   }
   const hierarchyData = buildNode(rootId)
   return d3.hierarchy(hierarchyData, d => d.children)
+}
+
+export function normalizeGraphCoordinates(graph) {
+  let xMin = Infinity,
+    xMax = -Infinity
+  let yMin = Infinity,
+    yMax = -Infinity
+
+  graph.forEachNode((_, attrs) => {
+    const x = attrs.x
+    const y = attrs.y
+
+    if (x < xMin) xMin = x
+    if (x > xMax) xMax = x
+    if (y < yMin) yMin = y
+    if (y > yMax) yMax = y
+  })
+
+  graph.forEachNode(n => {
+    const attrs = graph.getNodeAttributes(n)
+    const newX = (attrs.x - xMin) / (xMax - xMin)
+    const newY = (attrs.y - yMin) / (yMax - yMin)
+    graph.mergeNodeAttributes(n, { x: newX, y: newY })
+  })
+}
+
+export async function createSpectralLayout(graph, params = {}) {
+  let laplacian = {}
+  graph.forEachNode(n => {
+    const attr = graph.getNodeAttributes(n)
+    laplacian[n] = {}
+    laplacian[n][n] = graph.degree(n)
+  })
+  graph.forEachEdge(e => {
+    const attr = graph.getEdgeAttributes(e)
+    const w = attr["weight"]
+    const s = graph.source(e)
+    const t = graph.target(e)
+    if (s != t) {
+      laplacian[s][t] = -w
+      laplacian[t][s] = -w
+    }
+  })
+
+  const sl = await SpectralLayout(laplacian)
+
+  return sl
 }
