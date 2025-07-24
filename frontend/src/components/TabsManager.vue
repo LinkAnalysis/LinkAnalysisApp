@@ -18,7 +18,6 @@ const select_tab = id => {
 const add_tab = () => {
   addTab({ title: `Tab ${next_tab_id.value}`, id: next_tab_id.value })
   next_tab_id.value++
-  console.log(tabsData.value)
 }
 
 const close_tab = id => {

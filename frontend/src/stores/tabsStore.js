@@ -53,8 +53,6 @@ export const useTabsStore = defineStore("tabs", () => {
   }
 
   function addTab(tabData) {
-    console.log(tabData)
-
     graphs.value.push(ref(null))
     nodeFiles.value.push(ref(null))
     edgeFiles.value.push(ref(null))
@@ -71,7 +69,6 @@ export const useTabsStore = defineStore("tabs", () => {
     if (tabsData.value.length == 0) {
       selectedTabId.value = null
     } else {
-      console.log(tabsData.value)
       selectedTabId.value = tabsData.value[0].id
     }
   }
