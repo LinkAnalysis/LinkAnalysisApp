@@ -18,7 +18,6 @@ const props = defineProps({
   changed: Number,
   options: { type: Object, default: () => ({}) },
 })
-
 const { t } = useI18n()
 const { options } = toRefs(props)
 
@@ -101,8 +100,8 @@ watch(
       "
     >
       ID: {{ clickedNodeData.id }}<br />
-      <span v-if="clickedNodeData.Description">
-        {{ t("vertex_window.name") }}: {{ clickedNodeData.Description }}<br />
+      <span v-if="clickedNodeData.description">
+        {{ t("vertex_window.name") }}: {{ clickedNodeData.description }}<br />
       </span>
       <span v-else>
         {{ t("vertex_window.name") }}: {{ t("vertex_window.no_description")

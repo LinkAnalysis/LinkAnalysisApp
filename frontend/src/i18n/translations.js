@@ -12,6 +12,7 @@ export default {
         export_jpg: "JPG",
         export_png: "PNG",
         export_gexf: "GEXF",
+        upload_anti_money_graph: "Wczytaj plik dla Anti Money Laundering",
       },
       workspace: "Projekt",
       view: "Widok",
@@ -25,6 +26,11 @@ export default {
       zoomIn: "Powiększ",
       zoomOut: "Pomniejsz",
       reset: "Resetuj",
+    },
+    rowsWindow: {
+      window_message: "Podaj liczbę wierszy do wizualizacji",
+      available_range: "Dostępny zakres: 1-20000",
+      wrong_range_message: "Zły zakres liczby wierszy",
     },
     editor: {
       nodes: "Wierzchołki",
@@ -152,6 +158,7 @@ export default {
         export_jpg: "JPG",
         export_png: "PNG",
         export_gexf: "GEXF",
+        upload_anti_money_graph: "Upload Anti Money Laundering file",
       },
       workspace: "Workspace",
       view: "View",
@@ -165,6 +172,11 @@ export default {
       zoomIn: "Zoom in",
       zoomOut: "Zoom out",
       reset: "Reset",
+    },
+    rowsWindow: {
+      window_message: "Enter number of rows to visualize",
+      available_range: "Available range: 1-20000",
+      wrong_range_message: "Wrong range of rows",
     },
     editor: {
       nodes: "Nodes",

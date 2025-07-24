@@ -1,8 +1,10 @@
 import Papa from "papaparse"
 import Graph from "graphology"
 import circular from "graphology-layout/circular"
-import { ReadTextFile } from "../../wailsjs/go/main/App"
+import { ReadTextFile, ReadTextFileAntiMoney } from "../../wailsjs/go/main/App"
 import { layouts } from "./layouts"
+import { useTabsStore } from "../stores/tabsStore"
+import { storeToRefs } from "pinia"
 
 export function parseCSV(filename) {
   return new Promise((resolve, reject) => {
@@ -16,41 +18,118 @@ export function parseCSV(filename) {
   })
 }
 
+export function parseAntiMoneyLaunderingCSV(filename) {
+  return new Promise((resolve, reject) => {
+    Papa.parse(filename, {
+      header: true,
+      delimiter: ",",
+      skipEmptyLines: true,
+      worker: true,
+      complete: results => {
+        const transformed = results.data.map(row => ({
+          x: `${row["From Bank"]}-${row["Account"]}`,
+          y: `${row["To Bank"]}-${row["Account_1"]}`,
+          Timestamp: row["Timestamp"],
+          fromBank: row["From Bank"],
+          fromAccount: row["Account"],
+          toBank: row["To Bank"],
+          toAccount: row["Account_1"],
+          AmountReceived: row["Amount Received"],
+          ReceivingCurrency: row["Receiving Currency"],
+          AmountPaid: row["Amount Paid"],
+          PaymentCurrency: row["Payment Currency"],
+          PaymentFormat: row["Payment Format"],
+          IsLaundering: row["Is Laundering"],
+        }))
+        resolve(transformed)
+      },
+      error: error => reject(error),
+    })
+  })
+}
+
 // constructs the graphology Graph from the node and edge files
-export async function load_graph(node_file, edge_file) {
-  const graph = new Graph()
+export async function load_graph(node_file, edge_file, graphMode) {
+  console.log("jestem w file loaderze")
+  const graph = new Graph({ multi: true })
+  if (graphMode === "normal") {
+    const edges = await parseCSV(await ReadTextFile(edge_file))
 
-  const edges = await parseCSV(await ReadTextFile(edge_file))
+    if (node_file) {
+      const nodes = await parseCSV(await ReadTextFile(node_file))
+      nodes.forEach(({ id, Description }) =>
+        graph.addNode(id, { label: Description, size: 20, x: 0, y: 0 }),
+      )
+    } else {
+      const added = new Set()
+      edges.forEach(({ x, y }) => {
+        if (!added.has(x)) {
+          graph.addNode(x, { size: 20, x: 0, y: 0 })
+          added.add(x)
+        }
+        if (!added.has(y)) {
+          graph.addNode(y, { size: 20, x: 0, y: 0 })
+          added.add(y)
+        }
+      })
+    }
 
-  if (node_file) {
-    const nodes = await parseCSV(await ReadTextFile(node_file))
-    nodes.forEach(({ id, Description }) =>
-      graph.addNode(id, { label: Description, size: 20, x: 0, y: 0 }),
+    edges.forEach(({ x, y, edgeWeight, edgeLabel }) => {
+      const w = parseInt(edgeWeight)
+      graph.addEdge(x, y, {
+        label: edgeLabel,
+        weight: w,
+        size: w,
+        color: "#000000",
+      })
+    })
+  } else if (graphMode === "antiMoneyLaundering") {
+    const { selectedNumberOfRows } = storeToRefs(useTabsStore())
+    const edges = await parseAntiMoneyLaunderingCSV(
+      await ReadTextFileAntiMoney(edge_file, selectedNumberOfRows.value),
     )
-  } else {
+
     const added = new Set()
-    edges.forEach(({ x, y }) => {
+    edges.forEach(({ x, y, fromBank, fromAccount, toBank, toAccount }) => {
       if (!added.has(x)) {
-        graph.addNode(x, { size: 20, x: 0, y: 0 })
+        graph.addNode(x, {
+          label: `Bank: ${fromBank} Account: ${fromAccount}`,
+          size: 20,
+          x: 0,
+          y: 0,
+        })
         added.add(x)
       }
       if (!added.has(y)) {
-        graph.addNode(y, { size: 20, x: 0, y: 0 })
+        graph.addNode(y, {
+          label: `Bank: ${toBank} Account: ${toAccount}`,
+          size: 20,
+          x: 0,
+          y: 0,
+        })
         added.add(y)
       }
     })
+
+    edges.forEach(
+      ({ x, y, AmountPaid, PaymentCurrency, Timestamp, IsLaundering }) => {
+        const w = parseInt(AmountPaid)
+        graph.addEdge(x, y, {
+          label:
+            Timestamp +
+            ": " +
+            AmountPaid +
+            " " +
+            PaymentCurrency +
+            " Is Laundering: " +
+            IsLaundering,
+          weight: w,
+          size: w,
+          color: "#000000",
+        })
+      },
+    )
   }
-
-  edges.forEach(({ x, y, edgeWeight, edgeLabel }) => {
-    const w = parseInt(edgeWeight)
-    graph.addEdge(x, y, {
-      label: edgeLabel,
-      weight: w,
-      size: w,
-      color: "#000000",
-    })
-  })
-
   return graph
 }
 
