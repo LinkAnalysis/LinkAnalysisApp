@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/csv"
 	"fmt"
 	"math"
 	"os"
@@ -29,6 +30,48 @@ func (a *App) ReadTextFile(path string) (string, error) {
 		return "", err
 	}
 	return string(data), nil
+}
+
+func (a *App) ReadTextFileAntiMoney(path string, maxRows int) (string, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	r := csv.NewReader(file)
+	r.FieldsPerRecord = -1
+
+	records, err := r.ReadAll()
+	if err != nil {
+		return "", err
+	}
+	if len(records) == 0 {
+		return "", nil
+	}
+
+	filtered := [][]string{records[0]}
+	count := 0
+
+	for _, row := range records[1:] {
+		if maxRows > 0 && count >= maxRows {
+			break
+		}
+		if row[1] == row[3] && row[2] == row[4] {
+			continue
+		}
+		filtered = append(filtered, row)
+		count++
+	}
+
+	var sb strings.Builder
+	w := csv.NewWriter(&sb)
+	if err := w.WriteAll(filtered); err != nil {
+		return "", err
+	}
+	w.Flush()
+
+	return sb.String(), nil
 }
 
 func (a *App) OpenFileExplorer() (string, error) {
