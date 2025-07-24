@@ -11,6 +11,7 @@ import { applyStyleOptions } from "@/utils/graphUtils"
 import GraphControls from "./GraphControls.vue"
 import { toBlob } from "@sigma/export-image"
 import { SaveBytesToFile } from "../../../wailsjs/go/main/App"
+import { LogPrint } from "../../../wailsjs/runtime/runtime"
 
 const props = defineProps({
   graph: Graph,
@@ -26,16 +27,12 @@ const { container, renderer } = useSigmaRenderer({
   optionsRef: options,
 })
 
-const {
-  clickedNodeData,
-  popupNodePosition,
-  clickedEdgeData,
-  popupEdgePosition,
-} = useGraphInteractions({
-  renderer,
-  graph: props.graph,
-  optionsRef: options,
-})
+const { clickedNodeData, popupNodePosition, popupEdgeData, popupEdgePosition } =
+  useGraphInteractions({
+    renderer,
+    graph: props.graph,
+    optionsRef: options,
+  })
 
 const zoomIn = () => renderer.value?.getCamera().animatedZoom({ duration: 600 })
 const zoomOut = () =>
@@ -97,7 +94,11 @@ watch(
       v-if="clickedNodeData"
       :visible="true"
       :position="popupNodePosition"
-      @close="clearSelection"
+      @close="
+        () => {
+          LogPrint('Node Window Close')
+        }
+      "
     >
       ID: {{ clickedNodeData.id }}<br />
       <span v-if="clickedNodeData.Description">
@@ -110,15 +111,20 @@ watch(
       {{ t("vertex_window.number_of_neighbors") }}:
       {{ clickedNodeData.numOfNeighbors }}<br />
     </VertexWindow>
+
     <VertexWindow
-      v-if="clickedEdgeData"
+      v-if="popupEdgeData"
       :visible="true"
       :position="popupEdgePosition"
-      @close="clearSelection"
+      @close="
+        () => {
+          LogPrint('Edge Window Close')
+        }
+      "
     >
-      ID: {{ clickedEdgeData.id }}<br />
-      description: {{ clickedEdgeData.description }} <br />
-      weight: {{ clickedEdgeData.weight }} <br />
+      ID: {{ popupEdgeData.id }}<br />
+      description: {{ popupEdgeData.description }} <br />
+      weight: {{ popupEdgeData.weight }} <br />
     </VertexWindow>
   </div>
 </template>
