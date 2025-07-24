@@ -51,7 +51,7 @@ export function useGraphState({ renderer, graph, resetCamera }) {
       renderer.value?.refresh()
 
       if (!source || !target) return
-      if (!graph.edge(source, target)) return
+      if (!graph.hasEdge(source, target)) return
       ;[source, target].forEach(id => {
         graph.setNodeAttribute(id, "highlighted", true)
         edgeNodesHighlighted.add(id)
