@@ -146,6 +146,9 @@ export default {
       no_description: "Brak opisu",
       number_of_neighbors: "Liczba sąsiadów",
     },
+    app: {
+      loading: "Ładowanie grafu",
+    },
   },
   en: {
     header: {
@@ -291,6 +294,9 @@ export default {
       name: "Name",
       no_description: "No description available",
       number_of_neighbors: "Number of neighbors",
+    },
+    app: {
+      loading: "Loading graph",
     },
   },
 }
