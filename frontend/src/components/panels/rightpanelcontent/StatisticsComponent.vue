@@ -1,24 +1,27 @@
 <template>
   <div class="panel-section">
-    <h2>Statistics</h2>
+    <h2>{{ t("statistics.title") }}</h2>
     <div v-for="label in statLabels" :key="label" class="stat-row">
-      <span class="label">{{ label }}</span>
-      <button class="run-button">Run</button>
+      <span class="label">{{ t(`statistics.labels.${label}`) }}</span>
+      <button class="run-button">{{ t("statistics.run") }}</button>
     </div>
   </div>
 </template>
 
 <script setup>
+import { useI18n } from "vue-i18n"
+const { t } = useI18n()
+
 const statLabels = [
-  "Avarage Degree",
-  "Avg. Weighted Degree",
-  "Network Diameter",
-  "Graph Density",
-  "Avg. Path Length",
-  "Clustering Coefficient",
-  "Assortativity Coefficient",
-  "Connected Components",
-  "PageRange",
+  "averageDegree",
+  "avgWeightedDegree",
+  "networkDiameter",
+  "graphDensity",
+  "avgPathLength",
+  "clusteringCoefficient",
+  "assortativityCoefficient",
+  "connectedComponents",
+  "pageRange",
 ]
 </script>
 

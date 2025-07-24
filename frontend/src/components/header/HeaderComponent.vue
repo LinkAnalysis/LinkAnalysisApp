@@ -9,11 +9,12 @@ import { useI18n } from "vue-i18n"
 import { useTabsStore } from "../../stores/tabsStore.js"
 import { storeToRefs } from "pinia"
 import { LogPrint } from "../../../wailsjs/runtime/runtime.js"
-import svg from "graphology-svg"
 import * as gexf from "graphology-gexf"
-import * as graphml from "graphology-graphml"
+import { computed } from "vue"
+import plFlag from "@/assets/images/pl.png"
+import enFlag from "@/assets/images/gb.png"
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const tabsStore = useTabsStore()
 const { selectedNodeFile, selectedEdgeFile, selectedGraph, graphViewRef } =
@@ -62,10 +63,36 @@ const exportToGEXF = async () => {
   await SaveStringToFile(filePath, gexfString)
   LogPrint("Done!")
 }
+
+const availableLanguages = [
+  {
+    code: "pl",
+    label: () => t("header.languages.pl"),
+    icon: plFlag,
+  },
+  {
+    code: "en",
+    label: () => t("header.languages.en"),
+    icon: enFlag,
+  },
+]
+
+const languageOptions = computed(() =>
+  availableLanguages.map(lang => ({
+    label: lang.label(),
+    icon: lang.icon,
+    onClick: () => setLanguage(lang.code),
+    active: locale.value === lang.code,
+  })),
+)
+
+function setLanguage(lang) {
+  locale.value = lang
+}
 </script>
 
 <template>
-  <v-app-bar class="header-bar" flat elevation="0" app>
+  <header class="header-bar">
     <div class="branding">
       <img src="@/assets/images/logo.svg" alt="Logo" class="logo" />
       <span class="app-name">LinkAnalysis</span>
@@ -77,32 +104,32 @@ const exportToGEXF = async () => {
           name="file"
           :options="[
             {
-              label: 'Upload Graph',
+              label: t('header.file_menu.upload_graph'),
               onClick: () => console.log('Upload Graph'),
               children: [
                 {
-                  label: 'Upload edges configuration',
+                  label: t('header.file_menu.upload_edges'),
                   onClick: () => uploadEdgesConfiguration(),
                 },
                 {
-                  label: 'Upload nodes configuration',
+                  label: t('header.file_menu.upload_nodes'),
                   onClick: () => uploadNodesConfiguration(),
                 },
               ],
             },
             {
-              label: 'Export Graph',
+              label: t('header.file_menu.export_graph'),
               children: [
                 {
-                  label: 'JPG',
+                  label: t('header.file_menu.export_jpg'),
                   onClick: () => exportToJPG(),
                 },
                 {
-                  label: 'PNG',
+                  label: t('header.file_menu.export_png'),
                   onClick: exportToPNG,
                 },
                 {
-                  label: 'GEXF',
+                  label: t('header.file_menu.export_gexf'),
                   onClick: exportToGEXF,
                 },
               ],
@@ -110,23 +137,15 @@ const exportToGEXF = async () => {
           ]"
         />
       </div>
-      <HeaderButtonComponent
-        :label="t('header.workspace')"
-        name="workspace"
-        @click="emitChange"
-      />
-      <HeaderButtonComponent
-        :label="t('header.view')"
-        name="view"
-        @click="emitChange"
-      />
+      <HeaderButtonComponent :label="t('header.workspace')" name="workspace" />
+      <HeaderButtonComponent :label="t('header.view')" name="view" />
       <HeaderButtonComponent
         :label="t('header.settings')"
         name="settings"
-        @click="emitChange"
+        :options="languageOptions"
       />
     </div>
-  </v-app-bar>
+  </header>
 </template>
 
 <style scoped>

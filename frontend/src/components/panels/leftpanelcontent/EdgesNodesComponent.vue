@@ -80,13 +80,13 @@ const cancelEdit = () => {
       <label v-if="activeTab === 'nodes'" class="tab-search">
         <input
           v-model="searchTerm"
-          placeholder="Search by label (e.g. Node 1)"
+          :placeholder="t('editor.placeholder_node')"
         />
       </label>
       <label v-else class="tab-search">
         <input
           v-model="searchTerm"
-          placeholder="Search by label (e.g. Edge 1,2)"
+          :placeholder="t('editor.placeholder_edge')"
         />
       </label>
     </div>
