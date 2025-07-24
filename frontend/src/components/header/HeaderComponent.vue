@@ -92,7 +92,7 @@ function setLanguage(lang) {
 </script>
 
 <template>
-  <v-app-bar class="header-bar" flat elevation="0" app>
+  <header class="header-bar">
     <div class="branding">
       <img src="@/assets/images/logo.svg" alt="Logo" class="logo" />
       <span class="app-name">LinkAnalysis</span>
@@ -137,23 +137,15 @@ function setLanguage(lang) {
           ]"
         />
       </div>
-      <HeaderButtonComponent
-        :label="t('header.workspace')"
-        name="workspace"
-        @click="emitChange"
-      />
-      <HeaderButtonComponent
-        :label="t('header.view')"
-        name="view"
-        @click="emitChange"
-      />
+      <HeaderButtonComponent :label="t('header.workspace')" name="workspace" />
+      <HeaderButtonComponent :label="t('header.view')" name="view" />
       <HeaderButtonComponent
         :label="t('header.settings')"
         name="settings"
         :options="languageOptions"
       />
     </div>
-  </v-app-bar>
+  </header>
 </template>
 
 <style scoped>

@@ -3,7 +3,6 @@ import messages from "./translations"
 
 function detectLocale() {
   const candidates = navigator.languages ?? [navigator.language]
-  console.log(candidates)
   for (const tag of candidates) {
     const short = tag.toLowerCase().split("-")[0]
     if (short in messages) return short

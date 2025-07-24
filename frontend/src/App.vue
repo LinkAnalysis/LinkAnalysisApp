@@ -59,31 +59,31 @@ watch(graph, () => {
 
 <template>
   <div class="app-shell">
-    <v-app>
-      <HeaderComponent />
-      <v-main class="main-area">
-        <v-container fluid class="layout-grid">
-          <div class="left-panel">
-            <Panel :graph="graph" position="left" />
-          </div>
-          <div class="center-panel">
-            <MainContent :current-section="currentSection" />
-            <TabsManager />
-            <GraphView
-              v-if="graph"
-              :key="graphKey"
-              :graph="graph"
-              :changed="gC"
-              :options="selectedVisualizationOptions"
-              ref="graphViewRef"
-            />
-          </div>
-          <div class="right-panel">
-            <Panel :graph="graph" position="right" />
-          </div>
-        </v-container>
-      </v-main>
-    </v-app>
+    <HeaderComponent />
+
+    <div class="main-area">
+      <div class="layout-grid">
+        <div class="left-panel">
+          <Panel :graph="graph" position="left" />
+        </div>
+
+        <div class="center-panel">
+          <TabsManager />
+          <GraphView
+            v-if="graph"
+            :key="graphKey"
+            :graph="graph"
+            :changed="gC"
+            :options="selectedVisualizationOptions"
+            ref="graphViewRef"
+          />
+        </div>
+
+        <div class="right-panel">
+          <Panel :graph="graph" position="right" />
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
