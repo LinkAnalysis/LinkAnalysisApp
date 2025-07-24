@@ -3,6 +3,8 @@ import Graph from "graphology"
 import circular from "graphology-layout/circular"
 import { ReadTextFile, ReadTextFileAntiMoney } from "../../wailsjs/go/main/App"
 import { layouts } from "./layouts"
+import { useTabsStore } from "../stores/tabsStore"
+import { storeToRefs } from "pinia"
 
 export function parseCSV(filename) {
   return new Promise((resolve, reject) => {
@@ -48,6 +50,7 @@ export function parseAntiMoneyLaunderingCSV(filename) {
 
 // constructs the graphology Graph from the node and edge files
 export async function load_graph(node_file, edge_file, graphMode) {
+  console.log("jestem w file loaderze")
   const graph = new Graph({ multi: true })
   if (graphMode === "normal") {
     const edges = await parseCSV(await ReadTextFile(edge_file))
@@ -81,8 +84,9 @@ export async function load_graph(node_file, edge_file, graphMode) {
       })
     })
   } else if (graphMode === "antiMoneyLaundering") {
+    const { selectedNumberOfRows } = storeToRefs(useTabsStore())
     const edges = await parseAntiMoneyLaunderingCSV(
-      await ReadTextFileAntiMoney(edge_file, 100),
+      await ReadTextFileAntiMoney(edge_file, selectedNumberOfRows.value),
     )
 
     const added = new Set()
@@ -126,7 +130,6 @@ export async function load_graph(node_file, edge_file, graphMode) {
       },
     )
   }
-  console.log(graph)
   return graph
 }
 

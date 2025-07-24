@@ -24,6 +24,7 @@ export const useTabsStore = defineStore("tabs", () => {
   const selectedTabId = ref(null)
   const selectedTabIndex = computed(() => idToIndex(selectedTabId.value))
   const graphMode = ref([])
+  const numberOfRows = ref([])
 
   const selectedGraph = computed({
     get() {
@@ -60,6 +61,7 @@ export const useTabsStore = defineStore("tabs", () => {
     layoutTypes.value.push(ref(null))
     layoutParams.value.push(ref(null))
     graphMode.value.push(ref(null))
+    numberOfRows.value.push(ref(null))
     visualizationOptions.value.push(
       ref(structuredClone(visualizationDefaultOptions)),
     )
@@ -108,6 +110,21 @@ export const useTabsStore = defineStore("tabs", () => {
     set(newVal) {
       if (graphMode.value.length > 0 && graphMode.value[selectedTabIndex.value])
         graphMode.value[selectedTabIndex.value].value = newVal
+    },
+  })
+
+  const selectedNumberOfRows = computed({
+    get() {
+      if (numberOfRows.value.length > 0)
+        return numberOfRows.value[selectedTabIndex.value].value ?? null
+      return null
+    },
+    set(newVal) {
+      if (
+        numberOfRows.value.length > 0 &&
+        numberOfRows.value[selectedTabIndex.value]
+      )
+        numberOfRows.value[selectedTabIndex.value].value = newVal
     },
   })
 
@@ -182,5 +199,6 @@ export const useTabsStore = defineStore("tabs", () => {
     selectedVisualizationOptions,
     graphViewRef,
     selectedGraphMode,
+    selectedNumberOfRows,
   }
 })

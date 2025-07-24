@@ -15,6 +15,7 @@ import plFlag from "@/assets/images/pl.png"
 import enFlag from "@/assets/images/gb.png"
 
 const { t, locale } = useI18n()
+import { ref } from "vue"
 
 const tabsStore = useTabsStore()
 const {
@@ -23,22 +24,49 @@ const {
   selectedGraph,
   graphViewRef,
   selectedGraphMode,
+  selectedNumberOfRows,
 } = storeToRefs(tabsStore)
+
+const amlModalOpen = ref(false)
+const amlTempRows = ref(100)
+let amlResolve = null
+
+const confirmAml = () => {
+  amlResolve?.(amlTempRows.value)
+}
+
+const uploadAntiMoneyLaunderingGraph = async () => {
+  let filePath = null
+
+  try {
+    filePath = await OpenFileExplorer()
+    if (!filePath) return
+
+    amlTempRows.value = selectedNumberOfRows.value ?? 100
+    amlModalOpen.value = true
+
+    const rows = await new Promise((resolve, reject) => {
+      amlResolve = resolve
+    })
+
+    selectedNumberOfRows.value = rows
+  } catch (e) {
+    console.error("[openAmlModal] aborted/error:", e)
+  } finally {
+    amlModalOpen.value = false
+    amlResolve = null
+
+    if (filePath) {
+      selectedEdgeFile.value = filePath
+      selectedGraphMode.value = "antiMoneyLaundering"
+    }
+  }
+}
 
 const uploadNodesConfiguration = async () => {
   const filePath = await OpenFileExplorer()
   if (filePath) {
     selectedNodeFile.value = filePath
-  }
-}
-
-const uploadAntiMoneyLaunderingGraph = async () => {
-  const filePath = await OpenFileExplorer()
-  if (filePath) {
-    //fileStore.setNodeFile(filePath)
-    //tabsStore.getNodeFileRef(selectedTabId.value).value = filePath
-    selectedEdgeFile.value = filePath
-    selectedGraphMode.value = "antiMoneyLaundering"
   }
 }
 
@@ -108,6 +136,7 @@ function setLanguage(lang) {
 </script>
 
 <template>
+  <v-app-bar>
   <header class="header-bar">
     <div class="branding">
       <img src="@/assets/images/logo.svg" alt="Logo" class="logo" />
@@ -121,7 +150,6 @@ function setLanguage(lang) {
           :options="[
             {
               label: t('header.file_menu.upload_graph'),
-              onClick: () => console.log('Upload Graph'),
               children: [
                 {
                   label: t('header.file_menu.upload_edges'),
@@ -166,6 +194,24 @@ function setLanguage(lang) {
       />
     </div>
   </header>
+  </v-app-bar>
+  <teleport to="body">
+    <div v-if="amlModalOpen" class="aml-overlay">
+      <div class="aml-modal">
+        <h2>Wybierz liczbę wierszy do zwizualizowania</h2>
+        <input
+          type="number"
+          min="1"
+          v-model.number="amlTempRows"
+          class="aml-input"
+          @keyup.enter="confirmAml"
+        />
+        <div class="aml-actions">
+          <button class="aml-btn" @click="confirmAml">OK</button>
+        </div>
+      </div>
+    </div>
+  </teleport>
 </template>
 
 <style scoped>
@@ -282,5 +328,59 @@ function setLanguage(lang) {
 
 .hidden-input {
   display: none;
+}
+</style>
+
+<style>
+.aml-overlay {
+  position: fixed;
+  inset: 0;
+  backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+.aml-modal {
+  background: #fff;
+  padding: 32px 40px;
+  border-radius: 12px;
+  max-width: 480px;
+  width: 90%;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2);
+}
+
+.aml-input {
+  width: 100%;
+  margin-top: 16px;
+  padding: 10px 12px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.aml-actions {
+  margin-top: 24px;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.aml-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  background: #1976d2;
+  color: #fff;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.aml-btn--secondary {
+  background: #e0e0e0;
+  color: #333;
 }
 </style>
