@@ -9,7 +9,7 @@ export function useSigmaRenderer({ graph, optionsRef }) {
 
   onMounted(() => {
     applyStyleOptions(graph, optionsRef.value)
-    normalizeGraphCoordinates(graph)
+    //normalizeGraphCoordinates(graph)
 
     renderer.value = new Sigma(graph, container.value, {
       minCameraRatio: 0.08,

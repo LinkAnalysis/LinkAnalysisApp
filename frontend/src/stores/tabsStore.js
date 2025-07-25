@@ -228,6 +228,10 @@ export const useTabsStore = defineStore("tabs", () => {
     return globalSimulationWorker.value != null
   }
 
+  function simulationRunning() {
+    return globalSimulationWorker.value?.isRunning() ?? false
+  }
+
   return {
     getSelectedEdgeFileName,
     getSelectedNodeFileName,
@@ -255,5 +259,6 @@ export const useTabsStore = defineStore("tabs", () => {
     toggleSimulation,
     killSimulation,
     simulationExists,
+    simulationRunning,
   }
 })

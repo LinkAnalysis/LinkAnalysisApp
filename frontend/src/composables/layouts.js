@@ -53,6 +53,12 @@ export const layouts = {
       //circular.assign(graph)
       forceAtlas2.assign(graph, params)
     },
+    simulate: (graph, params = {}) => {
+      //const sensibleSettings = forceAtlas2.inferSettings(graph);
+      const worker = new FA2Layout(graph, params)
+      worker.start()
+      return worker
+    },
     defaultParams: {
       iterations: 1000,
       gravity: 1,
@@ -149,6 +155,19 @@ export const layouts = {
       return worker
     },
     defaultParams: { maxIterations: 500 },
+  },
+
+  noverlap: {
+    apply: (graph, params = {}) => {
+      noverlap.assign(graph, params)
+    },
+
+    simulate: (graph, params = {}) => {
+      const worker = new NoverlapLayout(graph, params)
+      worker.stop()
+      return worker
+    },
+    defaultParams: {},
   },
 }
 
