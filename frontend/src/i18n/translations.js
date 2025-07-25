@@ -1,3 +1,4 @@
+import forceLayout from "graphology-layout-force"
 import { layouts } from "../composables/layouts"
 
 export default {
@@ -35,7 +36,7 @@ export default {
     editor: {
       nodes: "Wierzchołki",
       edges: "Krawędzie",
-      placeholder_node: "(np. Node 1)",
+      placeholder_node: "(np. Wierzchołek 1)",
       placeholder_edge: "(np. Krawędź 1,2)",
       id: "ID",
       label: "Etykieta",
@@ -58,6 +59,7 @@ export default {
         d3tree: "Drzewo (D3 Tree)",
         radial: "Układ radialny",
         force: "Symulacja siłowa (3D Force)",
+        forceLayout: "Symulacja siłowa (2D Force)",
       },
       params: {
         iterations: "Liczba iteracji",
@@ -65,6 +67,11 @@ export default {
         scalingRatio: "Współczynnik skalowania",
         strongGravityMode: "Silny tryb grawitacji",
         rootId: "ID korzenia",
+        maxIteration: "Maksymalnie iteracji",
+        attraction: "Przyciąganie",
+        repulsion: "Odpychanie",
+        inertia: "Bezwładność",
+        maxMove: "Maksymalny ruch",
       },
     },
     visualization: {
@@ -207,6 +214,7 @@ export default {
         d3tree: "D3 Tree",
         radial: "Radial",
         force: "3D Force Simulation",
+        forceLayout: "2D Force Simulation",
       },
       params: {
         iterations: "Iterations",
@@ -214,6 +222,11 @@ export default {
         scalingRatio: "Scaling Ratio",
         strongGravityMode: "Strong Gravity Mode",
         rootId: "Root ID",
+        maxIteration: "Maksimum iterations",
+        attraction: "Atrraction",
+        repulsion: "Repulsion",
+        inertia: "Inertia",
+        maxMove: "Maksimum move",
       },
     },
     visualization: {
