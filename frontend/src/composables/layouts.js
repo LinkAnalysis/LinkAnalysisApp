@@ -5,6 +5,8 @@ import forceAtlas2 from "graphology-layout-forceatlas2"
 import * as d3 from "d3-hierarchy"
 import * as d3f from "d3-force-3d"
 import { LogPrint } from "../../wailsjs/runtime/runtime"
+import { rotate } from "sigma/utils"
+import forceLayout from "graphology-layout-force"
 
 export function normalizeGraphCoordinates(graph) {
   let xMin = Infinity,
@@ -53,6 +55,20 @@ export const layouts = {
       gravity: 1,
       scalingRatio: 1,
       strongGravityMode: false,
+      adjustSizes: true,
+    },
+  },
+  forceLayout: {
+    apply: (graph, params = {}) => {
+      forceLayout.assign(graph, params)
+    },
+    defaultParams: {
+      attraction: 0.5,
+      maxIterations: 4000,
+      gravity: 0.02,
+      repulsion: 0.02,
+      inertia: 0,
+      maxMove: 800,
     },
   },
   circlepack: {
@@ -70,7 +86,7 @@ export const layouts = {
       const treeLayout = d3.tree().nodeSize([50, 50])
       const tree = treeLayout(d3root)
       tree.descendants().forEach(d => {
-        graph.mergeNodeAttributes(d.data.id, { x: d.x, y: d.y })
+        graph.mergeNodeAttributes(d.data.id, { x: -d.x, y: -d.y })
       })
     },
     defaultParams: { rootId: 0 },

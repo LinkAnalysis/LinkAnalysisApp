@@ -17,7 +17,6 @@ const props = defineProps({
   changed: Number,
   options: { type: Object, default: () => ({}) },
 })
-
 const { t } = useI18n()
 const { options } = toRefs(props)
 
