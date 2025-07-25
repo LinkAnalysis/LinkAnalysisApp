@@ -8,6 +8,8 @@ import { useGraphElements } from "../../composables/useGraphElements"
 import { useTabsStore } from "../../stores/tabsStore"
 import { apply_layout } from "../../composables/file_loader"
 import { storeToRefs } from "pinia"
+import { layouts } from "../../composables/layouts"
+import { LogPrint } from "../../../wailsjs/runtime/runtime"
 
 const props = defineProps({
   graph: Graph,
@@ -29,6 +31,15 @@ const onApplyLayout = () => {
       selectedLayoutParams.value,
     )
     markSelectedGraphChange()
+  }
+}
+
+const onCreateSimulationWorker = () => {
+  if (selectedGraph.value) {
+    const g = selectedGraph.value
+    const l = selectedLayout.value
+    const p = selectedLayoutParams.value
+    tabsStore.createSimulation(layouts[l].simulate(g, {}))
   }
 }
 
@@ -69,7 +80,11 @@ function handleDeleteItem(type, id) {
       />
     </div>
     <div class="panel-wrapper">
-      <LayoutComponent class="panel-section" @apply-layout="onApplyLayout" />
+      <LayoutComponent
+        class="panel-section"
+        @apply-layout="onApplyLayout"
+        @createSimulationWorker="onCreateSimulationWorker"
+      />
     </div>
     <div class="panel-wrapper">
       <VisualizationComponent class="panel-section" />

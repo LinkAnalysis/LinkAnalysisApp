@@ -27,6 +27,9 @@
       <button class="apply-button" @click="applySettings">
         {{ t("layout.apply") }}
       </button>
+      <button v-if="canSimulate" @click="createSimulation" class="reset-button">
+        Create
+      </button>
     </div>
   </div>
 </template>
@@ -59,6 +62,9 @@ const currentParams = computed(() => selectedLayoutParams.value)
 const hasParams = computed(
   () => (Object.keys(selectedLayoutParams.value).length ?? 0) > 0,
 )
+const canSimulate = computed(() =>
+  Object.keys(layoutsMap[selectedLayout.value]).includes("simulate"),
+)
 
 watch(
   [selectedLayout, selectedTabId],
@@ -88,10 +94,14 @@ watch(
   { immediate: true },
 )
 
-const emit = defineEmits(["applyLayout"])
+const emit = defineEmits(["applyLayout", "createSimulationWorker"])
 
 const applySettings = () => {
   emit("applyLayout")
+}
+
+const createSimulation = () => {
+  emit("createSimulationWorker")
 }
 
 const resetSettings = () => {
