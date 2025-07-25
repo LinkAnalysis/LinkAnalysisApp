@@ -53,7 +53,9 @@ watch(
         newEdgeFile,
         newGraphMode,
       )
-      apply_layout(graph.value)
+      if (selectedGraphMode.value != "gexf") {
+        apply_layout(graph.value)
+      }
     } finally {
       isLoading.value = false
     }
