@@ -114,14 +114,40 @@ export function useGraphInteractions({ renderer, graph, optionsRef }) {
     }
   }
 
+  function hideNode(nodeId, hide = true) {
+    graph.setNodeAttribute(nodeId, "hidden", hide)
+
+    graph.forEachEdge(nodeId, edgeId =>
+      graph.setEdgeAttribute(edgeId, "hidden", hide),
+    )
+
+    selectedNodeIds.delete(nodeId)
+    highlightedEdges.forEach(e => {
+      if (graph.source(e) === nodeId || graph.target(e) === nodeId)
+        highlightedEdges.delete(e)
+    })
+    popupNodeId.value = null
+    clickedNodeData.value = null
+  }
+
   function attachListeners(r) {
     if (!r) return
+
+    r.on("rightClickNode", ({ node, event }) => {
+      event.preventSigmaDefault()
+      event.original.preventDefault()
+
+      hideNode(node)
+    })
 
     r.on("downNode", ({ node, event }) => {
       if (withCtrl(event)) {
         toggleNode(node)
       }
-      if (optionsRef.value.allowDragging !== false) {
+      if (
+        event.original.button === 0 &&
+        optionsRef.value.allowDragging !== false
+      ) {
         isDragging = true
         draggedNode = node
       }
