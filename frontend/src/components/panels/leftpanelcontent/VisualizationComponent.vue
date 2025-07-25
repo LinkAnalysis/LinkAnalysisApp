@@ -124,7 +124,7 @@ const settings = reactive({
   highlightedEdgeColor: "#ff9900",
   edgeSize: 1.5,
   useEdgeWeights: false,
-  renderEdgeLabels: true,
+  renderEdgeLabels: false,
   backgroundColor: "#ffffff",
 })
 

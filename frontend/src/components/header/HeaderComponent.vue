@@ -173,7 +173,7 @@ function setLanguage(lang) {
                 onClick: () => uploadAntiMoneyLaunderingGraph(),
               },
               {
-                label: 'Export Graph',
+                label: t('header.file_menu.export_graph'),
                 children: [
                   {
                     label: t('header.file_menu.export_jpg'),
