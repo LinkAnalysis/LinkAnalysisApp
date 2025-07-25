@@ -2,6 +2,11 @@ import circular from "graphology-layout/circular"
 import random from "graphology-layout/random"
 import circlepack from "graphology-layout/circlepack"
 import forceAtlas2 from "graphology-layout-forceatlas2"
+import FA2Layout from "graphology-layout-forceatlas2/worker"
+import ForceSupervisor from "graphology-layout-force/worker"
+import forceLayout from "graphology-layout-force"
+import noverlap from "graphology-layout-noverlap"
+import NoverlapLayout from "graphology-layout-noverlap/worker"
 import * as d3 from "d3-hierarchy"
 import * as d3f from "d3-force-3d"
 import { LogPrint } from "../../wailsjs/runtime/runtime"
@@ -131,6 +136,19 @@ export const layouts = {
       })
     },
     defaultParams: {},
+  },
+
+  gforce: {
+    apply: (graph, params = {}) => {
+      forceLayout.assign(graph, params)
+    },
+
+    simulate: (graph, params = {}) => {
+      const worker = new ForceSupervisor(graph, params)
+      worker.stop()
+      return worker
+    },
+    defaultParams: { maxIterations: 500 },
   },
 }
 
