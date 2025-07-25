@@ -53,7 +53,7 @@ export const layouts = {
     defaultParams: {
       iterations: 1000,
       gravity: 1,
-      scalingRatio: 1,
+      scalingRatio: 100,
       strongGravityMode: false,
       adjustSizes: true,
     },

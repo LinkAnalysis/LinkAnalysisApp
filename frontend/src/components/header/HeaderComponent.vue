@@ -85,6 +85,14 @@ const uploadEdgesConfiguration = async () => {
   }
 }
 
+const uploadGEXFConfiguration = async () => {
+  const filePath = await OpenFileExplorer()
+  if (filePath) {
+    selectedEdgeFile.value = filePath
+    selectedGraphMode.value = "gexf"
+  }
+}
+
 const exportToPNG = async () => {
   LogPrint("Exporting to PNG")
   if (!graphViewRef.value) {
@@ -180,7 +188,11 @@ function setLanguage(lang) {
                 onClick: () => uploadAntiMoneyLaunderingGraph(),
               },
               {
-                label: t('header.file_menu.export_graph'),
+                label: t('header.file_menu.upload_gexf'),
+                onClick: () => uploadGEXFConfiguration(),
+              },
+              {
+                label: 'Export Graph',
                 children: [
                   {
                     label: t('header.file_menu.export_jpg'),
