@@ -39,7 +39,6 @@ export function parseAntiMoneyLaunderingCSV(filename) {
           AmountPaid: row["Amount Paid"],
           PaymentCurrency: row["Payment Currency"],
           PaymentFormat: row["Payment Format"],
-          IsLaundering: row["Is Laundering"],
         }))
         resolve(transformed)
       },
@@ -111,24 +110,24 @@ export async function load_graph(node_file, edge_file, graphMode) {
       }
     })
 
-    edges.forEach(
-      ({ x, y, AmountPaid, PaymentCurrency, Timestamp, IsLaundering }) => {
-        const w = parseInt(AmountPaid)
-        graph.addEdge(x, y, {
-          label:
-            Timestamp +
-            ": " +
-            AmountPaid +
-            " " +
-            PaymentCurrency +
-            " Is Laundering: " +
-            IsLaundering,
-          weight: w,
-          size: w,
-          color: "#000000",
-        })
-      },
-    )
+    let maxWeight = 0
+    let minWeight = Infinity
+    edges.forEach(({ AmountPaid }) => {
+      const w = parseInt(AmountPaid)
+      if (w > maxWeight) maxWeight = w
+      if (w < minWeight) minWeight = w
+    })
+
+    edges.forEach(({ x, y, AmountPaid, PaymentCurrency, Timestamp }) => {
+      const w = parseInt(AmountPaid)
+      const normalized = 1 + (9 * (w - minWeight)) / (maxWeight - minWeight)
+      graph.addEdge(x, y, {
+        label: Timestamp + ": " + AmountPaid + " " + PaymentCurrency,
+        weight: normalized,
+        size: normalized,
+        color: "#000000",
+      })
+    })
   }
   return graph
 }
