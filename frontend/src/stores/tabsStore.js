@@ -187,37 +187,30 @@ export const useTabsStore = defineStore("tabs", () => {
   // - invalidating it explicitly
 
   const globalSimulationWorker = ref(null)
-  const globalSimulationGraph = ref(null)
-  watch(
-    globalSimulationGraph,
-    (val, oldVal) => {
-      if (!oldVal) return
+  watch(selectedTabId, () => {
+    if (globalSimulationWorker.value) killSimulation()
+  })
 
-      if (globalSimulationWorker.value) killSimulation()
-    },
-    { deep: true },
-  )
-
-  function createSimulation(worker, graphTarget) {
+  function createSimulation(worker) {
     killSimulation()
-    globalSimulationGraph.value = graphTarget
     globalSimulationWorker.value = worker
+    globalSimulationWorker.value.stop()
   }
 
   function startSimulation() {
-    if (globalSimulationGraph.value && globalSimulationWorker.value) {
+    if (globalSimulationWorker.value) {
       globalSimulationWorker.value.start()
     }
   }
 
   function stopSimulation() {
-    if (globalSimulationGraph.value && globalSimulationWorker.value) {
+    if (globalSimulationWorker.value) {
       globalSimulationWorker.value.stop()
     }
   }
 
   function toggleSimulation() {
-    if (globalSimulationGraph.value && globalSimulationWorker.value) {
+    if (globalSimulationWorker.value) {
       if (globalSimulationWorker.value.isRunning())
         globalSimulationWorker.value.stop()
       else globalSimulationWorker.value.start()
@@ -229,7 +222,10 @@ export const useTabsStore = defineStore("tabs", () => {
       globalSimulationWorker.value.kill()
       globalSimulationWorker.value = null
     }
-    globalSimulationGraph.value = null
+  }
+
+  function simulationExists() {
+    return globalSimulationWorker.value != null
   }
 
   return {
@@ -258,5 +254,6 @@ export const useTabsStore = defineStore("tabs", () => {
     stopSimulation,
     toggleSimulation,
     killSimulation,
+    simulationExists,
   }
 })
