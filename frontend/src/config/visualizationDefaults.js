@@ -8,6 +8,5 @@ export const visualizationDefaultOptions = {
   edgeSize: 1.5,
   useEdgeWeights: false,
   renderEdgeLabels: true,
-  hoverEffect: true,
   backgroundColor: "#ffffff",
 }

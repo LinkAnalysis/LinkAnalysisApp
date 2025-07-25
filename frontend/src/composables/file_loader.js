@@ -19,7 +19,6 @@ export function parseCSV(filename) {
 // constructs the graphology Graph from the node and edge files
 export async function load_graph(node_file, edge_file) {
   const graph = new Graph()
-
   const edges = await parseCSV(await ReadTextFile(edge_file))
 
   if (node_file) {
@@ -50,7 +49,6 @@ export async function load_graph(node_file, edge_file) {
       color: "#000000",
     })
   })
-
   return graph
 }
 

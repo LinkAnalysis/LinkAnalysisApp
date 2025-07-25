@@ -13,7 +13,9 @@ export const useTabsStore = defineStore("tabs", () => {
   const layoutTypes = ref([])
   const layoutParams = ref([])
   const visualizationOptions = ref([])
-
+  const filterSelected = ref([])
+  const filterSearchTerm = ref([])
+  const filterSearchIn = ref([])
   const tabsData = ref([])
 
   const idToIndex = id => tabsData.value.findIndex(o => o.id == id)
@@ -61,7 +63,9 @@ export const useTabsStore = defineStore("tabs", () => {
     visualizationOptions.value.push(
       ref(structuredClone(visualizationDefaultOptions)),
     )
-
+    filterSelected.value.push("searchByName")
+    filterSearchTerm.value.push("")
+    filterSearchIn.value.push("Nodes")
     tabsData.value.push(tabData)
   }
 
@@ -149,6 +153,19 @@ export const useTabsStore = defineStore("tabs", () => {
     getFileName(selectedNodeFile.value),
   )
 
+  const selectedFilter = computed({
+    get: () => filterSelected.value[selectedTabIndex.value],
+    set: v => (filterSelected.value[selectedTabIndex.value] = v),
+  })
+  const selectedSearchTerm = computed({
+    get: () => filterSearchTerm.value[selectedTabIndex.value],
+    set: v => (filterSearchTerm.value[selectedTabIndex.value] = v),
+  })
+  const selectedSearchIn = computed({
+    get: () => filterSearchIn.value[selectedTabIndex.value],
+    set: v => (filterSearchIn.value[selectedTabIndex.value] = v),
+  })
+
   return {
     getSelectedEdgeFileName,
     getSelectedNodeFileName,
@@ -167,5 +184,8 @@ export const useTabsStore = defineStore("tabs", () => {
     markSelectedGraphChange,
     selectedVisualizationOptions,
     graphViewRef,
+    selectedFilter,
+    selectedSearchTerm,
+    selectedSearchIn,
   }
 })
