@@ -7,7 +7,6 @@ export const visualizationDefaultOptions = {
   highlightedEdgeColor: "#ff9900",
   edgeSize: 1.5,
   useEdgeWeights: false,
-  renderEdgeLabels: true,
-  hoverEffect: true,
+  renderEdgeLabels: false,
   backgroundColor: "#ffffff",
 }

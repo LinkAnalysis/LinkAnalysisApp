@@ -24,7 +24,7 @@ const { nodeCount, edgeCount } = useGraphStats(graphRef)
       />
     </div>
     <div class="panel-wrapper">
-      <FilterComponent class="panel-section" />
+      <FilterComponent class="panel-section" :graph="graphRef" />
     </div>
     <div class="panel-wrapper">
       <StatisticsComponent class="panel-section" />

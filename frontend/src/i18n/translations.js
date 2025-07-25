@@ -46,6 +46,9 @@ export default {
       save: "Zapisz",
       delete: "Usuń",
       cancel: "Anuluj",
+      upload_file: "Prześlij plik",
+      choose_file: "Wybierz plik",
+      reset: "Resetuj",
     },
     layout: {
       title: "Układ",
@@ -86,7 +89,7 @@ export default {
         nodeColor: "Kolor wierzchołków",
         selectedNodeColor: "Kolor zaznaczonego wierzchołka",
         nodeSize: "Rozmiar wierzchołków",
-        allowDragging: "Możliwość przeciągania",
+        allowDragging: "Blokada wierzchołków",
 
         edgeColor: "Kolor krawędzi",
         highlightedEdgeColor: "Kolor podświetlonej krawędzi",
@@ -152,6 +155,7 @@ export default {
       name: "Nazwa",
       no_description: "Brak opisu",
       number_of_neighbors: "Liczba sąsiadów",
+      weight: "Waga",
     },
     app: {
       loading: "Ładowanie grafu",
@@ -201,6 +205,9 @@ export default {
       save: "Save",
       delete: "Delete",
       cancel: "Cancel",
+      upload_file: "Upload file",
+      choose_file: "Choose file",
+      reset: "Reset",
     },
     layout: {
       title: "Layout",
@@ -241,7 +248,7 @@ export default {
         nodeColor: "Node Color",
         selectedNodeColor: "Selected Node Color",
         nodeSize: "Node Size",
-        allowDragging: "Dragging",
+        allowDragging: "Nodes lock",
 
         edgeColor: "Edge Color",
         highlightedEdgeColor: "Highlighted Edge Color",
@@ -307,6 +314,7 @@ export default {
       name: "Name",
       no_description: "No description available",
       number_of_neighbors: "Number of neighbors",
+      weight: "Weight",
     },
     app: {
       loading: "Loading graph",

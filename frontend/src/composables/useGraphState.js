@@ -40,6 +40,7 @@ export function useGraphState({ renderer, graph, resetCamera }) {
   )
 
   const edgeNodesHighlighted = new Set()
+  let focusedEdgeId = null
 
   watch(
     () => [fileStore.focusedEdgeSource, fileStore.focusedEdgeTarget],
@@ -48,14 +49,22 @@ export function useGraphState({ renderer, graph, resetCamera }) {
         graph.removeNodeAttribute(id, "highlighted"),
       )
       edgeNodesHighlighted.clear()
+      if (focusedEdgeId && graph.hasEdge(focusedEdgeId))
+        graph.removeEdgeAttribute(focusedEdgeId, "highlighted")
+      focusedEdgeId = null
       renderer.value?.refresh()
 
       if (!source || !target) return
+      const eId = graph.edge(source, target)
+      if (!eId) return
       if (!graph.hasEdge(source, target)) return
       ;[source, target].forEach(id => {
         graph.setNodeAttribute(id, "highlighted", true)
         edgeNodesHighlighted.add(id)
       })
+
+      graph.setEdgeAttribute(eId, "highlighted", true)
+      focusedEdgeId = eId
       renderer.value?.refresh()
 
       const { x, y } = midpoint(renderer.value, source, target)
