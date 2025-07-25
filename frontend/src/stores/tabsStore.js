@@ -1,5 +1,5 @@
 import { defineStore } from "pinia"
-import { computed, ref } from "vue"
+import { computed, ref, watch } from "vue"
 import { visualizationDefaultOptions } from "../config/visualizationDefaults"
 
 const getFileName = fullPath => {
@@ -180,6 +180,58 @@ export const useTabsStore = defineStore("tabs", () => {
     getFileName(selectedNodeFile.value),
   )
 
+  // simulation is invalidated by:
+  // - changing tab
+  // - changing graph
+  // - applying other simulation
+  // - invalidating it explicitly
+
+  const globalSimulationWorker = ref(null)
+  const globalSimulationGraph = ref(null)
+  watch(
+    globalSimulationGraph,
+    (val, oldVal) => {
+      if (!oldVal) return
+
+      if (globalSimulationWorker.value) killSimulation()
+    },
+    { deep: true },
+  )
+
+  function createSimulation(worker, graphTarget) {
+    killSimulation()
+    globalSimulationGraph.value = graphTarget
+    globalSimulationWorker.value = worker
+  }
+
+  function startSimulation() {
+    if (globalSimulationGraph.value && globalSimulationWorker.value) {
+      globalSimulationWorker.value.start()
+    }
+  }
+
+  function stopSimulation() {
+    if (globalSimulationGraph.value && globalSimulationWorker.value) {
+      globalSimulationWorker.value.stop()
+    }
+  }
+
+  function toggleSimulation() {
+    if (globalSimulationGraph.value && globalSimulationWorker.value) {
+      if (globalSimulationWorker.value.isRunning())
+        globalSimulationWorker.value.stop()
+      else globalSimulationWorker.value.start()
+    }
+  }
+
+  function killSimulation() {
+    if (globalSimulationWorker.value) {
+      globalSimulationWorker.value.kill()
+      globalSimulationWorker.value = null
+    }
+    globalSimulationGraph.value = null
+  }
+
   return {
     getSelectedEdgeFileName,
     getSelectedNodeFileName,
@@ -200,5 +252,11 @@ export const useTabsStore = defineStore("tabs", () => {
     graphViewRef,
     selectedGraphMode,
     selectedNumberOfRows,
+
+    createSimulation,
+    startSimulation,
+    stopSimulation,
+    toggleSimulation,
+    killSimulation,
   }
 })
