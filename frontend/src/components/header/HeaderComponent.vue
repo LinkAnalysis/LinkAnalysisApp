@@ -108,11 +108,18 @@ const exportToJPG = async () => {
 }
 
 const exportToGEXF = async () => {
-  LogPrint("Exporting to GEXF")
-  const gexfString = gexf.write(selectedGraph.value)
+  const graphCopy = selectedGraph.value.copy()
+
+  graphCopy.forEachNode((node, attributes) => {
+    if (attributes.x !== undefined && attributes.y !== undefined) {
+      graphCopy.setNodeAttribute(node, "x", attributes.x * 1000)
+      graphCopy.setNodeAttribute(node, "y", attributes.y * 1000)
+    }
+  })
+
+  const gexfString = gexf.write(graphCopy)
   const filePath = await SaveFileExplorer("graph", "gexf")
   await SaveStringToFile(filePath, gexfString)
-  LogPrint("Done!")
 }
 
 const availableLanguages = [
