@@ -27,6 +27,7 @@ export default {
       zoomIn: "Powiększ",
       zoomOut: "Pomniejsz",
       reset: "Resetuj",
+      restore: "Przywróć węzły",
     },
     rowsWindow: {
       window_message: "Podaj liczbę wierszy do wizualizacji",
@@ -186,6 +187,7 @@ export default {
       zoomIn: "Zoom in",
       zoomOut: "Zoom out",
       reset: "Reset",
+      restore: "Restore nodes",
     },
     rowsWindow: {
       window_message: "Enter number of rows to visualize",

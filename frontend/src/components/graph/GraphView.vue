@@ -83,6 +83,7 @@ watch(
     <div ref="container" class="sigma-container" />
 
     <GraphControls
+      :graph="props.graph"
       @zoomIn="zoomIn"
       @zoomOut="zoomOut"
       @resetView="() => resetCamera(true)"
