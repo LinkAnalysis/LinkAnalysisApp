@@ -12,10 +12,10 @@ import GraphControls from "./GraphControls.vue"
 import { toBlob } from "@sigma/export-image"
 import { SaveBytesToFile } from "../../../wailsjs/go/main/App"
 import { LogPrint } from "../../../wailsjs/runtime/runtime"
+import { useTabsStore } from "../../stores/tabsStore"
 
 const props = defineProps({
   graph: Graph,
-  changed: Number,
   options: { type: Object, default: () => ({}) },
 })
 const { t } = useI18n()
@@ -60,6 +60,9 @@ defineExpose({
   saveImage,
 })
 
+const tabsStore = useTabsStore()
+const onToggleSimulation = () => tabsStore.toggleSimulation()
+
 useGraphState({ renderer, graph: props.graph, resetCamera })
 
 watch(
@@ -81,6 +84,9 @@ watch(
 
 <template>
   <div class="graph-wrapper">
+    <button v-if="tabsStore.simulationExists()" @click="onToggleSimulation">
+      stop/resume
+    </button>
     <div ref="container" class="sigma-container" />
 
     <GraphControls
