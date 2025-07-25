@@ -5,6 +5,7 @@ import { ReadTextFile, ReadTextFileAntiMoney } from "../../wailsjs/go/main/App"
 import { layouts } from "./layouts"
 import { useTabsStore } from "../stores/tabsStore"
 import { storeToRefs } from "pinia"
+import { parse } from "graphology-gexf"
 
 export function parseCSV(filename) {
   return new Promise((resolve, reject) => {
@@ -49,8 +50,7 @@ export function parseAntiMoneyLaunderingCSV(filename) {
 
 // constructs the graphology Graph from the node and edge files
 export async function load_graph(node_file, edge_file, graphMode) {
-  console.log("jestem w file loaderze")
-  const graph = new Graph({ multi: true })
+  let graph = new Graph({ multi: true })
   if (graphMode === "normal") {
     const edges = await parseCSV(await ReadTextFile(edge_file))
 
@@ -127,6 +127,15 @@ export async function load_graph(node_file, edge_file, graphMode) {
         size: normalized,
         color: "#000000",
       })
+    })
+  } else if (graphMode === "gexf") {
+    const gexfContent = await ReadTextFile(edge_file)
+    graph = parse(Graph, gexfContent)
+    graph.forEachNode((node, attrs) => {
+      if (typeof attrs.x === "number" && typeof attrs.y === "number") {
+        graph.setNodeAttribute(node, "x", attrs.x / 1000)
+        graph.setNodeAttribute(node, "y", attrs.y / 1000)
+      }
     })
   }
   return graph
