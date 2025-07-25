@@ -1,6 +1,3 @@
-import forceLayout from "graphology-layout-force"
-import { layouts } from "../composables/layouts"
-
 export default {
   pl: {
     header: {
@@ -73,6 +70,7 @@ export default {
         strongGravityMode: "Silny tryb grawitacji",
         rootId: "ID korzenia",
         maxIteration: "Maksymalnie iteracji",
+        maxIterations: "Maksymalnie iteracji",
         attraction: "Przyciąganie",
         repulsion: "Odpychanie",
         inertia: "Bezwładność",
@@ -233,11 +231,12 @@ export default {
         scalingRatio: "Scaling Ratio",
         strongGravityMode: "Strong Gravity Mode",
         rootId: "Root ID",
-        maxIteration: "Maksimum iterations",
+        maxIteration: "Maximum iterations",
+        maxIterations: "Maximum iterations",
         attraction: "Atrraction",
         repulsion: "Repulsion",
         inertia: "Inertia",
-        maxMove: "Maksimum move",
+        maxMove: "Maximum move",
       },
     },
     visualization: {
