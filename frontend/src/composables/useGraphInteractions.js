@@ -14,6 +14,8 @@ export function useGraphInteractions({ renderer, graph, optionsRef }) {
 
   let draggedNode = null
   let isDragging = false
+  let dragGroupOffsets = null
+  let initialDragPosition = null
 
   function updatePopupNodePosition() {
     if (!renderer.value || !popupNodeId.value) return
@@ -144,22 +146,49 @@ export function useGraphInteractions({ renderer, graph, optionsRef }) {
       if (withCtrl(event)) {
         toggleNode(node)
       }
-      if (
-        event.original.button === 0 &&
-        optionsRef.value.allowDragging !== false
-      ) {
+
+      const isLeftClick = event.original.button === 0
+      const allowDrag = optionsRef.value.allowDragging !== false
+
+      if (isLeftClick && allowDrag) {
         isDragging = true
-        draggedNode = node
-        graph.setNodeAttribute(draggedNode, "fixed", true)
+
+        const pos = renderer.value.viewportToGraph(event)
+        initialDragPosition = pos
+
+        if (event.original.shiftKey && selectedNodeIds.has(node)) {
+          draggedNode = null
+          dragGroupOffsets = {}
+          selectedNodeIds.forEach(n => {
+            const attrs = graph.getNodeAttributes(n)
+            dragGroupOffsets[n] = { dx: attrs.x - pos.x, dy: attrs.y - pos.y }
+            graph.setNodeAttribute(n, "fixed", true)
+          })
+        } else {
+          draggedNode = node
+          dragGroupOffsets = null
+          graph.setNodeAttribute(draggedNode, "fixed", true)
+        }
+
         if (!r.getCustomBBox()) r.setCustomBBox(r.getBBox())
       }
     })
 
     r.on("moveBody", ({ event }) => {
-      if (!isDragging || !draggedNode) return
+      if (!isDragging) return
+
       const pos = renderer.value.viewportToGraph(event)
-      graph.setNodeAttribute(draggedNode, "x", pos.x)
-      graph.setNodeAttribute(draggedNode, "y", pos.y)
+
+      if (draggedNode) {
+        graph.setNodeAttribute(draggedNode, "x", pos.x)
+        graph.setNodeAttribute(draggedNode, "y", pos.y)
+      } else if (dragGroupOffsets) {
+        for (const [nodeId, offset] of Object.entries(dragGroupOffsets)) {
+          graph.setNodeAttribute(nodeId, "x", pos.x + offset.dx)
+          graph.setNodeAttribute(nodeId, "y", pos.y + offset.dy)
+        }
+      }
+
       event.preventSigmaDefault()
       event.original.preventDefault()
       event.original.stopPropagation()
@@ -169,9 +198,22 @@ export function useGraphInteractions({ renderer, graph, optionsRef }) {
 
     const stopDrag = () => {
       isDragging = false
-      if (draggedNode) graph.removeNodeAttribute(draggedNode, "fixed")
-      draggedNode = null
+
+      if (draggedNode) {
+        graph.removeNodeAttribute(draggedNode, "fixed")
+        draggedNode = null
+      }
+
+      if (dragGroupOffsets) {
+        Object.keys(dragGroupOffsets).forEach(n =>
+          graph.removeNodeAttribute(n, "fixed"),
+        )
+        dragGroupOffsets = null
+      }
+
+      initialDragPosition = null
     }
+
     r.on("upNode", stopDrag)
     r.on("upStage", stopDrag)
 
