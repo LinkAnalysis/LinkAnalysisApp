@@ -37,13 +37,6 @@ const stats = useGraphStatistics(toRef(props, "graph"))
 
 const { t } = useI18n()
 
-const statLabels = [
-  "avgPathLength",
-  "clusteringCoefficient",
-  "assortativityCoefficient",
-  "connectedComponents",
-  "pageRange",
-]
 const statDefs = [
   { key: "averageDegree", fn: stats.getAverageDegree },
   { key: "avgWeightedDegree", fn: stats.getAverageWeightedDegree },
