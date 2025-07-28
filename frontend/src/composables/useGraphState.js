@@ -55,16 +55,18 @@ export function useGraphState({ renderer, graph, resetCamera }) {
       renderer.value?.refresh()
 
       if (!source || !target) return
-      const eId = graph.edge(source, target)
-      if (!eId) return
+      const edgeIds = graph.edges(source, target)
+      if (!edgeIds.length) return
       if (!graph.hasEdge(source, target)) return
       ;[source, target].forEach(id => {
         graph.setNodeAttribute(id, "highlighted", true)
         edgeNodesHighlighted.add(id)
       })
 
-      graph.setEdgeAttribute(eId, "highlighted", true)
-      focusedEdgeId = eId
+      edgeIds.forEach(eId => {
+        graph.setEdgeAttribute(eId, "highlighted", true)
+      })
+      focusedEdgeId = edgeIds[0]
       renderer.value?.refresh()
 
       const { x, y } = midpoint(renderer.value, source, target)
