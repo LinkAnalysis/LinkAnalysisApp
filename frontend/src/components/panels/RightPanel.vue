@@ -33,7 +33,7 @@ const edges = computed(() =>
       <FilterComponent class="panel-section" :graph="graphRef" />
     </div>
     <div class="panel-wrapper">
-      <StatisticsComponent class="panel-section" />
+      <StatisticsComponent class="panel-section" :graph="graph" />
     </div>
   </div>
 </template>
