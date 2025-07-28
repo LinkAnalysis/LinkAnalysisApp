@@ -150,6 +150,8 @@ export function useGraphInteractions({ renderer, graph, optionsRef }) {
       ) {
         isDragging = true
         draggedNode = node
+        graph.setNodeAttribute(draggedNode, "fixed", true)
+        if (!r.getCustomBBox()) r.setCustomBBox(r.getBBox())
       }
     })
 
@@ -167,6 +169,7 @@ export function useGraphInteractions({ renderer, graph, optionsRef }) {
 
     const stopDrag = () => {
       isDragging = false
+      if (draggedNode) graph.removeNodeAttribute(draggedNode, "fixed")
       draggedNode = null
     }
     r.on("upNode", stopDrag)
