@@ -11,49 +11,34 @@
     <button class="reset" @click="$emit('resetView')">
       {{ t("controls.reset") }}
     </button>
-    <<<<<<< HEAD
+
     <div v-if="tabsStore.simulationExists()" class="sim-settings">
       <button class="sim-toggle" @click="onToggleSimulation">
         {{ tabsStore.simulationRunning() ? "⏸️" : "▶️" }}
       </button>
       <button class="sim-kill" @click="onKillSimulation">❌</button>
     </div>
-    =======
 
     <button class="restore" @click="restoreHiddenNodes">
       {{ t("controls.restore") }}
     </button>
-    >>>>>>> main
   </div>
 </template>
 
 <script setup>
 import { useI18n } from "vue-i18n"
-<<<<<<< HEAD
 import { useTabsStore } from "../../stores/tabsStore"
-import ForceSupervisor from "graphology-layout-force/worker"
-import { storeToRefs } from "pinia"
-import { LogPrint } from "../../../wailsjs/runtime/runtime"
+
 defineEmits(["zoomIn", "zoomOut", "resetView"])
 const tabsStore = useTabsStore()
-const { selectedGraph } = storeToRefs(tabsStore)
-let worker = null
 const onToggleSimulation = () => {
-  //LogPrint("HEEWASJFKJ")
-  //worker = new ForceSupervisor(selectedGraph.value, {})
-  //LogPrint(`${JSON.stringify(worker, null, 2)}`)
-  //worker.start()
   tabsStore.toggleSimulation()
 }
 const onKillSimulation = () => tabsStore.killSimulation()
-=======
 
 const props = defineProps({
   graph: Object,
 })
-defineEmits(["zoomIn", "zoomOut", "resetView"])
-
->>>>>>> main
 const { t } = useI18n()
 
 function restoreHiddenNodes() {
