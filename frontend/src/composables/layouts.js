@@ -50,12 +50,13 @@ export const layouts = {
   },
   forceAtlas2: {
     apply: (graph, params = {}) => {
-      //circular.assign(graph)
       forceAtlas2.assign(graph, params)
     },
     simulate: (graph, params = {}) => {
-      //const sensibleSettings = forceAtlas2.inferSettings(graph);
-      const worker = new FA2Layout(graph, params)
+      const worker = new FA2Layout(graph, {
+        isNodeFixed: (_, attr) => attr.fixed,
+        settings: params,
+      })
       worker.start()
       return worker
     },
@@ -146,15 +147,27 @@ export const layouts = {
 
   gforce: {
     apply: (graph, params = {}) => {
-      forceLayout.assign(graph, params)
+      for (let i = 0; i < 50; i++)
+        forceLayout.assign(graph, {
+          maxIterations: 10,
+          settings: params,
+        })
     },
 
     simulate: (graph, params = {}) => {
-      const worker = new ForceSupervisor(graph, params)
+      const worker = new ForceSupervisor(graph, {
+        isNodeFixed: (_, attr) => attr.fixed,
+        settings: params,
+      })
       worker.stop()
       return worker
     },
-    defaultParams: { maxIterations: 500 },
+    defaultParams: {
+      attraction: 0.0005,
+      repulsion: 0.1,
+      gravity: 0.0001,
+      inertia: 0.6,
+    },
   },
 
   noverlap: {
@@ -163,7 +176,10 @@ export const layouts = {
     },
 
     simulate: (graph, params = {}) => {
-      const worker = new NoverlapLayout(graph, params)
+      const worker = new NoverlapLayout(graph, {
+        isNodeFixed: (_, attr) => attr.fixed,
+        settings: params,
+      })
       worker.stop()
       return worker
     },

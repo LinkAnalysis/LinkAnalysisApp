@@ -6,13 +6,11 @@ import { watch, toRefs } from "vue"
 import { useSigmaRenderer } from "@/composables/useSigmaRenderer"
 import { useGraphInteractions } from "@/composables/useGraphInteractions"
 import { useGraphState } from "@/composables/useGraphState"
-import { normalizeGraphCoordinates } from "@/composables/layouts"
 import { applyStyleOptions } from "@/utils/graphUtils"
 import GraphControls from "./GraphControls.vue"
 import { toBlob } from "@sigma/export-image"
 import { SaveBytesToFile } from "../../../wailsjs/go/main/App"
 import { LogPrint } from "../../../wailsjs/runtime/runtime"
-import { useTabsStore } from "../../stores/tabsStore"
 
 const props = defineProps({
   graph: Graph,
@@ -33,40 +31,17 @@ const { clickedNodeData, popupNodePosition, popupEdgeData, popupEdgePosition } =
     optionsRef: options,
   })
 
-const autoZoom = ref(true)
-const toggleAutoZoom = () => {
-  autoZoom.value = !autoZoom.value
-}
-const onSimulationUpdate = () => {
-  const r = renderer.value
-  if (!r) return
-  if (!tabsStore.simulationRunning()) return
-  if (!autoZoom.value) return
-  const { x, y } = r.getBBox()
-  const dx = Math.abs(x[0] - x[1])
-  const dy = Math.abs(y[0] - y[1])
-  const d = Math.max(dx, dy)
-  if (d > r.getCamera().ratio) {
-    r.getCamera().maxRatio = d + 10
-    r.getCamera().ratio = d
-  }
-}
-
-props.graph.on("eachNodeAttributesUpdated", e => onSimulationUpdate())
-
 const zoomIn = () => renderer.value?.getCamera().animatedZoom({ duration: 600 })
 const zoomOut = () =>
   renderer.value?.getCamera().animatedUnzoom({ duration: 600 })
 
-function resetCamera(full = false) {
+function resetCamera() {
   const r = renderer.value
   if (!r) return
+  r.setCustomBBox(null)
+  r.resize(true)
   r.refresh()
-  //normalizeGraphCoordinates(props.graph)
-  r.setCustomBBox({ x: [0, 1], y: [0, 1] })
-  full
-    ? r.getCamera().animatedReset()
-    : r.getCamera().animate({ x: 0.5, y: 0.5 })
+  r.getCamera().animatedReset()
 }
 
 const saveImage = async (filePath, ext) => {
@@ -80,9 +55,6 @@ const saveImage = async (filePath, ext) => {
 defineExpose({
   saveImage,
 })
-
-const tabsStore = useTabsStore()
-const onToggleSimulation = () => tabsStore.toggleSimulation()
 
 useGraphState({ renderer, graph: props.graph, resetCamera })
 
@@ -105,18 +77,11 @@ watch(
 
 <template>
   <div class="graph-wrapper">
-    <button v-if="tabsStore.simulationExists()" @click="onToggleSimulation">
-      {{ tabsStore.simulationRunning() ? "Stop" : "Resume" }}
-    </button>
-    <button v-if="tabsStore.simulationExists()" @click="toggleAutoZoom">
-      Zoom {{ autoZoom ? "off" : "on" }}
-    </button>
     <div ref="container" class="sigma-container" />
-
     <GraphControls
       @zoomIn="zoomIn"
       @zoomOut="zoomOut"
-      @resetView="() => resetCamera(true)"
+      @resetView="() => resetCamera()"
     />
 
     <VertexWindow

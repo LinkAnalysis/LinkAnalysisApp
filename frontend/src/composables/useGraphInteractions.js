@@ -1,5 +1,4 @@
 import { ref, watch, onScopeDispose } from "vue"
-import { LogPrint } from "../../wailsjs/runtime/runtime"
 
 export function useGraphInteractions({ renderer, graph, optionsRef }) {
   const selectedNodeId = ref(null)
@@ -148,6 +147,8 @@ export function useGraphInteractions({ renderer, graph, optionsRef }) {
       if (optionsRef.value.allowDragging !== false) {
         isDragging = true
         draggedNode = node
+        graph.setNodeAttribute(draggedNode, "fixed", true)
+        if (!r.getCustomBBox()) r.setCustomBBox(r.getBBox())
       }
     })
 
@@ -165,6 +166,7 @@ export function useGraphInteractions({ renderer, graph, optionsRef }) {
 
     const stopDrag = () => {
       isDragging = false
+      graph.removeNodeAttribute(draggedNode, "fixed")
       draggedNode = null
     }
     r.on("upNode", stopDrag)

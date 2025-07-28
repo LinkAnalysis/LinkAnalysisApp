@@ -9,7 +9,6 @@ import { useTabsStore } from "../../stores/tabsStore"
 import { apply_layout } from "../../composables/file_loader"
 import { storeToRefs } from "pinia"
 import { layouts } from "../../composables/layouts"
-import { LogPrint } from "../../../wailsjs/runtime/runtime"
 
 const props = defineProps({
   graph: Graph,
@@ -39,7 +38,7 @@ const onCreateSimulationWorker = () => {
     const g = selectedGraph.value
     const l = selectedLayout.value
     const p = selectedLayoutParams.value
-    tabsStore.createSimulation(layouts[l].simulate(g, {}))
+    tabsStore.createSimulation(layouts[l].simulate(g, p))
   }
 }
 

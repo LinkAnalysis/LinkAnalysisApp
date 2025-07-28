@@ -1,5 +1,5 @@
 import { defineStore } from "pinia"
-import { computed, ref, watch } from "vue"
+import { computed, ref, shallowRef, watch } from "vue"
 import { visualizationDefaultOptions } from "../config/visualizationDefaults"
 
 const getFileName = fullPath => {
@@ -180,13 +180,7 @@ export const useTabsStore = defineStore("tabs", () => {
     getFileName(selectedNodeFile.value),
   )
 
-  // simulation is invalidated by:
-  // - changing tab
-  // - changing graph
-  // - applying other simulation
-  // - invalidating it explicitly
-
-  const globalSimulationWorker = ref(null)
+  const globalSimulationWorker = shallowRef(null)
   watch(selectedTabId, () => {
     if (globalSimulationWorker.value) killSimulation()
   })
