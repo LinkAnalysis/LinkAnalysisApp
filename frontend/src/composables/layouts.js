@@ -2,11 +2,15 @@ import circular from "graphology-layout/circular"
 import random from "graphology-layout/random"
 import circlepack from "graphology-layout/circlepack"
 import forceAtlas2 from "graphology-layout-forceatlas2"
+import FA2Layout from "graphology-layout-forceatlas2/worker"
+import ForceSupervisor from "graphology-layout-force/worker"
+import forceLayout from "graphology-layout-force"
+import noverlap from "graphology-layout-noverlap"
+import NoverlapLayout from "graphology-layout-noverlap/worker"
 import * as d3 from "d3-hierarchy"
 import * as d3f from "d3-force-3d"
 import { LogPrint } from "../../wailsjs/runtime/runtime"
 import { rotate } from "sigma/utils"
-import forceLayout from "graphology-layout-force"
 
 export function normalizeGraphCoordinates(graph) {
   let xMin = Infinity,
@@ -47,8 +51,15 @@ export const layouts = {
   },
   forceAtlas2: {
     apply: (graph, params = {}) => {
-      //circular.assign(graph)
       forceAtlas2.assign(graph, params)
+    },
+    simulate: (graph, params = {}) => {
+      const worker = new FA2Layout(graph, {
+        isNodeFixed: (_, attr) => attr.fixed,
+        settings: params,
+      })
+      worker.start()
+      return worker
     },
     defaultParams: {
       iterations: 1000,
@@ -62,8 +73,16 @@ export const layouts = {
     apply: (graph, params = {}) => {
       forceLayout.assign(graph, params)
     },
+    simulate: (graph, params = {}) => {
+      const worker = new ForceSupervisor(graph, {
+        isNodeFixed: (_, attr) => attr.fixed,
+        settings: params,
+      })
+      worker.stop()
+      return worker
+    },
     defaultParams: {
-      attraction: 0.5,
+      attraction: 0.0005,
       maxIterations: 4000,
       gravity: 0.02,
       repulsion: 0.02,
@@ -146,6 +165,21 @@ export const layouts = {
         graph.mergeNodeAttributes(id, { x, y, z })
       })
     },
+    defaultParams: {},
+  },
+  noverlap: {
+    apply: (graph, params = {}) => {
+      noverlap.assign(graph, params)
+    },
+
+    // simulate: (graph, params = {}) => {
+    //   const worker = new NoverlapLayout(graph, {
+    //     isNodeFixed: (_, attr) => attr.fixed,
+    //     settings: params,
+    //   })
+    //   worker.stop()
+    //   return worker
+    // },
     defaultParams: {},
   },
 }

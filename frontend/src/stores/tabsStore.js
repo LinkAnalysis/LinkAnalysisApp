@@ -1,5 +1,5 @@
 import { defineStore } from "pinia"
-import { computed, ref } from "vue"
+import { computed, ref, shallowRef, watch } from "vue"
 import { visualizationDefaultOptions } from "../config/visualizationDefaults"
 import modularity from "graphology-metrics/graph/modularity"
 
@@ -260,6 +260,53 @@ export const useTabsStore = defineStore("tabs", () => {
     getFileName(selectedNodeFile.value),
   )
 
+  const globalSimulationWorker = shallowRef(null)
+  watch(selectedTabId, () => {
+    if (globalSimulationWorker.value) killSimulation()
+  })
+
+  function createSimulation(worker) {
+    killSimulation()
+    globalSimulationWorker.value = worker
+    globalSimulationWorker.value.stop()
+  }
+
+  function startSimulation() {
+    if (globalSimulationWorker.value) {
+      globalSimulationWorker.value.start()
+    }
+  }
+
+  function stopSimulation() {
+    if (globalSimulationWorker.value) {
+      globalSimulationWorker.value.stop()
+    }
+  }
+
+  function toggleSimulation() {
+    if (globalSimulationWorker.value) {
+      if (globalSimulationWorker.value.isRunning())
+        globalSimulationWorker.value.stop()
+      else globalSimulationWorker.value.start()
+    }
+  }
+
+  function killSimulation() {
+    if (globalSimulationWorker.value) {
+      globalSimulationWorker.value.kill()
+      globalSimulationWorker.value = null
+    }
+  }
+
+  function simulationExists() {
+    return globalSimulationWorker.value != null
+  }
+
+  function simulationRunning() {
+    if (!globalSimulationWorker.value) return false
+    return globalSimulationWorker.value.isRunning()
+  }
+
   const selectedFilter = computed({
     get: () => filterSelected.value[selectedTabIndex.value],
     set: v => (filterSelected.value[selectedTabIndex.value] = v),
@@ -301,5 +348,12 @@ export const useTabsStore = defineStore("tabs", () => {
     networkDiameter,
     networkDensity,
     simpleSize,
+    createSimulation,
+    startSimulation,
+    stopSimulation,
+    toggleSimulation,
+    killSimulation,
+    simulationExists,
+    simulationRunning,
   }
 })
