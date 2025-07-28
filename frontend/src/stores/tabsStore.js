@@ -46,6 +46,8 @@ export const useTabsStore = defineStore("tabs", () => {
     },
   })
 
+  const isLoading = ref(false)
+
   const selectedGraphChangedMarker = ref(false)
   function markSelectedGraphChange() {
     selectedGraphChangedMarker.value = !selectedGraphChangedMarker.value
@@ -355,5 +357,6 @@ export const useTabsStore = defineStore("tabs", () => {
     killSimulation,
     simulationExists,
     simulationRunning,
+    isLoading,
   }
 })

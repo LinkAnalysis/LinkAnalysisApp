@@ -1,5 +1,5 @@
 <script setup>
-import { toRef } from "vue"
+import { nextTick, toRef } from "vue"
 import EdgesNodesComponent from "./leftpanelcontent/EdgesNodesComponent.vue"
 import LayoutComponent from "./leftpanelcontent/LayoutComponent.vue"
 import VisualizationComponent from "./leftpanelcontent/VisualizationComponent.vue"
@@ -19,16 +19,25 @@ const { nodes, edges } = useGraphElements(graphRef)
 
 const tabsStore = useTabsStore()
 const { markSelectedGraphChange } = tabsStore
-const { selectedGraph, selectedLayout, selectedLayoutParams, selectedTabId } =
-  storeToRefs(tabsStore)
+const {
+  selectedGraph,
+  selectedLayout,
+  selectedLayoutParams,
+  selectedTabId,
+  isLoading,
+} = storeToRefs(tabsStore)
 
-const onApplyLayout = () => {
+const onApplyLayout = async () => {
   if (selectedGraph.value) {
+    isLoading.value = true
+    await nextTick()
+    await new Promise(resolve => setTimeout(resolve, 50))
     apply_layout(
       selectedGraph.value,
       selectedLayout.value,
       selectedLayoutParams.value,
     )
+    isLoading.value = false
     markSelectedGraphChange()
   }
 }
