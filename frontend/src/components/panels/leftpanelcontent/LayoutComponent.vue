@@ -11,19 +11,43 @@
       <table v-if="hasParams" class="settings-table">
         <tbody>
           <template v-for="(value, key) in currentParams">
-            <template v-if="typeof value === 'object'" v-for="(v, k) in value">
-              <tr>
-                <td>{{ formatLabel(k) }}</td>
-                <td v-if="typeof v === 'boolean'">
-                  <input
-                    type="checkbox"
-                    v-model="selectedLayoutParams[key][k]"
-                  />
-                </td>
-                <td v-else="typeof v === 'number'">
-                  <input type="number" v-model="selectedLayoutParams[key][k]" />
-                </td>
-              </tr>
+            <template v-if="typeof value === 'object'">
+              <template v-if="value.optionsList != null">
+                <tr>
+                  <td>{{ key }}</td>
+                  <td>
+                    <div>
+                      <select v-model="value.selected.name" class="dropdown">
+                        <option
+                          v-for="op in value.optionsList"
+                          :key="op.name"
+                          :value="op.name"
+                        >
+                          {{ op.name }}
+                        </option>
+                      </select>
+                      <input type="number" />
+                    </div>
+                  </td>
+                </tr>
+              </template>
+              <template v-else v-for="(v, k) in value">
+                <tr>
+                  <td>{{ formatLabel(k) }}</td>
+                  <td v-if="typeof v === 'boolean'">
+                    <input
+                      type="checkbox"
+                      v-model="selectedLayoutParams[key][k]"
+                    />
+                  </td>
+                  <td v-else="typeof v === 'number'">
+                    <input
+                      type="number"
+                      v-model="selectedLayoutParams[key][k]"
+                    />
+                  </td>
+                </tr>
+              </template>
             </template>
             <template v-else>
               <tr>

@@ -62,7 +62,7 @@ export const layouts = {
     simulate: (graph, params = {}) => {
       const worker = new NoverlapLayout(graph, {
         isNodeFixed: (_, attr) => attr.fixed,
-        settings: params,
+        ...params,
       })
       worker.stop()
       return worker
@@ -85,7 +85,7 @@ export const layouts = {
     simulate: (graph, params = {}) => {
       const worker = new FA2Layout(graph, {
         isNodeFixed: (_, attr) => attr.fixed,
-        settings: params,
+        ...params,
       })
       worker.start()
       return worker
@@ -122,20 +122,77 @@ export const layouts = {
       },
     },
   },
-  // d3tree: {
-  //   apply: (graph, params = {}) => {
-  //     const rootId = params.rootId
-  //     //const rootId = graph.nodes()[Math.floor(Math.random() * graph.nodes().length)];
-  //     LogPrint(rootId)
-  //     const d3root = buildD3Hierarchy(graph, rootId)
-  //     const treeLayout = d3.tree().nodeSize([50, 50])
-  //     const tree = treeLayout(d3root)
-  //     tree.descendants().forEach(d => {
-  //       graph.mergeNodeAttributes(d.data.id, { x: -d.x, y: -d.y })
-  //     })
-  //   },
-  //   defaultParams: { rootId: 0 },
-  // },
+
+  d3force: {
+    apply: (graph, params) => {
+      const nodes = []
+      const links = []
+      normalizeGraphCoordinates(graph)
+
+      graph.forEachNode((key, attrs) => {
+        nodes.push({ id: key, x: attrs.x, y: attrs.y, vx: 0, vy: 0 })
+      })
+
+      graph.forEachEdge((key, source, target) => {
+        links.push({ source, target })
+      })
+
+      const sim = d3f
+        .forceSimulation(nodes)
+        .force(
+          "link",
+          d3f
+            .forceLink(links)
+            .id(d => d.id)
+            .distance(params.nodesDistance),
+        )
+        .force("charge", d3f.forceManyBody().strength(params.chargeForce))
+        .force("center", d3f.forceCenter(0.5, 0.5).strength(params.centerForce))
+        .force("collide", d3f.forceCollide(params.collideForce))
+        .stop()
+
+      for (let i = 0; i < params.iterations; i++) {
+        sim.tick()
+      }
+
+      nodes.forEach(({ id, x, y }) => {
+        graph.mergeNodeAttributes(id, { x, y })
+      })
+      normalizeGraphCoordinates(graph)
+    },
+    defaultParams: {
+      iterations: 100,
+      nodesDistance: 0.1,
+      chargeForce: -0.1,
+      centerForce: -0.1,
+      collideForce: -0.1,
+    },
+  },
+  d3tree: {
+    apply: (graph, params = {}) => {
+      let rootId = graph.nodes()[0]
+      //if(params)
+      //const rootId = graph.nodes()[Math.floor(Math.random() * graph.nodes().length)];
+      LogPrint(rootId)
+      const d3root = buildD3Hierarchy(graph, rootId)
+      const treeLayout = d3.tree().nodeSize([50, 50])
+      const tree = treeLayout(d3root)
+      tree.descendants().forEach(d => {
+        graph.mergeNodeAttributes(d.data.id, { x: -d.x, y: -d.y })
+      })
+    },
+    defaultParams: {
+      rootSelectOptions: {
+        optionsList: [
+          { name: "rootId", type: "text" },
+          { name: "maxDegree" },
+          { name: "minDegree" },
+          { name: "random" },
+        ],
+        selected: { name: "random" },
+      },
+    },
+  },
   // radial: {
   //   apply: (graph, params = {}) => {
   //     //const rootId = graph.nodes()[Math.floor(Math.random() * graph.nodes().length)];
@@ -154,57 +211,18 @@ export const layouts = {
   //   },
   //   defaultParams: { rootId: 0 },
   // },
-  // force: {
-  //   apply: (graph, params = {}) => {
-  //     const nodes = []
-  //     const links = []
-
-  //     graph.forEachNode((key, attrs) => {
-  //       nodes.push({ id: key })
-  //     })
-  //     graph.forEachEdge((key, source, target) => {
-  //       links.push({ source, target })
-  //     })
-
-  //     const width = 1000
-  //     const height = 1000
-  //     const depth = 600
-
-  //     const simulation = d3f
-  //       .forceSimulation(nodes)
-  //       .force("charge", d3f.forceManyBody().strength(-10))
-  //       .force(
-  //         "link",
-  //         d3f
-  //           .forceLink(links)
-  //           .id(d => d.id)
-  //           .distance(1000),
-  //       )
-  //       .force("center", d3f.forceCenter(0, 0, 0))
-  //       .stop()
-
-  //     const ticks = 600
-  //     for (let i = 0; i < ticks; i++) {
-  //       simulation.tick()
-  //     }
-  //     nodes.forEach(({ id, x, y, z }) => {
-  //       graph.mergeNodeAttributes(id, { x, y, z })
-  //     })
-  //   },
-  //   defaultParams: {},
-  // },
 }
 
-// function buildD3Hierarchy(graph, rootId) {
-//   const visited = new Set()
-//   const buildNode = id => {
-//     visited.add(id)
-//     const children = []
-//     graph.forEachOutboundNeighbor(id, neighbor => {
-//       if (!visited.has(neighbor)) children.push(buildNode(neighbor))
-//     })
-//     return { id, children }
-//   }
-//   const hierarchyData = buildNode(rootId)
-//   return d3.hierarchy(hierarchyData, d => d.children)
-// }
+function buildD3Hierarchy(graph, rootId) {
+  const visited = new Set()
+  const buildNode = id => {
+    visited.add(id)
+    const children = []
+    graph.forEachOutboundNeighbor(id, neighbor => {
+      if (!visited.has(neighbor)) children.push(buildNode(neighbor))
+    })
+    return { id, children }
+  }
+  const hierarchyData = buildNode(rootId)
+  return d3.hierarchy(hierarchyData, d => d.children)
+}
