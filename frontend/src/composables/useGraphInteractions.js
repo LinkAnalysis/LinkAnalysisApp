@@ -1,7 +1,9 @@
-import { ref, watch, onScopeDispose } from "vue"
+import { ref, reactive, watch, onScopeDispose } from "vue"
+import { withCtrl } from "@/utils/keys"
 
 export function useGraphInteractions({ renderer, graph, optionsRef }) {
-  const selectedNodeId = ref(null)
+  const selectedNodeIds = reactive(new Set())
+  const selectedEdgeIds = reactive(new Set())
   const popupNodeId = ref(null)
   const clickedNodeData = ref(null)
   const popupNodePosition = ref({ x: 0, y: 0 })
@@ -36,105 +38,94 @@ export function useGraphInteractions({ renderer, graph, optionsRef }) {
   const highlightedEdges = new Set()
   function recomputeHighlightedEdges() {
     highlightedEdges.forEach(e => {
-      if (e != popupEdgeId.value) graph.removeEdgeAttribute(e, "highlighted")
+      if (!selectedEdgeIds.has(e)) graph.removeEdgeAttribute(e, "highlighted")
     })
     highlightedEdges.clear()
 
-    if (selectedNodeId.value) {
-      graph.outEdges(selectedNodeId.value).forEach(e => {
+    selectedNodeIds.forEach(nId => {
+      graph.outEdges(nId).forEach(e => {
         graph.setEdgeAttribute(e, "highlighted", true)
         highlightedEdges.add(e)
       })
-    }
+    })
   }
 
-  function selectSingleNode(nodeId) {
-    if (selectedNodeId.value === nodeId) {
+  function toggleNode(nodeId) {
+    let added = false
+    if (selectedNodeIds.has(nodeId)) {
+      selectedNodeIds.delete(nodeId)
       if (!graph.hasNodeAttribute(nodeId, "edgeHighlighted"))
         graph.removeNodeAttribute(nodeId, "highlighted")
-      selectedNodeId.value = null
-      popupNodeId.value = null
-      clickedNodeData.value = null
-      recomputeHighlightedEdges()
-      return
+      if (popupNodeId.value === nodeId) {
+        popupNodeId.value = null
+        clickedNodeData.value = null
+      }
+    } else {
+      added = true
+      selectedNodeIds.add(nodeId)
+      graph.setNodeAttribute(nodeId, "highlighted", true)
+      popupNodeId.value = nodeId
+      const a = graph.getNodeAttributes(nodeId)
+      clickedNodeData.value = {
+        id: nodeId,
+        description: a.label,
+        numOfNeighbors: graph.neighbors(nodeId).length,
+      }
+      updatePopupNodePosition()
     }
-
-    if (selectedNodeId.value) {
-      graph.removeNodeAttribute(selectedNodeId.value, "highlighted")
-    }
-
-    selectedNodeId.value = nodeId
-    graph.setNodeAttribute(nodeId, "highlighted", true)
-
-    popupNodeId.value = nodeId
-    const a = graph.getNodeAttributes(nodeId)
-    clickedNodeData.value = {
-      id: nodeId,
-      description: a.label,
-      numOfNeighbors: graph.neighbors(nodeId).length,
-    }
-    updatePopupNodePosition()
-
     recomputeHighlightedEdges()
+    return added
   }
 
-  function clearPopupEdgeSelection() {
-    popupEdgeData.value = null
-
-    if (!popupEdgeId.value) return
-
-    const edgeId = popupEdgeId.value
-    if (!highlightedEdges.has(edgeId))
-      graph.removeEdgeAttribute(edgeId, "highlighted")
-
-    const sourceId = graph.source(popupEdgeId.value)
-    const targetId = graph.target(popupEdgeId.value)
-
-    graph.removeNodeAttribute(sourceId, "edgeHighlighted")
-    if (selectedNodeId.value != sourceId)
-      graph.removeNodeAttribute(sourceId, "highlighted")
-
-    graph.removeNodeAttribute(targetId, "edgeHighlighted")
-    if (selectedNodeId.value != targetId)
-      graph.removeNodeAttribute(targetId, "highlighted")
-
-    popupEdgeId.value = null
+  function toggleEdge(edgeId) {
+    if (selectedEdgeIds.has(edgeId)) {
+      selectedEdgeIds.delete(edgeId)
+      if (!highlightedEdges.has(edgeId))
+        graph.removeEdgeAttribute(edgeId, "highlighted")
+      const s = graph.source(edgeId)
+      const t = graph.target(edgeId)
+      ;[s, t].forEach(n => {
+        graph.removeNodeAttribute(n, "edgeHighlighted")
+        if (!selectedNodeIds.has(n)) graph.removeNodeAttribute(n, "highlighted")
+      })
+      if (popupEdgeId.value === edgeId) {
+        popupEdgeId.value = null
+        popupEdgeData.value = null
+      }
+      return false
+    } else {
+      selectedEdgeIds.add(edgeId)
+      graph.setEdgeAttribute(edgeId, "highlighted", true)
+      const s = graph.source(edgeId)
+      const t = graph.target(edgeId)
+      ;[s, t].forEach(n => {
+        graph.setNodeAttribute(n, "highlighted", true)
+        graph.setNodeAttribute(n, "edgeHighlighted", true)
+      })
+      popupEdgeId.value = edgeId
+      const attrs = graph.getEdgeAttributes(edgeId)
+      popupEdgeData.value = {
+        id: edgeId,
+        description: attrs.label,
+        weight: attrs.weight,
+      }
+      updatePopupEdgePosition()
+      return true
+    }
   }
 
-  function selectPopupEdge(edgeId) {
-    if (popupEdgeId.value === edgeId) {
-      clearPopupEdgeSelection()
-      return
-    }
+  function hideNode(nodeId, hide = true) {
+    graph.setNodeAttribute(nodeId, "hidden", hide)
 
-    popupEdgeId.value = edgeId
-    graph.setEdgeAttribute(edgeId, "highlighted", true)
-    graph.setNodeAttribute(graph.source(edgeId), "highlighted", true)
-    graph.setNodeAttribute(graph.source(edgeId), "edgeHighlighted", true)
+    graph.forEachEdge(nodeId, edgeId =>
+      graph.setEdgeAttribute(edgeId, "hidden", hide),
+    )
 
-    graph.setNodeAttribute(graph.target(edgeId), "highlighted", true)
-    graph.setNodeAttribute(graph.target(edgeId), "edgeHighlighted", true)
-
-    const attrs = graph.getEdgeAttributes(edgeId)
-    popupEdgeData.value = {
-      id: edgeId,
-      description: attrs.label,
-      weight: attrs.weight,
-    }
-    updatePopupEdgePosition()
-  }
-
-  function clearSelection() {
-    if (selectedNodeId.value) {
-      graph.removeNodeAttribute(selectedNodeId.value, "highlighted")
-    }
-    selectedNodeId.value = null
-
+    selectedNodeIds.delete(nodeId)
     highlightedEdges.forEach(e => {
-      if (e != popupEdgeId.value) graph.removeEdgeAttribute(e, "highlighted")
+      if (graph.source(e) === nodeId || graph.target(e) === nodeId)
+        highlightedEdges.delete(e)
     })
-    highlightedEdges.clear()
-
     popupNodeId.value = null
     clickedNodeData.value = null
   }
@@ -142,9 +133,21 @@ export function useGraphInteractions({ renderer, graph, optionsRef }) {
   function attachListeners(r) {
     if (!r) return
 
-    r.on("downNode", ({ node }) => {
-      selectSingleNode(node)
-      if (optionsRef.value.allowDragging !== false) {
+    r.on("rightClickNode", ({ node, event }) => {
+      event.preventSigmaDefault()
+      event.original.preventDefault()
+
+      hideNode(node)
+    })
+
+    r.on("downNode", ({ node, event }) => {
+      if (withCtrl(event)) {
+        toggleNode(node)
+      }
+      if (
+        event.original.button === 0 &&
+        optionsRef.value.allowDragging !== false
+      ) {
         isDragging = true
         draggedNode = node
         graph.setNodeAttribute(draggedNode, "fixed", true)
@@ -172,13 +175,20 @@ export function useGraphInteractions({ renderer, graph, optionsRef }) {
     r.on("upNode", stopDrag)
     r.on("upStage", stopDrag)
 
-    r.on("clickEdge", ({ edge }) => {
-      selectPopupEdge(edge)
+    r.on("clickEdge", ({ edge, event }) => {
+      if (!withCtrl(event)) return
+      toggleEdge(edge)
     })
 
-    r.getMouseCaptor().on("clickStage", () => {
-      clearSelection()
-      clearPopupEdgeSelection()
+    r.getMouseCaptor().on("clickStage", ({ event }) => {
+      if (!withCtrl(event)) return
+      selectedNodeIds.forEach(n => graph.removeNodeAttribute(n, "highlighted"))
+      selectedEdgeIds.forEach(e => graph.removeEdgeAttribute(e, "highlighted"))
+      selectedNodeIds.clear()
+      selectedEdgeIds.clear()
+      highlightedEdges.clear()
+      popupNodeId.value = null
+      popupEdgeId.value = null
     })
 
     r.getCamera().on("updated", () => {
@@ -197,13 +207,9 @@ export function useGraphInteractions({ renderer, graph, optionsRef }) {
   })
 
   return {
-    selectedNodeId,
-    clickedNodeData,
     popupNodePosition,
-    popupEdgeId,
+    clickedNodeData,
     popupEdgeData,
     popupEdgePosition,
-    clearSelection,
-    clearPopupEdgeSelection,
   }
 }

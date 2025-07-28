@@ -19,7 +19,7 @@ const { nodes, edges } = useGraphElements(graphRef)
 
 const tabsStore = useTabsStore()
 const { markSelectedGraphChange } = tabsStore
-const { selectedGraph, selectedLayout, selectedLayoutParams } =
+const { selectedGraph, selectedLayout, selectedLayoutParams, selectedTabId } =
   storeToRefs(tabsStore)
 
 const onApplyLayout = () => {
@@ -46,6 +46,7 @@ function handleEditNode(updated) {
   graphRef.value.updateNodeAttributes(updated.id, old => ({
     ...old,
     label: updated.label,
+    image: updated.image ?? null,
   }))
 }
 
@@ -72,6 +73,7 @@ function handleDeleteItem(type, id) {
         class="panel-section"
         :nodes="nodes"
         :edges="edges"
+        :current-tab="selectedTabId"
         @edit-node="handleEditNode"
         @edit-edge="handleEditEdge"
         @delete-node="id => handleDeleteItem('node', id)"

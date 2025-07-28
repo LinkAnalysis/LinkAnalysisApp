@@ -85,6 +85,14 @@ const uploadEdgesConfiguration = async () => {
   }
 }
 
+const uploadGEXFConfiguration = async () => {
+  const filePath = await OpenFileExplorer()
+  if (filePath) {
+    selectedEdgeFile.value = filePath
+    selectedGraphMode.value = "gexf"
+  }
+}
+
 const exportToPNG = async () => {
   LogPrint("Exporting to PNG")
   if (!graphViewRef.value) {
@@ -108,11 +116,18 @@ const exportToJPG = async () => {
 }
 
 const exportToGEXF = async () => {
-  LogPrint("Exporting to GEXF")
-  const gexfString = gexf.write(selectedGraph.value)
+  const graphCopy = selectedGraph.value.copy()
+
+  graphCopy.forEachNode((node, attributes) => {
+    if (attributes.x !== undefined && attributes.y !== undefined) {
+      graphCopy.setNodeAttribute(node, "x", attributes.x * 1000)
+      graphCopy.setNodeAttribute(node, "y", attributes.y * 1000)
+    }
+  })
+
+  const gexfString = gexf.write(graphCopy)
   const filePath = await SaveFileExplorer("graph", "gexf")
   await SaveStringToFile(filePath, gexfString)
-  LogPrint("Done!")
 }
 
 const availableLanguages = [
@@ -171,6 +186,10 @@ function setLanguage(lang) {
               {
                 label: t('header.file_menu.upload_anti_money_graph'),
                 onClick: () => uploadAntiMoneyLaunderingGraph(),
+              },
+              {
+                label: t('header.file_menu.upload_gexf'),
+                onClick: () => uploadGEXFConfiguration(),
               },
               {
                 label: 'Export Graph',

@@ -9,7 +9,9 @@ import { storeToRefs } from "pinia"
 import TabsManager from "./components/TabsManager.vue"
 import { load_graph, apply_layout } from "@/composables/file_loader"
 import { useTabsStore } from "./stores/tabsStore"
+import { useI18n } from "vue-i18n"
 
+const { t } = useI18n()
 const tabs = useTabsStore()
 const {
   selectedGraph,
@@ -45,13 +47,18 @@ watch(
     }
 
     isLoading.value = true
-    graph.value = await load_graph(
-      newNodeFile ?? null,
-      newEdgeFile,
-      newGraphMode,
-    )
-    apply_layout(graph.value)
-    isLoading.value = false
+    try {
+      graph.value = await load_graph(
+        newNodeFile ?? null,
+        newEdgeFile,
+        newGraphMode,
+      )
+      if (selectedGraphMode.value != "gexf") {
+        apply_layout(graph.value)
+      }
+    } finally {
+      isLoading.value = false
+    }
   },
   { immediate: true },
 )
@@ -72,6 +79,17 @@ watch(graph, () => {
 
         <div class="center-panel">
           <TabsManager />
+          <transition name="fade">
+            <div
+              v-if="isLoading"
+              class="loading-overlay"
+              role="status"
+              aria-live="polite"
+            >
+              <div class="spinner" />
+              <span class="loading-text">{{ t("app.loading") }}</span>
+            </div>
+          </transition>
           <GraphView
             v-if="graph"
             :key="graphKey"
@@ -134,5 +152,47 @@ watch(graph, () => {
 
 .center-panel {
   background-color: #fff;
+}
+
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(2px);
+  background: rgba(255, 255, 255, 0.7);
+  z-index: 20;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #ddd;
+  border-top-color: #000;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.15s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.center-panel {
+  position: relative;
 }
 </style>

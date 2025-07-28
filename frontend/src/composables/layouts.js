@@ -10,6 +10,7 @@ import NoverlapLayout from "graphology-layout-noverlap/worker"
 import * as d3 from "d3-hierarchy"
 import * as d3f from "d3-force-3d"
 import { LogPrint } from "../../wailsjs/runtime/runtime"
+import { rotate } from "sigma/utils"
 
 export function normalizeGraphCoordinates(graph) {
   let xMin = Infinity,
@@ -63,8 +64,30 @@ export const layouts = {
     defaultParams: {
       iterations: 1000,
       gravity: 1,
-      scalingRatio: 1,
+      scalingRatio: 100,
       strongGravityMode: false,
+      adjustSizes: true,
+    },
+  },
+  forceLayout: {
+    apply: (graph, params = {}) => {
+      forceLayout.assign(graph, params)
+    },
+    simulate: (graph, params = {}) => {
+      const worker = new ForceSupervisor(graph, {
+        isNodeFixed: (_, attr) => attr.fixed,
+        settings: params,
+      })
+      worker.stop()
+      return worker
+    },
+    defaultParams: {
+      attraction: 0.5,
+      maxIterations: 4000,
+      gravity: 0.02,
+      repulsion: 0.02,
+      inertia: 0,
+      maxMove: 800,
     },
   },
   circlepack: {
@@ -82,7 +105,7 @@ export const layouts = {
       const treeLayout = d3.tree().nodeSize([50, 50])
       const tree = treeLayout(d3root)
       tree.descendants().forEach(d => {
-        graph.mergeNodeAttributes(d.data.id, { x: d.x, y: d.y })
+        graph.mergeNodeAttributes(d.data.id, { x: -d.x, y: -d.y })
       })
     },
     defaultParams: { rootId: 0 },
@@ -144,32 +167,6 @@ export const layouts = {
     },
     defaultParams: {},
   },
-
-  gforce: {
-    apply: (graph, params = {}) => {
-      for (let i = 0; i < 50; i++)
-        forceLayout.assign(graph, {
-          maxIterations: 10,
-          settings: params,
-        })
-    },
-
-    simulate: (graph, params = {}) => {
-      const worker = new ForceSupervisor(graph, {
-        isNodeFixed: (_, attr) => attr.fixed,
-        settings: params,
-      })
-      worker.stop()
-      return worker
-    },
-    defaultParams: {
-      attraction: 0.0005,
-      repulsion: 0.1,
-      gravity: 0.0001,
-      inertia: 0.6,
-    },
-  },
-
   noverlap: {
     apply: (graph, params = {}) => {
       noverlap.assign(graph, params)

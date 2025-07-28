@@ -20,12 +20,11 @@
             <option value="Edges">{{ t("filters.search.edges") }}</option>
           </select>
         </template>
-
         <template v-else>
-          <span
-            >{{ t("filters.search.comingSoon") }}:
-            {{ t(`filters.buttons.${selectedFilter}`) }}</span
-          >
+          <span>
+            {{ t("filters.search.comingSoon") }}:
+            {{ t(`filters.buttons.${selectedFilter}`) }}
+          </span>
         </template>
       </div>
 
@@ -40,7 +39,9 @@
           <input
             v-model="searchTerm"
             :placeholder="t('filters.search.placeholderEdge')"
-        /></label>
+          />
+        </label>
+
         <button class="search-button" @click="performSearch">
           {{ t("filters.search.search") }}
         </button>
@@ -52,13 +53,32 @@
   </div>
 </template>
 
-<script setup>
-import { ref } from "vue"
+<script setup lang="js">
+import { computed } from "vue"
+import { useTabsStore } from "@/stores/tabsStore"
 import { useFileStore } from "@/stores/fileStore"
 import { useI18n } from "vue-i18n"
+const props = defineProps({
+  graph: Object,
+})
 
 const { t } = useI18n()
+
+const tabsStore = useTabsStore()
 const fileStore = useFileStore()
+
+const selectedFilter = computed({
+  get: () => tabsStore.selectedFilter,
+  set: v => (tabsStore.selectedFilter = v),
+})
+const searchTerm = computed({
+  get: () => tabsStore.selectedSearchTerm,
+  set: v => (tabsStore.selectedSearchTerm = v),
+})
+const searchIn = computed({
+  get: () => tabsStore.selectedSearchIn,
+  set: v => (tabsStore.selectedSearchIn = v),
+})
 
 const filters = [
   { key: "searchByName" },
@@ -70,20 +90,18 @@ const filters = [
   { key: "llm" },
 ]
 
-const selectedFilter = ref("searchByName")
-const searchTerm = ref("")
-const searchIn = ref("Nodes")
-
 function performSearch() {
-  if (selectedFilter.value !== "searchByName" || !searchTerm.value) return
-  console.log("[panel] click!", searchTerm.value)
-  const id = searchTerm.value.trim()
+  if (selectedFilter.value !== "searchByName" || !searchTerm.value.trim())
+    return
+
+  const term = searchTerm.value.trim()
+
   try {
     if (searchIn.value === "Nodes") {
-      fileStore.focusNode(id)
+      fileStore.focusNode(term)
     } else {
-      const [source, target] = id.split(",").map(s => s.trim())
-      fileStore.focusEdgeEndpoints(source, target)
+      const [src, tgt] = term.split(",").map(s => s.trim())
+      fileStore.focusEdgeEndpoints(src, tgt)
     }
   } catch (err) {
     console.log("focusNode/Edge threw!", err)
@@ -91,6 +109,23 @@ function performSearch() {
 }
 
 function resetSearch() {
+  const term = searchTerm.value.trim()
+
+  if (term && props.graph) {
+    if (searchIn.value === "Nodes") {
+      if (props.graph.hasNode(term))
+        props.graph.setNodeAttribute(term, "highlighted", false)
+    } else {
+      const [src, tgt] = term.split(",").map(s => s.trim())
+      const eid = props.graph.edges(src, tgt)[0]
+      if (eid) {
+        props.graph.setEdgeAttribute(eid, "highlighted", false)
+        props.graph.setNodeAttribute(src, "highlighted", false)
+        props.graph.setNodeAttribute(tgt, "highlighted", false)
+      }
+    }
+  }
+
   searchTerm.value = ""
   fileStore.focusNode(null)
   fileStore.focusEdgeEndpoints(null, null)
@@ -104,11 +139,9 @@ function resetSearch() {
   width: 100%;
   font-family: sans-serif;
 }
-
 h2 {
-  margin-top: 0;
+  margin: 0 0 8px;
   text-align: center;
-  margin-bottom: 8px;
 }
 
 button {
@@ -152,7 +185,6 @@ select {
   border: 2px solid black;
   border-radius: 6px;
 }
-
 input {
   flex: 1;
   padding: 6px;
@@ -164,7 +196,7 @@ input {
 .search-button,
 .reset-button {
   margin: auto;
-  padding: 6px 6px;
+  padding: 6px;
   font-size: 16px;
   border: 2px solid black;
   border-radius: 8px;

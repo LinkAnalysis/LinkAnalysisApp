@@ -1,5 +1,3 @@
-import { layouts } from "../composables/layouts"
-
 export default {
   pl: {
     header: {
@@ -13,6 +11,7 @@ export default {
         export_png: "PNG",
         export_gexf: "GEXF",
         upload_anti_money_graph: "Wczytaj plik dla Anti Money Laundering",
+        upload_gexf: "Wczytaj graf .gexf",
       },
       workspace: "Projekt",
       view: "Widok",
@@ -26,6 +25,7 @@ export default {
       zoomIn: "Powiększ",
       zoomOut: "Pomniejsz",
       reset: "Resetuj",
+      restore: "Przywróć węzły",
     },
     rowsWindow: {
       window_message: "Podaj liczbę wierszy do wizualizacji",
@@ -35,7 +35,7 @@ export default {
     editor: {
       nodes: "Wierzchołki",
       edges: "Krawędzie",
-      placeholder_node: "(np. Node 1)",
+      placeholder_node: "(np. Wierzchołek 1)",
       placeholder_edge: "(np. Krawędź 1,2)",
       id: "ID",
       label: "Etykieta",
@@ -45,6 +45,9 @@ export default {
       save: "Zapisz",
       delete: "Usuń",
       cancel: "Anuluj",
+      upload_file: "Prześlij plik",
+      choose_file: "Wybierz plik",
+      reset: "Resetuj",
     },
     layout: {
       title: "Układ",
@@ -58,6 +61,7 @@ export default {
         d3tree: "Drzewo (D3 Tree)",
         radial: "Układ radialny",
         force: "Symulacja siłowa (3D Force)",
+        forceLayout: "Symulacja siłowa (2D Force)",
       },
       params: {
         iterations: "Liczba iteracji",
@@ -65,6 +69,12 @@ export default {
         scalingRatio: "Współczynnik skalowania",
         strongGravityMode: "Silny tryb grawitacji",
         rootId: "ID korzenia",
+        maxIteration: "Maksymalnie iteracji",
+        maxIterations: "Maksymalnie iteracji",
+        attraction: "Przyciąganie",
+        repulsion: "Odpychanie",
+        inertia: "Bezwładność",
+        maxMove: "Maksymalny ruch",
       },
     },
     visualization: {
@@ -79,7 +89,7 @@ export default {
         nodeColor: "Kolor wierzchołków",
         selectedNodeColor: "Kolor zaznaczonego wierzchołka",
         nodeSize: "Rozmiar wierzchołków",
-        allowDragging: "Możliwość przeciągania",
+        allowDragging: "Blokada wierzchołków",
 
         edgeColor: "Kolor krawędzi",
         highlightedEdgeColor: "Kolor podświetlonej krawędzi",
@@ -145,6 +155,10 @@ export default {
       name: "Nazwa",
       no_description: "Brak opisu",
       number_of_neighbors: "Liczba sąsiadów",
+      weight: "Waga",
+    },
+    app: {
+      loading: "Ładowanie grafu",
     },
   },
   en: {
@@ -159,6 +173,7 @@ export default {
         export_png: "PNG",
         export_gexf: "GEXF",
         upload_anti_money_graph: "Upload Anti Money Laundering file",
+        upload_gexf: "Upload .gexf file",
       },
       workspace: "Workspace",
       view: "View",
@@ -172,6 +187,7 @@ export default {
       zoomIn: "Zoom in",
       zoomOut: "Zoom out",
       reset: "Reset",
+      restore: "Restore nodes",
     },
     rowsWindow: {
       window_message: "Enter number of rows to visualize",
@@ -191,6 +207,9 @@ export default {
       save: "Save",
       delete: "Delete",
       cancel: "Cancel",
+      upload_file: "Upload file",
+      choose_file: "Choose file",
+      reset: "Reset",
     },
     layout: {
       title: "Layout",
@@ -204,6 +223,7 @@ export default {
         d3tree: "D3 Tree",
         radial: "Radial",
         force: "3D Force Simulation",
+        forceLayout: "2D Force Simulation",
       },
       params: {
         iterations: "Iterations",
@@ -211,6 +231,12 @@ export default {
         scalingRatio: "Scaling Ratio",
         strongGravityMode: "Strong Gravity Mode",
         rootId: "Root ID",
+        maxIteration: "Maximum iterations",
+        maxIterations: "Maximum iterations",
+        attraction: "Atrraction",
+        repulsion: "Repulsion",
+        inertia: "Inertia",
+        maxMove: "Maximum move",
       },
     },
     visualization: {
@@ -225,7 +251,7 @@ export default {
         nodeColor: "Node Color",
         selectedNodeColor: "Selected Node Color",
         nodeSize: "Node Size",
-        allowDragging: "Dragging",
+        allowDragging: "Nodes lock",
 
         edgeColor: "Edge Color",
         highlightedEdgeColor: "Highlighted Edge Color",
@@ -291,6 +317,10 @@ export default {
       name: "Name",
       no_description: "No description available",
       number_of_neighbors: "Number of neighbors",
+      weight: "Weight",
+    },
+    app: {
+      loading: "Loading graph",
     },
   },
 }

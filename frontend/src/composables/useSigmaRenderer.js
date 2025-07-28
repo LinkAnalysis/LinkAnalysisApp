@@ -1,6 +1,7 @@
 import { ref, shallowRef, onMounted, onBeforeUnmount } from "vue"
 import Sigma from "sigma"
 import { applyStyleOptions } from "@/utils/graphUtils"
+import { createNodeImageProgram } from "@sigma/node-image"
 
 export function useSigmaRenderer({ graph, optionsRef }) {
   const container = ref(null)
@@ -9,12 +10,17 @@ export function useSigmaRenderer({ graph, optionsRef }) {
   onMounted(() => {
     applyStyleOptions(graph, optionsRef.value)
 
+    normalizeGraphCoordinates(graph)
     renderer.value = new Sigma(graph, container.value, {
       minCameraRatio: 0.08,
       maxCameraRatio: 50,
       renderEdgeLabels: optionsRef.value.renderEdgeLabels,
       enableEdgeEvents: true,
       labelRenderedSizeThreshold: optionsRef.value.renderNodeLabels ? 6 : 9999,
+      defaultNodeType: "image",
+      nodeProgramClasses: {
+        image: createNodeImageProgram(),
+      },
 
       nodeReducer: (node, data) => {
         if (data.highlighted) {
@@ -92,7 +98,6 @@ export function useSigmaRenderer({ graph, optionsRef }) {
         ctx.restore()
       },
     })
-
     renderer.value.getContainer().style.background =
       optionsRef.value.backgroundColor
   })

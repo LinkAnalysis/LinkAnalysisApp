@@ -10,7 +10,6 @@ import { applyStyleOptions } from "@/utils/graphUtils"
 import GraphControls from "./GraphControls.vue"
 import { toBlob } from "@sigma/export-image"
 import { SaveBytesToFile } from "../../../wailsjs/go/main/App"
-import { LogPrint } from "../../../wailsjs/runtime/runtime"
 
 const props = defineProps({
   graph: Graph,
@@ -79,6 +78,7 @@ watch(
   <div class="graph-wrapper">
     <div ref="container" class="sigma-container" />
     <GraphControls
+      :graph="props.graph"
       @zoomIn="zoomIn"
       @zoomOut="zoomOut"
       @resetView="() => resetCamera()"
@@ -88,11 +88,6 @@ watch(
       v-if="clickedNodeData"
       :visible="true"
       :position="popupNodePosition"
-      @close="
-        () => {
-          LogPrint('Node Window Close')
-        }
-      "
     >
       ID: {{ clickedNodeData.id }}<br />
       <span v-if="clickedNodeData.description">
@@ -110,15 +105,10 @@ watch(
       v-if="popupEdgeData"
       :visible="true"
       :position="popupEdgePosition"
-      @close="
-        () => {
-          LogPrint('Edge Window Close')
-        }
-      "
     >
       ID: {{ popupEdgeData.id }}<br />
-      description: {{ popupEdgeData.description }} <br />
-      weight: {{ popupEdgeData.weight }} <br />
+      {{ t("vertex_window.name") }}: {{ popupEdgeData.description }} <br />
+      {{ t("vertex_window.weight") }}: {{ popupEdgeData.weight }} <br />
     </VertexWindow>
   </div>
 </template>

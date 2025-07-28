@@ -5,7 +5,6 @@
     <div class="table-wrapper">
       <table class="settings-table">
         <tbody>
-          <!-- === NODES === -->
           <tr class="section-header">
             <td colspan="2">
               <strong>{{ t("visualization.sections.nodes") }}</strong>
@@ -44,42 +43,6 @@
               <input type="checkbox" v-model="settings.allowDragging" />
             </td>
           </tr>
-          <!--
-            <tr>
-            <td>Node Shape</td>
-            <td>
-              <select v-model="settings.nodeShape">
-              <option>Circle</option>
-              <option>Square</option>
-              <option>Triangle</option>
-              </select>
-            </td>
-            </tr>
-            -->
-          <!--
-            <tr>
-            <td>Render Node Labels</td>
-            <td>
-              <input type="checkbox" v-model="settings.renderNodeLabels" />
-            </td>
-            </tr>
-            -->
-          <!--
-            <tr>
-            <td>Node size by degree</td>
-            <td>
-              <input type="checkbox" v-model="settings.nodeSizeByDegree" />
-            </td>
-            </tr>
-            <tr>
-            <td>Node Dragging</td>
-            <td>
-              <input type="checkbox" v-model="settings.nodeDragging" />
-            </td>
-            </tr>
-            -->
-
-          <!-- === EDGES === -->
           <tr class="section-header">
             <td colspan="2">
               <strong>{{ t("visualization.sections.edges") }}</strong>
@@ -118,47 +81,12 @@
               <input type="checkbox" v-model="settings.useEdgeWeights" />
             </td>
           </tr>
-          <!--
-            <tr>
-            <td>Edge Type</td>
-            <td>
-              <select v-model="settings.edgeType">
-              <option>Line</option>
-              <option>Dashed</option>
-              <option>Arrow</option>
-              </select>
-            </td>
-            </tr>
-            -->
           <tr>
             <td>{{ t("visualization.settings.renderEdgeLabels") }}</td>
             <td>
               <input type="checkbox" v-model="settings.renderEdgeLabels" />
             </td>
           </tr>
-
-          <!-- === INTERACTION === -->
-          <tr class="section-header">
-            <td colspan="2">
-              <strong>{{ t("visualization.sections.interaction") }}</strong>
-            </td>
-          </tr>
-          <!--
-            <tr>
-            <td>Highlight Neighbors</td>
-            <td>
-              <input type="checkbox" v-model="settings.highlightNeighbors" />
-            </td>
-            </tr>
-            -->
-          <tr>
-            <td>{{ t("visualization.settings.hoverEffect") }}</td>
-            <td>
-              <input type="checkbox" v-model="settings.hoverEffect" />
-            </td>
-          </tr>
-
-          <!-- === BACKGROUND === -->
           <tr class="section-header">
             <td colspan="2">
               <strong>{{ t("visualization.sections.background") }}</strong>
@@ -196,8 +124,7 @@ const settings = reactive({
   highlightedEdgeColor: "#ff9900",
   edgeSize: 1.5,
   useEdgeWeights: false,
-  renderEdgeLabels: true,
-  hoverEffect: true,
+  renderEdgeLabels: false,
   backgroundColor: "#ffffff",
 })
 
