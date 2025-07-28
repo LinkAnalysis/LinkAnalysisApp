@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import ConfirmDialog from "@/components/ConfirmDialog.vue"
 import { RecycleScroller } from "vue3-virtual-scroller"
 import "vue3-virtual-scroller/dist/vue3-virtual-scroller.css"
 
@@ -26,6 +27,11 @@ const searchTerm = ref("")
 const fileInput = ref(null)
 const uploadedFile = ref(null)
 const previewUrl = ref(null)
+
+const confirmDialogOpen = ref(false)
+const confirmDialogTitle = ref("")
+const confirmDialogMessage = ref("")
+const pendingDelete = ref(null)
 
 const items = computed(() => {
   const src = activeTab.value === "nodes" ? props.nodes : props.edges
@@ -69,10 +75,33 @@ const saveEdit = () => {
   previewUrl.value = null
 }
 
+const labelOrId = item => {
+  const lbl = (item.label ?? "").trim()
+  return lbl.length ? lbl : item.id
+}
+
 const deleteEdit = () => {
   if (!editingItem.value) return
-  emit(`delete-${tabPrefix.value}`, editingItem.value.id)
+  const lbl = labelOrId(editingItem.value)
+  confirmDialogTitle.value = t("editor.confirm_delete")
+
+  confirmDialogMessage.value = t("editor.confirm_delete_message")
+
+  pendingDelete.value = editingItem.value
+  confirmDialogOpen.value = true
+}
+
+const handleConfirmDelete = () => {
+  if (!pendingDelete.value) return
+  emit(`delete-${tabPrefix.value}`, pendingDelete.value.id)
   editingItem.value = null
+  pendingDelete.value = null
+  confirmDialogOpen.value = false
+}
+
+const handleCancelDelete = () => {
+  confirmDialogOpen.value = false
+  pendingDelete.value = null
 }
 
 const cancelEdit = () => {
@@ -220,6 +249,15 @@ function resetFile() {
       </template>
     </div>
   </div>
+  <ConfirmDialog
+    :open="confirmDialogOpen"
+    :title="confirmDialogTitle"
+    :message="confirmDialogMessage"
+    :confirm-label="t('editor.confirm')"
+    :cancel-label="t('editor.cancel')"
+    @confirm="handleConfirmDelete"
+    @cancel="handleCancelDelete"
+  />
 </template>
 
 <style scoped>

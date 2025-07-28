@@ -17,6 +17,41 @@ export function useGraphInteractions({ renderer, graph, optionsRef }) {
   let dragGroupOffsets = null
   let initialDragPosition = null
 
+  function deleteSelection() {
+    selectedEdgeIds.forEach(edgeId => {
+      if (!graph.hasEdge(edgeId)) return
+      const source = graph.source(edgeId)
+      const target = graph.target(edgeId)
+      graph.setNodeAttribute(source, "highlighted", false)
+      graph.setNodeAttribute(target, "highlighted", false)
+      graph.dropEdge(edgeId)
+    })
+
+    selectedEdgeIds.clear()
+
+    selectedNodeIds.forEach(n => graph.hasNode(n) && graph.dropNode(n))
+    selectedNodeIds.clear()
+
+    highlightedEdges.clear()
+    popupNodeId.value = popupEdgeId.value = null
+    clickedNodeData.value = popupEdgeData.value = null
+  }
+
+  function onKeyDown(event) {
+    const isInput =
+      event.target instanceof HTMLInputElement ||
+      event.target instanceof HTMLTextAreaElement ||
+      event.target?.isContentEditable
+    if (isInput) return
+
+    if (event.key === "Delete" || event.key === "Backspace") {
+      if (selectedNodeIds.size || selectedEdgeIds.size) {
+        event.preventDefault()
+        deleteSelection()
+      }
+    }
+  }
+
   function updatePopupNodePosition() {
     if (!renderer.value || !popupNodeId.value) return
     const a = graph.getNodeAttributes(popupNodeId.value)
@@ -148,7 +183,7 @@ export function useGraphInteractions({ renderer, graph, optionsRef }) {
       }
 
       const isLeftClick = event.original.button === 0
-      const allowDrag = optionsRef.value.allowDragging !== false
+      const allowDrag = !optionsRef.value.allowDragging
 
       if (isLeftClick && allowDrag) {
         isDragging = true
@@ -240,7 +275,6 @@ export function useGraphInteractions({ renderer, graph, optionsRef }) {
   }
 
   watch(renderer, r => attachListeners(r), { immediate: true })
-
   onScopeDispose(() => {
     const r = renderer.value
     if (!r) return
@@ -253,5 +287,8 @@ export function useGraphInteractions({ renderer, graph, optionsRef }) {
     clickedNodeData,
     popupEdgeData,
     popupEdgePosition,
+    deleteSelection,
+    selectedNodeIds,
+    selectedEdgeIds,
   }
 }
