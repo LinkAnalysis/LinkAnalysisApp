@@ -67,7 +67,6 @@ watch(
       return
     }
     selectedLayoutParams.value = { ...defaultLayoutParams[newLayout] }
-    console.log("selected params: ", selectedLayoutParams.value)
   },
 )
 

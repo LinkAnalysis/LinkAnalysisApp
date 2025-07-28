@@ -2,7 +2,7 @@
 import Graph from "graphology"
 import VertexWindow from "./VertexWindow.vue"
 import { useI18n } from "vue-i18n"
-import { watch, toRefs } from "vue"
+import { watch, toRefs, computed } from "vue"
 import { useSigmaRenderer } from "@/composables/useSigmaRenderer"
 import { useGraphInteractions } from "@/composables/useGraphInteractions"
 import { useGraphState } from "@/composables/useGraphState"
@@ -11,6 +11,7 @@ import { applyStyleOptions } from "@/utils/graphUtils"
 import GraphControls from "./GraphControls.vue"
 import { toBlob } from "@sigma/export-image"
 import { SaveBytesToFile } from "../../../wailsjs/go/main/App"
+import { importCsvToGraph, importGexfToGraph } from "@/composables/file_loader"
 
 const props = defineProps({
   graph: Graph,
@@ -35,6 +36,42 @@ const { clickedNodeData, popupNodePosition, popupEdgeData, popupEdgePosition } =
 const zoomIn = () => renderer.value?.getCamera().animatedZoom({ duration: 600 })
 const zoomOut = () =>
   renderer.value?.getCamera().animatedUnzoom({ duration: 600 })
+
+const dragEnabled = computed(() => !!props.graph)
+
+const handleDrop = event => {
+  if (!dragEnabled.value) return
+
+  const files = event.dataTransfer.files
+  if (files.length === 0) return
+
+  const file = files[0]
+  const isCsv = file.name.endsWith(".csv")
+
+  const reader = new FileReader()
+  reader.onload = async () => {
+    const text = reader.result
+
+    try {
+      if (file.name.endsWith(".csv")) {
+        await importCsvToGraph(props.graph, text)
+      } else if (file.name.endsWith(".gexf")) {
+        await importGexfToGraph(props.graph, text, true)
+      } else {
+        console.warn("Obsługiwane są tylko pliki .csv oraz .gexf")
+        return
+      }
+
+      applyStyleOptions(props.graph, options.value)
+      renderer.value?.refresh()
+      resetCamera()
+    } catch (err) {
+      console.error("Błąd importu:", err)
+    }
+  }
+
+  reader.readAsText(file)
+}
 
 function resetCamera(full = false) {
   const r = renderer.value
@@ -79,7 +116,12 @@ watch(
 </script>
 
 <template>
-  <div class="graph-wrapper">
+  <div
+    class="graph-wrapper"
+    :class="{ 'drag-active': dragEnabled }"
+    @dragover.prevent="dragEnabled && $event.preventDefault()"
+    @drop.prevent="dragEnabled && handleDrop($event)"
+  >
     <div ref="container" class="sigma-container" />
 
     <GraphControls

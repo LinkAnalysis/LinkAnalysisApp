@@ -124,6 +124,7 @@ export default {
         neighborsNetwork: "Sieć sąsiadów",
         groupBy: "Grupuj według",
         llm: "LLM",
+        undefined: "Nieznany",
       },
       search: {
         label: "Szukaj w",
@@ -286,6 +287,7 @@ export default {
         neighborsNetwork: "Neighbors Network",
         groupBy: "Group by",
         llm: "LLM",
+        undefined: "Unknown",
       },
       search: {
         label: "Search in",
