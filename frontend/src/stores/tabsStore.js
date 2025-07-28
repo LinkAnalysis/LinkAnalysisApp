@@ -63,7 +63,7 @@ export const useTabsStore = defineStore("tabs", () => {
     averageDegrees.value.splice(index, 1)
     averageWeightedDegrees.value.splice(index, 1)
     diameters.value.splice(index, 1)
-    networkDensities.splice(index, 1)
+    networkDensities.value.splice(index, 1)
     networkSimpleSize.splice(index, 1)
   }
 
