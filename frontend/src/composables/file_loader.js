@@ -174,3 +174,44 @@ export function update_graph_edges(graph, edges_csv) {
 
   return graph
 }
+
+export async function importCsvToGraph(graph, csvText) {
+  const edges = await parseCSV(csvText)
+  edges.forEach(({ x, y }) => {
+    if (!graph.hasNode(x)) {
+      graph.addNode(x, { size: 20, x: 0, y: 0 })
+    }
+    if (!graph.hasNode(y)) {
+      graph.addNode(y, { size: 20, x: 0, y: 0 })
+    }
+  })
+  edges.forEach(({ x, y, edgeWeight, edgeLabel }) => {
+    const w = parseInt(edgeWeight)
+    graph.addEdge(x, y, {
+      label: edgeLabel,
+      weight: w,
+      size: w,
+      color: "#000000",
+    })
+  })
+  circular.assign(graph)
+}
+
+export function importGexfToGraph(graph, gexfText, replace = true) {
+  const temp = parse(Graph, gexfText)
+  temp.forEachNode((n, attrs) => {
+    if (typeof attrs.x === "number" && typeof attrs.y === "number") {
+      temp.setNodeAttribute(n, "x", attrs.x / 1000)
+      temp.setNodeAttribute(n, "y", attrs.y / 1000)
+    }
+  })
+
+  if (replace) graph.clear()
+  temp.forEachNode((n, attrs) => {
+    if (!graph.hasNode(n)) graph.addNode(n, attrs)
+  })
+
+  temp.forEachEdge((e, attrs, s, t) => {
+    if (!graph.hasEdge(e)) graph.addEdgeWithKey(e, s, t, attrs)
+  })
+}

@@ -48,6 +48,9 @@ export default {
       upload_file: "Prześlij plik",
       choose_file: "Wybierz plik",
       reset: "Resetuj",
+      confirm: "Potwierdź",
+      confirm_delete: "Potwierdź usunięcie",
+      confirm_delete_message: "Czy na pewno chcesz usunąć wybrane elementy?",
     },
     layout: {
       title: "Układ",
@@ -126,6 +129,7 @@ export default {
         neighborsNetwork: "Sieć sąsiadów",
         groupBy: "Grupuj według",
         llm: "LLM",
+        undefined: "Nieznany",
       },
       search: {
         label: "Szukaj w",
@@ -213,6 +217,9 @@ export default {
       upload_file: "Upload file",
       choose_file: "Choose file",
       reset: "Reset",
+      confirm: "Confirm",
+      confirm_delete: "Confirm deletion",
+      confirm_delete_message: "Are you sure you want to delete selected items?",
     },
     layout: {
       title: "Layout",
@@ -291,6 +298,7 @@ export default {
         neighborsNetwork: "Neighbors Network",
         groupBy: "Group by",
         llm: "LLM",
+        undefined: "Unknown",
       },
       search: {
         label: "Search in",

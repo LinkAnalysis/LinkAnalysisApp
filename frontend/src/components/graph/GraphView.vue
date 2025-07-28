@@ -2,7 +2,7 @@
 import Graph from "graphology"
 import VertexWindow from "./VertexWindow.vue"
 import { useI18n } from "vue-i18n"
-import { watch, toRefs } from "vue"
+import { watch, toRefs, computed, ref } from "vue"
 import { useSigmaRenderer } from "@/composables/useSigmaRenderer"
 import { useGraphInteractions } from "@/composables/useGraphInteractions"
 import { useGraphState } from "@/composables/useGraphState"
@@ -10,6 +10,8 @@ import { applyStyleOptions } from "@/utils/graphUtils"
 import GraphControls from "./GraphControls.vue"
 import { toBlob } from "@sigma/export-image"
 import { SaveBytesToFile } from "../../../wailsjs/go/main/App"
+import { importCsvToGraph, importGexfToGraph } from "@/composables/file_loader"
+import ConfirmDialog from "@/components/ConfirmDialog.vue"
 
 const props = defineProps({
   graph: Graph,
@@ -23,16 +25,98 @@ const { container, renderer } = useSigmaRenderer({
   optionsRef: options,
 })
 
-const { clickedNodeData, popupNodePosition, popupEdgeData, popupEdgePosition } =
-  useGraphInteractions({
-    renderer,
-    graph: props.graph,
-    optionsRef: options,
-  })
+const {
+  clickedNodeData,
+  popupNodePosition,
+  popupEdgeData,
+  popupEdgePosition,
+  deleteSelection,
+  selectedNodeIds,
+  selectedEdgeIds,
+} = useGraphInteractions({
+  renderer,
+  graph: props.graph,
+  optionsRef: options,
+})
 
 const zoomIn = () => renderer.value?.getCamera().animatedZoom({ duration: 600 })
 const zoomOut = () =>
   renderer.value?.getCamera().animatedUnzoom({ duration: 600 })
+
+const dragEnabled = computed(() => !!props.graph)
+
+const handleDrop = event => {
+  if (!dragEnabled.value) return
+
+  const files = event.dataTransfer.files
+  if (files.length === 0) return
+
+  const file = files[0]
+  const isCsv = file.name.endsWith(".csv")
+
+  const reader = new FileReader()
+  reader.onload = async () => {
+    const text = reader.result
+
+    try {
+      if (file.name.endsWith(".csv")) {
+        await importCsvToGraph(props.graph, text)
+      } else if (file.name.endsWith(".gexf")) {
+        await importGexfToGraph(props.graph, text, true)
+      } else {
+        console.warn("Obsługiwane są tylko pliki .csv oraz .gexf")
+        return
+      }
+
+      applyStyleOptions(props.graph, options.value)
+      renderer.value?.refresh()
+      resetCamera()
+    } catch (err) {
+      console.error("Błąd importu:", err)
+    }
+  }
+
+  reader.readAsText(file)
+}
+
+const confirmDeleteModalOpen = ref(false)
+const confirmDialogTitle = ref("")
+const confirmMessage = ref("")
+
+function openDeleteDialog() {
+  const labels = [...props.graph?.nodes()]
+    .filter(n => selectedNodeIds.has(n))
+    .map(n => {
+      const a = props.graph.getNodeAttributes(n)
+      return a.label || n
+    })
+
+  confirmDialogTitle.value = t("editor.confirm_delete")
+  confirmMessage.value = t("editor.confirm_delete_message")
+
+  confirmDeleteModalOpen.value = true
+}
+
+function doDelete() {
+  deleteSelection()
+  confirmDeleteModalOpen.value = false
+}
+
+window.addEventListener("keydown", e => {
+  if (
+    (e.key === "Delete" || e.key === "Backspace") &&
+    (selectedNodeIds.size || selectedEdgeIds.size)
+  ) {
+    const isInput =
+      e.target instanceof HTMLInputElement ||
+      e.target instanceof HTMLTextAreaElement ||
+      e.target?.isContentEditable
+    if (!isInput) {
+      e.preventDefault()
+      openDeleteDialog()
+    }
+  }
+})
 
 function resetCamera() {
   const r = renderer.value
@@ -75,7 +159,12 @@ watch(
 </script>
 
 <template>
-  <div class="graph-wrapper">
+  <div
+    class="graph-wrapper"
+    :class="{ 'drag-active': dragEnabled }"
+    @dragover.prevent="dragEnabled && $event.preventDefault()"
+    @drop.prevent="dragEnabled && handleDrop($event)"
+  >
     <div ref="container" class="sigma-container" />
     <GraphControls
       :graph="props.graph"
@@ -110,6 +199,15 @@ watch(
       {{ t("vertex_window.name") }}: {{ popupEdgeData.description }} <br />
       {{ t("vertex_window.weight") }}: {{ popupEdgeData.weight }} <br />
     </VertexWindow>
+    <ConfirmDialog
+      :open="confirmDeleteModalOpen"
+      :title="confirmDialogTitle"
+      :message="confirmMessage"
+      :confirm-label="t('editor.confirm')"
+      :cancel-label="t('editor.cancel')"
+      @confirm="doDelete()"
+      @cancel="confirmDeleteModalOpen = false"
+    />
   </div>
 </template>
 
