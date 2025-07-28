@@ -62,6 +62,7 @@ export default {
         radial: "Układ radialny",
         force: "Symulacja siłowa (3D Force)",
         forceLayout: "Symulacja siłowa (2D Force)",
+        noverlap: "Bez nachodzenia (Noverlap)",
       },
       params: {
         iterations: "Liczba iteracji",
@@ -75,6 +76,7 @@ export default {
         repulsion: "Odpychanie",
         inertia: "Bezwładność",
         maxMove: "Maksymalny ruch",
+        adjustSizes: "Dostosowanie rozmiarów",
       },
     },
     visualization: {
@@ -225,6 +227,7 @@ export default {
         radial: "Radial",
         force: "3D Force Simulation",
         forceLayout: "2D Force Simulation",
+        noverlap: "No Overlap",
       },
       params: {
         iterations: "Iterations",
@@ -238,6 +241,7 @@ export default {
         repulsion: "Repulsion",
         inertia: "Inertia",
         maxMove: "Maximum move",
+        adjustSizes: "Adjust sizes",
       },
     },
     visualization: {

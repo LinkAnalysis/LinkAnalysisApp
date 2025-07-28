@@ -12,6 +12,13 @@
       {{ t("controls.reset") }}
     </button>
 
+    <div v-if="tabsStore.simulationExists()" class="sim-settings">
+      <button class="sim-toggle" @click="onToggleSimulation">
+        {{ simulationRunning ? "⏸️" : "▶️" }}
+      </button>
+      <button class="sim-kill" @click="onKillSimulation">❌</button>
+    </div>
+
     <button class="restore" @click="restoreHiddenNodes">
       {{ t("controls.restore") }}
     </button>
@@ -20,12 +27,20 @@
 
 <script setup>
 import { useI18n } from "vue-i18n"
+import { useTabsStore } from "../../stores/tabsStore"
+import { computed } from "vue"
+
+defineEmits(["zoomIn", "zoomOut", "resetView"])
+const tabsStore = useTabsStore()
+const onToggleSimulation = () => {
+  tabsStore.toggleSimulation()
+}
+const onKillSimulation = () => tabsStore.killSimulation()
+const simulationRunning = computed(() => tabsStore.simulationRunning())
 
 const props = defineProps({
   graph: Object,
 })
-defineEmits(["zoomIn", "zoomOut", "resetView"])
-
 const { t } = useI18n()
 
 function restoreHiddenNodes() {
@@ -65,5 +80,8 @@ function restoreHiddenNodes() {
 .controls button {
   cursor: pointer;
   width: 100%;
+}
+.sim-settings {
+  display: flex;
 }
 </style>

@@ -1,8 +1,8 @@
 import { ref, shallowRef, onMounted, onBeforeUnmount } from "vue"
 import Sigma from "sigma"
-import { normalizeGraphCoordinates } from "@/composables/layouts"
 import { applyStyleOptions } from "@/utils/graphUtils"
 import { createNodeImageProgram } from "@sigma/node-image"
+import { normalizeGraphCoordinates } from "./layouts"
 
 export function useSigmaRenderer({ graph, optionsRef }) {
   const container = ref(null)
@@ -13,7 +13,7 @@ export function useSigmaRenderer({ graph, optionsRef }) {
     normalizeGraphCoordinates(graph)
     renderer.value = new Sigma(graph, container.value, {
       minCameraRatio: 0.08,
-      maxCameraRatio: 20,
+      maxCameraRatio: 50,
       renderEdgeLabels: optionsRef.value.renderEdgeLabels,
       enableEdgeEvents: true,
       labelRenderedSizeThreshold: optionsRef.value.renderNodeLabels ? 6 : 9999,
@@ -100,7 +100,6 @@ export function useSigmaRenderer({ graph, optionsRef }) {
     })
     renderer.value.getContainer().style.background =
       optionsRef.value.backgroundColor
-    renderer.value.setCustomBBox(renderer.value.getBBox())
   })
 
   onBeforeUnmount(() => {

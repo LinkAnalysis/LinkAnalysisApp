@@ -6,7 +6,6 @@ import { watch, toRefs, computed } from "vue"
 import { useSigmaRenderer } from "@/composables/useSigmaRenderer"
 import { useGraphInteractions } from "@/composables/useGraphInteractions"
 import { useGraphState } from "@/composables/useGraphState"
-import { normalizeGraphCoordinates } from "@/composables/layouts"
 import { applyStyleOptions } from "@/utils/graphUtils"
 import GraphControls from "./GraphControls.vue"
 import { toBlob } from "@sigma/export-image"
@@ -15,7 +14,6 @@ import { importCsvToGraph, importGexfToGraph } from "@/composables/file_loader"
 
 const props = defineProps({
   graph: Graph,
-  changed: Number,
   options: { type: Object, default: () => ({}) },
 })
 const { t } = useI18n()
@@ -73,15 +71,13 @@ const handleDrop = event => {
   reader.readAsText(file)
 }
 
-function resetCamera(full = false) {
+function resetCamera() {
   const r = renderer.value
   if (!r) return
+  r.setCustomBBox(null)
+  r.resize(true)
   r.refresh()
-  normalizeGraphCoordinates(props.graph)
-  r.setCustomBBox({ x: [0, 1], y: [0, 1] })
-  full
-    ? r.getCamera().animatedReset()
-    : r.getCamera().animate({ x: 0.5, y: 0.5 })
+  r.getCamera().animatedReset()
 }
 
 const saveImage = async (filePath, ext) => {
@@ -123,12 +119,11 @@ watch(
     @drop.prevent="dragEnabled && handleDrop($event)"
   >
     <div ref="container" class="sigma-container" />
-
     <GraphControls
       :graph="props.graph"
       @zoomIn="zoomIn"
       @zoomOut="zoomOut"
-      @resetView="() => resetCamera(true)"
+      @resetView="() => resetCamera()"
     />
 
     <VertexWindow
