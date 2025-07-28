@@ -82,7 +82,7 @@ export const layouts = {
       return worker
     },
     defaultParams: {
-      attraction: 0.5,
+      attraction: 0.0005,
       maxIterations: 4000,
       gravity: 0.02,
       repulsion: 0.02,
@@ -172,14 +172,14 @@ export const layouts = {
       noverlap.assign(graph, params)
     },
 
-    simulate: (graph, params = {}) => {
-      const worker = new NoverlapLayout(graph, {
-        isNodeFixed: (_, attr) => attr.fixed,
-        settings: params,
-      })
-      worker.stop()
-      return worker
-    },
+    // simulate: (graph, params = {}) => {
+    //   const worker = new NoverlapLayout(graph, {
+    //     isNodeFixed: (_, attr) => attr.fixed,
+    //     settings: params,
+    //   })
+    //   worker.stop()
+    //   return worker
+    // },
     defaultParams: {},
   },
 }
