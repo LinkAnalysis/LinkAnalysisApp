@@ -227,7 +227,8 @@ export const useTabsStore = defineStore("tabs", () => {
   }
 
   function simulationRunning() {
-    return globalSimulationWorker.value?.isRunning() ?? false
+    if (!globalSimulationWorker.value) return false
+    return globalSimulationWorker.value.isRunning()
   }
 
   const selectedFilter = computed({

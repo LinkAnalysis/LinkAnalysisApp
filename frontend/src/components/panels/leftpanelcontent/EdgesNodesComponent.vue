@@ -7,7 +7,7 @@ import "vue3-virtual-scroller/dist/vue3-virtual-scroller.css"
 const props = defineProps({
   nodes: { type: Array, default: () => [] },
   edges: { type: Array, default: () => [] },
-  currentTab: String,
+  currentTab: Number,
 })
 
 const { t } = useI18n()

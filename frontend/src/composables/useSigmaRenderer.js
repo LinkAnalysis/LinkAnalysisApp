@@ -2,6 +2,7 @@ import { ref, shallowRef, onMounted, onBeforeUnmount } from "vue"
 import Sigma from "sigma"
 import { applyStyleOptions } from "@/utils/graphUtils"
 import { createNodeImageProgram } from "@sigma/node-image"
+import { normalizeGraphCoordinates } from "./layouts"
 
 export function useSigmaRenderer({ graph, optionsRef }) {
   const container = ref(null)
@@ -9,7 +10,6 @@ export function useSigmaRenderer({ graph, optionsRef }) {
 
   onMounted(() => {
     applyStyleOptions(graph, optionsRef.value)
-
     normalizeGraphCoordinates(graph)
     renderer.value = new Sigma(graph, container.value, {
       minCameraRatio: 0.08,

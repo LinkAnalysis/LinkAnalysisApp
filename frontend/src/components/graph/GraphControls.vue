@@ -14,7 +14,7 @@
 
     <div v-if="tabsStore.simulationExists()" class="sim-settings">
       <button class="sim-toggle" @click="onToggleSimulation">
-        {{ tabsStore.simulationRunning() ? "⏸️" : "▶️" }}
+        {{ simulationRunning ? "⏸️" : "▶️" }}
       </button>
       <button class="sim-kill" @click="onKillSimulation">❌</button>
     </div>
@@ -28,6 +28,7 @@
 <script setup>
 import { useI18n } from "vue-i18n"
 import { useTabsStore } from "../../stores/tabsStore"
+import { computed } from "vue"
 
 defineEmits(["zoomIn", "zoomOut", "resetView"])
 const tabsStore = useTabsStore()
@@ -35,6 +36,7 @@ const onToggleSimulation = () => {
   tabsStore.toggleSimulation()
 }
 const onKillSimulation = () => tabsStore.killSimulation()
+const simulationRunning = computed(() => tabsStore.simulationRunning())
 
 const props = defineProps({
   graph: Object,

@@ -169,7 +169,7 @@ export function useGraphInteractions({ renderer, graph, optionsRef }) {
 
     const stopDrag = () => {
       isDragging = false
-      graph.removeNodeAttribute(draggedNode, "fixed")
+      if (draggedNode) graph.removeNodeAttribute(draggedNode, "fixed")
       draggedNode = null
     }
     r.on("upNode", stopDrag)
