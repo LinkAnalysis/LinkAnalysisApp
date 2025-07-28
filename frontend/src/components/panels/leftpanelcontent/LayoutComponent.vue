@@ -10,15 +10,36 @@
     <div>
       <table v-if="hasParams" class="settings-table">
         <tbody>
-          <tr v-for="(value, key) in currentParams" :key="key">
-            <td>{{ formatLabel(key) }}</td>
-            <td v-if="typeof value === 'boolean'">
-              <input type="checkbox" v-model="selectedLayoutParams[key]" />
-            </td>
-            <td v-else>
-              <input type="number" v-model.number="selectedLayoutParams[key]" />
-            </td>
-          </tr>
+          <template v-for="(value, key) in currentParams">
+            <template v-if="typeof value === 'object'" v-for="(v, k) in value">
+              <tr>
+                <td>{{ formatLabel(k) }}</td>
+                <td v-if="typeof v === 'boolean'">
+                  <input
+                    type="checkbox"
+                    v-model="selectedLayoutParams[key][k]"
+                  />
+                </td>
+                <td v-else="typeof v === 'number'">
+                  <input type="number" v-model="selectedLayoutParams[key][k]" />
+                </td>
+              </tr>
+            </template>
+            <template v-else>
+              <tr>
+                <td>{{ formatLabel(key) }}</td>
+                <td v-if="typeof value === 'boolean'">
+                  <input type="checkbox" v-model="selectedLayoutParams[key]" />
+                </td>
+                <td v-else>
+                  <input
+                    type="number"
+                    v-model.number="selectedLayoutParams[key]"
+                  />
+                </td>
+              </tr>
+            </template>
+          </template>
         </tbody>
       </table>
       <button v-if="hasParams" class="reset-button" @click="resetSettings">
@@ -28,7 +49,7 @@
         {{ t("layout.apply") }}
       </button>
       <button v-if="canSimulate" @click="createSimulation" class="reset-button">
-        Simulation
+        Create simulation
       </button>
     </div>
   </div>
@@ -72,8 +93,9 @@ watch(
     if (oldTabId != newTabId) {
       return
     }
-    selectedLayoutParams.value = { ...defaultLayoutParams[newLayout] }
-    console.log("selected params: ", selectedLayoutParams.value)
+    selectedLayoutParams.value = JSON.parse(
+      JSON.stringify(defaultLayoutParams[newLayout]),
+    )
   },
 )
 
@@ -106,7 +128,9 @@ const createSimulation = () => {
 }
 
 const resetSettings = () => {
-  selectedLayoutParams.value = { ...defaultLayoutParams[selectedLayout.value] }
+  selectedLayoutParams.value = JSON.parse(
+    JSON.stringify(defaultLayoutParams[selectedLayout.value]),
+  ) //{ ...defaultLayoutParams[selectedLayout.value] }
 }
 
 const formatLabel = key => {
