@@ -94,7 +94,10 @@ export default {
         nodeColor: "Kolor wierzchołków",
         selectedNodeColor: "Kolor zaznaczonego wierzchołka",
         nodeSize: "Rozmiar wierzchołków",
+        nodeResize: "Uwzględnij liczbę sąsiadów",
         allowDragging: "Blokada wierzchołków",
+        minSize: "Minimalny rozmiar wierzchołka",
+        maxSize: "Maksymalny rozmiar wierzchołka",
 
         edgeColor: "Kolor krawędzi",
         highlightedEdgeColor: "Kolor podświetlonej krawędzi",
@@ -275,7 +278,10 @@ export default {
         nodeColor: "Node Color",
         selectedNodeColor: "Selected Node Color",
         nodeSize: "Node Size",
+        nodeResize: "Use number of neighbors",
         allowDragging: "Nodes lock",
+        minSize: "Minimum size of node",
+        maxSize: "Maximim size of node",
 
         edgeColor: "Edge Color",
         highlightedEdgeColor: "Highlighted Edge Color",

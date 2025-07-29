@@ -38,6 +38,42 @@
             </td>
           </tr>
           <tr>
+            <td>{{ t("visualization.settings.nodeResize") }}</td>
+            <td>
+              <input
+                type="checkbox"
+                v-model="settings.nodeResize"
+                @click="showNodeResize = !showNodeResize"
+              />
+            </td>
+          </tr>
+          <tr v-if="showNodeResize">
+            <td>{{ t("visualization.settings.minSize") }}</td>
+            <td>
+              <input
+                type="range"
+                v-model.number="settings.minNodeSize"
+                min="5"
+                max="50"
+                step="1"
+              />
+              <span>{{ settings.minNodeSize }}</span>
+            </td>
+          </tr>
+          <tr v-if="showNodeResize">
+            <td>{{ t("visualization.settings.maxSize") }}</td>
+            <td>
+              <input
+                type="range"
+                v-model.number="settings.maxNodeSize"
+                min="5"
+                max="50"
+                step="1"
+              />
+              <span>{{ settings.maxNodeSize }}</span>
+            </td>
+          </tr>
+          <tr>
             <td>{{ t("visualization.settings.allowDragging") }}</td>
             <td>
               <input type="checkbox" v-model="settings.allowDragging" />
@@ -126,6 +162,9 @@ const settings = reactive({
   useEdgeWeights: false,
   renderEdgeLabels: false,
   backgroundColor: "#ffffff",
+  nodeResize: false,
+  minNodeSize: 5,
+  maxNodeSize: 50,
 })
 
 watch(
