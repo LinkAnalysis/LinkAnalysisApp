@@ -16,17 +16,43 @@
                 <tr>
                   <td>{{ key }}</td>
                   <td>
-                    <div>
-                      <select v-model="value.selected.name" class="dropdown">
+                    <div
+                      style="
+                        width: 100%;
+                        height: 100%;
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: center;
+                      "
+                    >
+                      <select
+                        v-model="value.selected.name"
+                        class="dropdown"
+                        style="width: 90%; height: 50%"
+                      >
                         <option
                           v-for="op in value.optionsList"
                           :key="op.name"
                           :value="op.name"
+                          style="width: 90%; height: 50%"
                         >
                           {{ op.name }}
                         </option>
                       </select>
-                      <input type="number" />
+                      <input
+                        v-if="
+                          value.optionsList.find(
+                            item => item.name === value.selected.name,
+                          ).type
+                        "
+                        :type="
+                          value.optionsList.find(
+                            item => item.name === value.selected.name,
+                          ).type
+                        "
+                        v-model="value.selected.value"
+                        style="width: 90%; height: 50%"
+                      />
                     </div>
                   </td>
                 </tr>
@@ -85,6 +111,7 @@ import { layouts as layoutsMap } from "@/composables/layouts"
 import { storeToRefs } from "pinia"
 import { computed, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import { LogPrint } from "../../../../wailsjs/runtime/runtime"
 
 const { t } = useI18n()
 
@@ -144,6 +171,8 @@ watch(
 const emit = defineEmits(["applyLayout", "createSimulationWorker"])
 
 const applySettings = () => {
+  //console.log(selectedLayoutParams.value)
+  //LogPrint(`${JSON.stringify(selectedLayoutParams.value, null, 2)}`)
   emit("applyLayout")
 }
 

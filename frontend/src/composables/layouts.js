@@ -168,14 +168,14 @@ export const layouts = {
       collideForce: -0.1,
     },
   },
-  d3tree: {
-    apply: (graph, params = {}) => {
-      let rootId = graph.nodes()[0]
-      //if(params)
-      //const rootId = graph.nodes()[Math.floor(Math.random() * graph.nodes().length)];
-      LogPrint(rootId)
+  tree: {
+    apply: (graph, params) => {
+      const rootId = selectRootFromParams(graph, params)
+      if (!rootId) {
+        return
+      }
       const d3root = buildD3Hierarchy(graph, rootId)
-      const treeLayout = d3.tree().nodeSize([50, 50])
+      const treeLayout = d3.tree().nodeSize([0.8, 0.8])
       const tree = treeLayout(d3root)
       tree.descendants().forEach(d => {
         graph.mergeNodeAttributes(d.data.id, { x: -d.x, y: -d.y })
@@ -184,33 +184,84 @@ export const layouts = {
     defaultParams: {
       rootSelectOptions: {
         optionsList: [
-          { name: "rootId", type: "text" },
-          { name: "maxDegree" },
-          { name: "minDegree" },
-          { name: "random" },
+          { name: "rootId", type: "text", value: null },
+          { name: "maxDegree", value: null },
+          { name: "minDegree", value: null },
+          { name: "random", value: null },
         ],
-        selected: { name: "random" },
+        selected: { name: "random", value: null },
       },
     },
   },
-  // radial: {
-  //   apply: (graph, params = {}) => {
-  //     //const rootId = graph.nodes()[Math.floor(Math.random() * graph.nodes().length)];
-  //     const rootId = params.rootId
-  //     const d3root = buildD3Hierarchy(graph, rootId)
-  //     const d3cluster = d3.cluster().size([2 * Math.PI, 100])
-  //     const d3layout = d3cluster(d3root)
-  //     d3layout.descendants().forEach(d => {
-  //       const radius = d.y
-  //       const angle = d.x
-  //       const x = Math.cos(angle) * radius
-  //       const y = Math.sin(angle) * radius
+  radial: {
+    apply: (graph, params) => {
+      const rootId = selectRootFromParams(graph, params)
+      if (!rootId) {
+        return
+      }
 
-  //       graph.mergeNodeAttributes(d.data.id, { x, y })
-  //     })
-  //   },
-  //   defaultParams: { rootId: 0 },
-  // },
+      const d3root = buildD3Hierarchy(graph, rootId)
+      const d3cluster = d3.cluster().size([2 * Math.PI, 0.8])
+      const d3layout = d3cluster(d3root)
+      d3layout.descendants().forEach(d => {
+        const radius = d.y
+        const angle = d.x
+        const x = Math.cos(angle) * radius
+        const y = Math.sin(angle) * radius
+
+        graph.mergeNodeAttributes(d.data.id, { x, y })
+      })
+    },
+    defaultParams: {
+      rootSelectOptions: {
+        optionsList: [
+          { name: "rootId", type: "text", value: null },
+          { name: "maxDegree", value: null },
+          { name: "minDegree", value: null },
+          { name: "random", value: null },
+        ],
+        selected: { name: "random", value: null },
+      },
+    },
+  },
+}
+
+function selectRootFromParams(graph, params) {
+  const rootSelectionName = params?.rootSelectOptions?.selected?.name
+  if (!rootSelectionName) return null
+  const rootSelectionValue = params?.rootSelectOptions?.selected?.value
+  let rootId = null
+  if (rootSelectionName === "rootId" && graph.hasNode(rootSelectionValue)) {
+    rootId = rootSelectionValue
+  }
+  if (rootSelectionName === "random") {
+    rootId = graph.nodes()[Math.floor(Math.random() * graph.nodes().length)]
+  }
+  if (rootSelectionName == "maxDegree") {
+    let maxDegree = -1
+    let maxNode = null
+    graph.forEachNode(node => {
+      const degree = graph.degree(node)
+      if (degree > maxDegree) {
+        maxDegree = degree
+        maxNode = node
+      }
+    })
+    rootId = maxNode
+  }
+  if (rootSelectionName == "minDegree") {
+    let minDegree = graph.order + 1
+    let minNode = null
+    graph.forEachNode(node => {
+      const degree = graph.degree(node)
+      if (degree < minDegree) {
+        minDegree = degree
+        minNode = node
+      }
+    })
+    rootId = minNode
+  }
+  return rootId
 }
 
 function buildD3Hierarchy(graph, rootId) {
