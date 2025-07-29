@@ -4,6 +4,7 @@ import OverviewComponent from "./rightpanelcontent/OverviewComponent.vue"
 import FilterComponent from "./rightpanelcontent/FilterComponent.vue"
 import StatisticsComponent from "./rightpanelcontent/StatisticsComponent.vue"
 import Graph from "graphology"
+import { graph } from "graphology-metrics"
 
 const props = defineProps({
   graph: Graph,
@@ -27,7 +28,12 @@ const edges = computed(() =>
 <template>
   <div class="panel-content">
     <div class="panel-wrapper">
-      <OverviewComponent class="panel-section" :nodes="nodes" :edges="edges" />
+      <OverviewComponent
+        class="panel-section"
+        :nodes="nodes"
+        :edges="edges"
+        :graph="graphRef"
+      />
     </div>
     <div class="panel-wrapper">
       <FilterComponent class="panel-section" :graph="graphRef" />

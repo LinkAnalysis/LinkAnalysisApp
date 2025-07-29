@@ -50,11 +50,11 @@ import { useTabsStore } from "@/stores/tabsStore"
 const props = defineProps({
   nodes: { type: Array, default: () => [] },
   edges: { type: Array, default: () => [] },
+  graph: { type: Object, default: null },
 })
 
 const { t } = useI18n()
-const graphType = "undirected"
-
+const graphType = computed(() => props.graph?.type ?? "undirected")
 const totalNodes = computed(() => props.nodes.length)
 const hiddenNodes = computed(() => props.nodes.filter(n => n.hidden).length)
 const visibleNodes = computed(() => totalNodes.value - hiddenNodes.value)

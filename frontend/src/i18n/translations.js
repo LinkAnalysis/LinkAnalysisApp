@@ -131,6 +131,7 @@ export default {
       graph_type: {
         directed: "Skierowany",
         undirected: "Nieskierowany",
+        mixed: "Mieszany",
       },
       edge_file: "Plik krawędzi",
       node_file: "Plik wierzchołków",
@@ -329,6 +330,7 @@ export default {
       graph_type: {
         directed: "Directed",
         undirected: "Undirected",
+        mixed: "Mixed",
       },
       edge_file: "Edges configuration",
       node_file: "Nodes configuration",
