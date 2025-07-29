@@ -54,7 +54,7 @@
                 type="range"
                 v-model.number="settings.minNodeSize"
                 min="5"
-                max="50"
+                :max="settings.maxNodeSize"
                 step="1"
               />
               <span>{{ settings.minNodeSize }}</span>
@@ -66,7 +66,7 @@
               <input
                 type="range"
                 v-model.number="settings.maxNodeSize"
-                min="5"
+                :min="settings.minNodeSize"
                 max="50"
                 step="1"
               />
