@@ -9,8 +9,6 @@ import noverlap from "graphology-layout-noverlap"
 import NoverlapLayout from "graphology-layout-noverlap/worker"
 import * as d3 from "d3-hierarchy"
 import * as d3f from "d3-force-3d"
-import { LogPrint } from "../../wailsjs/runtime/runtime"
-import { rotate } from "sigma/utils"
 
 export function normalizeGraphCoordinates(graph) {
   let xMin = Infinity,
@@ -113,7 +111,7 @@ export const layouts = {
       return worker
     },
     defaultParams: {
-      maxIterations: 4000,
+      maxIterations: 100,
       settings: {
         attraction: 0.0005,
         repulsion: 0.1,

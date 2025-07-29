@@ -1,5 +1,3 @@
-import random from "graphology-layout/random"
-
 export default {
   pl: {
     header: {
@@ -84,6 +82,15 @@ export default {
         maxDegree: "Maksymalny stopień",
         minDegree: "Minimalny stopień",
         random: "Losowo",
+        gridSize: "Rozmiar Siatki",
+        margin: "Margines",
+        expansion: "Ekspansja",
+        ratio: "Proporcja",
+        speed: "Prędkość",
+        nodesDistance: "Odległość wierzchołków",
+        chargeForce: "Siła ładunku",
+        centerForce: "Siła dośrodkowa",
+        collideForce: "Siła zderzenia",
       },
     },
     visualization: {
@@ -231,7 +238,7 @@ export default {
         circlepack: "Circle Pack",
         tree: "Tree",
         radial: "Radial",
-        force: "Force Simulation (D3 js)",
+        d3force: "Force Simulation (D3 js)",
         forceLayout: "Force Simulation (Graphology js)",
         noverlap: "No Overlap",
       },
@@ -252,7 +259,16 @@ export default {
         rootId: "Root ID",
         maxDegree: "Max degree",
         minDegree: "Min degree",
-        random: "random",
+        random: "Random",
+        gridSize: "Grid size",
+        margin: "Margin",
+        expansion: "Expansion",
+        ratio: "Ratio",
+        speed: "Speed",
+        nodesDistance: "Nodes distance",
+        chargeForce: "Charge force",
+        centerForce: "Center force",
+        collideForce: "Collide force",
       },
     },
     visualization: {
