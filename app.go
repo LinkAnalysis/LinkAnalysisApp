@@ -79,8 +79,8 @@ func (a *App) OpenFileExplorer() (string, error) {
 		Title: "Select file",
 		Filters: []runtime.FileFilter{
 			{
-				DisplayName: "CSV File",
-				Pattern:     "*.csv",
+				DisplayName: "CSV/GEXF File",
+				Pattern:     "*.csv;*.gexf",
 			},
 		},
 	})

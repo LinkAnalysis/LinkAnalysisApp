@@ -1,6 +1,7 @@
 import { defineStore } from "pinia"
-import { computed, ref } from "vue"
+import { computed, ref, shallowRef, watch } from "vue"
 import { visualizationDefaultOptions } from "../config/visualizationDefaults"
+import modularity from "graphology-metrics/graph/modularity"
 
 const getFileName = fullPath => {
   return fullPath ? fullPath.split(/[/\\]/).pop() : ""
@@ -13,8 +14,15 @@ export const useTabsStore = defineStore("tabs", () => {
   const layoutTypes = ref([])
   const layoutParams = ref([])
   const visualizationOptions = ref([])
-
+  const filterSelected = ref([])
+  const filterSearchTerm = ref([])
+  const filterSearchIn = ref([])
   const tabsData = ref([])
+  const averageDegrees = ref([])
+  const averageWeightedDegrees = ref([])
+  const diameters = ref([])
+  const networkDensities = ref([])
+  const networkSimpleSize = ref([])
 
   const idToIndex = id => tabsData.value.findIndex(o => o.id == id)
   const tabsCount = computed(() => tabsData.value.length)
@@ -38,6 +46,8 @@ export const useTabsStore = defineStore("tabs", () => {
     },
   })
 
+  const isLoading = ref(false)
+
   const selectedGraphChangedMarker = ref(false)
   function markSelectedGraphChange() {
     selectedGraphChangedMarker.value = !selectedGraphChangedMarker.value
@@ -52,6 +62,11 @@ export const useTabsStore = defineStore("tabs", () => {
     layoutTypes.value.splice(index, 1)
     layoutParams.value.splice(index, 1)
     visualizationOptions.value.splice(index, 1)
+    averageDegrees.value.splice(index, 1)
+    averageWeightedDegrees.value.splice(index, 1)
+    diameters.value.splice(index, 1)
+    networkDensities.value.splice(index, 1)
+    networkSimpleSize.splice(index, 1)
   }
 
   function addTab(tabData) {
@@ -65,8 +80,15 @@ export const useTabsStore = defineStore("tabs", () => {
     visualizationOptions.value.push(
       ref(structuredClone(visualizationDefaultOptions)),
     )
-
+    filterSelected.value.push("searchByName")
+    filterSearchTerm.value.push("")
+    filterSearchIn.value.push("Nodes")
     tabsData.value.push(tabData)
+    averageDegrees.value.push(null)
+    averageWeightedDegrees.value.push(null)
+    diameters.value.push(null)
+    networkDensities.value.push(null)
+    networkSimpleSize.value.push(null)
   }
 
   function resetSelectedTab() {
@@ -110,6 +132,66 @@ export const useTabsStore = defineStore("tabs", () => {
     set(newVal) {
       if (graphMode.value.length > 0 && graphMode.value[selectedTabIndex.value])
         graphMode.value[selectedTabIndex.value].value = newVal
+    },
+  })
+
+  const averageDegree = computed({
+    get() {
+      const i = selectedTabIndex.value
+      const slot = averageDegrees.value[i]
+      return slot ?? null
+    },
+    set(v) {
+      const i = selectedTabIndex.value
+      averageDegrees.value[i] = v
+    },
+  })
+
+  const avgWeightedDegree = computed({
+    get() {
+      const i = selectedTabIndex.value
+      const slot = averageWeightedDegrees.value[i]
+      return slot ?? null
+    },
+    set(v) {
+      const i = selectedTabIndex.value
+      averageWeightedDegrees.value[i] = v
+    },
+  })
+
+  const networkDiameter = computed({
+    get() {
+      const i = selectedTabIndex.value
+      const slot = diameters.value[i]
+      return slot ?? null
+    },
+    set(v) {
+      const i = selectedTabIndex.value
+      diameters.value[i] = v
+    },
+  })
+
+  const networkDensity = computed({
+    get() {
+      const i = selectedTabIndex.value
+      const slot = networkDensities.value[i]
+      return slot ?? null
+    },
+    set(v) {
+      const i = selectedTabIndex.value
+      networkDensities.value[i] = v
+    },
+  })
+
+  const simpleSize = computed({
+    get() {
+      const i = selectedTabIndex.value
+      const slot = networkSimpleSize.value[i]
+      return slot ?? null
+    },
+    set(v) {
+      const i = selectedTabIndex.value
+      networkSimpleSize.value[i] = v
     },
   })
 
@@ -180,6 +262,66 @@ export const useTabsStore = defineStore("tabs", () => {
     getFileName(selectedNodeFile.value),
   )
 
+  const globalSimulationWorker = shallowRef(null)
+  watch(selectedTabId, () => {
+    if (globalSimulationWorker.value) killSimulation()
+  })
+
+  function createSimulation(worker) {
+    killSimulation()
+    globalSimulationWorker.value = worker
+    globalSimulationWorker.value.stop()
+  }
+
+  function startSimulation() {
+    if (globalSimulationWorker.value) {
+      globalSimulationWorker.value.start()
+    }
+  }
+
+  function stopSimulation() {
+    if (globalSimulationWorker.value) {
+      globalSimulationWorker.value.stop()
+    }
+  }
+
+  function toggleSimulation() {
+    if (globalSimulationWorker.value) {
+      if (globalSimulationWorker.value.isRunning())
+        globalSimulationWorker.value.stop()
+      else globalSimulationWorker.value.start()
+    }
+  }
+
+  function killSimulation() {
+    if (globalSimulationWorker.value) {
+      globalSimulationWorker.value.kill()
+      globalSimulationWorker.value = null
+    }
+  }
+
+  function simulationExists() {
+    return globalSimulationWorker.value != null
+  }
+
+  function simulationRunning() {
+    if (!globalSimulationWorker.value) return false
+    return globalSimulationWorker.value.isRunning()
+  }
+
+  const selectedFilter = computed({
+    get: () => filterSelected.value[selectedTabIndex.value],
+    set: v => (filterSelected.value[selectedTabIndex.value] = v),
+  })
+  const selectedSearchTerm = computed({
+    get: () => filterSearchTerm.value[selectedTabIndex.value],
+    set: v => (filterSearchTerm.value[selectedTabIndex.value] = v),
+  })
+  const selectedSearchIn = computed({
+    get: () => filterSearchIn.value[selectedTabIndex.value],
+    set: v => (filterSearchIn.value[selectedTabIndex.value] = v),
+  })
+
   return {
     getSelectedEdgeFileName,
     getSelectedNodeFileName,
@@ -198,7 +340,23 @@ export const useTabsStore = defineStore("tabs", () => {
     markSelectedGraphChange,
     selectedVisualizationOptions,
     graphViewRef,
+    selectedFilter,
+    selectedSearchTerm,
+    selectedSearchIn,
     selectedGraphMode,
     selectedNumberOfRows,
+    averageDegree,
+    avgWeightedDegree,
+    networkDiameter,
+    networkDensity,
+    simpleSize,
+    createSimulation,
+    startSimulation,
+    stopSimulation,
+    toggleSimulation,
+    killSimulation,
+    simulationExists,
+    simulationRunning,
+    isLoading,
   }
 })

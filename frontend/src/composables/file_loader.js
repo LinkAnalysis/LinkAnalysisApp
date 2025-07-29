@@ -5,6 +5,7 @@ import { ReadTextFile, ReadTextFileAntiMoney } from "../../wailsjs/go/main/App"
 import { layouts } from "./layouts"
 import { useTabsStore } from "../stores/tabsStore"
 import { storeToRefs } from "pinia"
+import { parse } from "graphology-gexf"
 
 export function parseCSV(filename) {
   return new Promise((resolve, reject) => {
@@ -39,7 +40,6 @@ export function parseAntiMoneyLaunderingCSV(filename) {
           AmountPaid: row["Amount Paid"],
           PaymentCurrency: row["Payment Currency"],
           PaymentFormat: row["Payment Format"],
-          IsLaundering: row["Is Laundering"],
         }))
         resolve(transformed)
       },
@@ -50,8 +50,7 @@ export function parseAntiMoneyLaunderingCSV(filename) {
 
 // constructs the graphology Graph from the node and edge files
 export async function load_graph(node_file, edge_file, graphMode) {
-  console.log("jestem w file loaderze")
-  const graph = new Graph({ multi: true })
+  let graph = new Graph({ multi: true })
   if (graphMode === "normal") {
     const edges = await parseCSV(await ReadTextFile(edge_file))
 
@@ -111,24 +110,33 @@ export async function load_graph(node_file, edge_file, graphMode) {
       }
     })
 
-    edges.forEach(
-      ({ x, y, AmountPaid, PaymentCurrency, Timestamp, IsLaundering }) => {
-        const w = parseInt(AmountPaid)
-        graph.addEdge(x, y, {
-          label:
-            Timestamp +
-            ": " +
-            AmountPaid +
-            " " +
-            PaymentCurrency +
-            " Is Laundering: " +
-            IsLaundering,
-          weight: w,
-          size: w,
-          color: "#000000",
-        })
-      },
-    )
+    let maxWeight = 0
+    let minWeight = Infinity
+    edges.forEach(({ AmountPaid }) => {
+      const w = parseInt(AmountPaid)
+      if (w > maxWeight) maxWeight = w
+      if (w < minWeight) minWeight = w
+    })
+
+    edges.forEach(({ x, y, AmountPaid, PaymentCurrency, Timestamp }) => {
+      const w = parseInt(AmountPaid)
+      const normalized = 1 + (9 * (w - minWeight)) / (maxWeight - minWeight)
+      graph.addEdge(x, y, {
+        label: Timestamp + ": " + AmountPaid + " " + PaymentCurrency,
+        weight: normalized,
+        size: normalized,
+        color: "#000000",
+      })
+    })
+  } else if (graphMode === "gexf") {
+    const gexfContent = await ReadTextFile(edge_file)
+    graph = parse(Graph, gexfContent)
+    graph.forEachNode((node, attrs) => {
+      if (typeof attrs.x === "number" && typeof attrs.y === "number") {
+        graph.setNodeAttribute(node, "x", attrs.x / 1000)
+        graph.setNodeAttribute(node, "y", attrs.y / 1000)
+      }
+    })
   }
   return graph
 }
@@ -165,4 +173,45 @@ export function update_graph_edges(graph, edges_csv) {
   circular.assign(graph)
 
   return graph
+}
+
+export async function importCsvToGraph(graph, csvText) {
+  const edges = await parseCSV(csvText)
+  edges.forEach(({ x, y }) => {
+    if (!graph.hasNode(x)) {
+      graph.addNode(x, { size: 20, x: 0, y: 0 })
+    }
+    if (!graph.hasNode(y)) {
+      graph.addNode(y, { size: 20, x: 0, y: 0 })
+    }
+  })
+  edges.forEach(({ x, y, edgeWeight, edgeLabel }) => {
+    const w = parseInt(edgeWeight)
+    graph.addEdge(x, y, {
+      label: edgeLabel,
+      weight: w,
+      size: w,
+      color: "#000000",
+    })
+  })
+  circular.assign(graph)
+}
+
+export function importGexfToGraph(graph, gexfText, replace = true) {
+  const temp = parse(Graph, gexfText)
+  temp.forEachNode((n, attrs) => {
+    if (typeof attrs.x === "number" && typeof attrs.y === "number") {
+      temp.setNodeAttribute(n, "x", attrs.x / 1000)
+      temp.setNodeAttribute(n, "y", attrs.y / 1000)
+    }
+  })
+
+  if (replace) graph.clear()
+  temp.forEachNode((n, attrs) => {
+    if (!graph.hasNode(n)) graph.addNode(n, attrs)
+  })
+
+  temp.forEachEdge((e, attrs, s, t) => {
+    if (!graph.hasEdge(e)) graph.addEdgeWithKey(e, s, t, attrs)
+  })
 }

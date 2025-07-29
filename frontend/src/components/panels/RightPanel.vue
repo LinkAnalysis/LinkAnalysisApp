@@ -1,33 +1,39 @@
 <script setup>
+import { toRef, computed } from "vue"
 import OverviewComponent from "./rightpanelcontent/OverviewComponent.vue"
 import FilterComponent from "./rightpanelcontent/FilterComponent.vue"
 import StatisticsComponent from "./rightpanelcontent/StatisticsComponent.vue"
-import { useGraphStats } from "@/composables/useGraphStats"
 import Graph from "graphology"
-import { toRef } from "vue"
+
 const props = defineProps({
   graph: Graph,
 })
 
 const graphRef = toRef(props, "graph")
 
-const { nodeCount, edgeCount } = useGraphStats(graphRef)
+const nodes = computed(() =>
+  graphRef.value
+    ? graphRef.value.nodes().map(id => graphRef.value.getNodeAttributes(id))
+    : [],
+)
+
+const edges = computed(() =>
+  graphRef.value
+    ? graphRef.value.edges().map(id => graphRef.value.getEdgeAttributes(id))
+    : [],
+)
 </script>
 
 <template>
   <div class="panel-content">
     <div class="panel-wrapper">
-      <OverviewComponent
-        class="panel-section"
-        :node-count="nodeCount"
-        :edges-count="edgeCount"
-      />
+      <OverviewComponent class="panel-section" :nodes="nodes" :edges="edges" />
     </div>
     <div class="panel-wrapper">
-      <FilterComponent class="panel-section" />
+      <FilterComponent class="panel-section" :graph="graphRef" />
     </div>
     <div class="panel-wrapper">
-      <StatisticsComponent class="panel-section" />
+      <StatisticsComponent class="panel-section" :graph="graph" />
     </div>
   </div>
 </template>
@@ -38,13 +44,11 @@ const { nodeCount, edgeCount } = useGraphStats(graphRef)
   display: flex;
   flex-direction: column;
 }
-
 .panel-wrapper {
   flex: 1;
   margin: 4px 0;
   padding: 0 4px;
 }
-
 .panel-section {
   border: 2px solid black;
   width: 100%;

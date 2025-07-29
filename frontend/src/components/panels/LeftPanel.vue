@@ -1,5 +1,5 @@
 <script setup>
-import { toRef } from "vue"
+import { nextTick, toRef } from "vue"
 import EdgesNodesComponent from "./leftpanelcontent/EdgesNodesComponent.vue"
 import LayoutComponent from "./leftpanelcontent/LayoutComponent.vue"
 import VisualizationComponent from "./leftpanelcontent/VisualizationComponent.vue"
@@ -8,6 +8,7 @@ import { useGraphElements } from "../../composables/useGraphElements"
 import { useTabsStore } from "../../stores/tabsStore"
 import { apply_layout } from "../../composables/file_loader"
 import { storeToRefs } from "pinia"
+import { layouts } from "../../composables/layouts"
 
 const props = defineProps({
   graph: Graph,
@@ -18,17 +19,35 @@ const { nodes, edges } = useGraphElements(graphRef)
 
 const tabsStore = useTabsStore()
 const { markSelectedGraphChange } = tabsStore
-const { selectedGraph, selectedLayout, selectedLayoutParams } =
-  storeToRefs(tabsStore)
+const {
+  selectedGraph,
+  selectedLayout,
+  selectedLayoutParams,
+  selectedTabId,
+  isLoading,
+} = storeToRefs(tabsStore)
 
-const onApplyLayout = () => {
+const onApplyLayout = async () => {
   if (selectedGraph.value) {
+    isLoading.value = true
+    await nextTick()
+    await new Promise(resolve => setTimeout(resolve, 50))
     apply_layout(
       selectedGraph.value,
       selectedLayout.value,
       selectedLayoutParams.value,
     )
+    isLoading.value = false
     markSelectedGraphChange()
+  }
+}
+
+const onCreateSimulationWorker = () => {
+  if (selectedGraph.value) {
+    const g = selectedGraph.value
+    const l = selectedLayout.value
+    const p = selectedLayoutParams.value
+    tabsStore.createSimulation(layouts[l].simulate(g, p))
   }
 }
 
@@ -36,6 +55,7 @@ function handleEditNode(updated) {
   graphRef.value.updateNodeAttributes(updated.id, old => ({
     ...old,
     label: updated.label,
+    image: updated.image ?? null,
   }))
 }
 
@@ -62,6 +82,7 @@ function handleDeleteItem(type, id) {
         class="panel-section"
         :nodes="nodes"
         :edges="edges"
+        :current-tab="selectedTabId"
         @edit-node="handleEditNode"
         @edit-edge="handleEditEdge"
         @delete-node="id => handleDeleteItem('node', id)"
@@ -69,7 +90,11 @@ function handleDeleteItem(type, id) {
       />
     </div>
     <div class="panel-wrapper">
-      <LayoutComponent class="panel-section" @apply-layout="onApplyLayout" />
+      <LayoutComponent
+        class="panel-section"
+        @apply-layout="onApplyLayout"
+        @createSimulationWorker="onCreateSimulationWorker"
+      />
     </div>
     <div class="panel-wrapper">
       <VisualizationComponent class="panel-section" />

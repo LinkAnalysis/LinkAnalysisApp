@@ -1,6 +1,6 @@
 <script setup lang="js">
 import Graph from "graphology"
-import { defineProps, computed } from "vue"
+import { computed } from "vue"
 import LeftPanel from "./LeftPanel.vue"
 import RightPanel from "./RightPanel.vue"
 

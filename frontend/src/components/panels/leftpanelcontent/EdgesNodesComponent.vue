@@ -1,12 +1,14 @@
 <script setup>
-import { ref, computed } from "vue"
+import { ref, computed, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import ConfirmDialog from "@/components/ConfirmDialog.vue"
 import { RecycleScroller } from "vue3-virtual-scroller"
 import "vue3-virtual-scroller/dist/vue3-virtual-scroller.css"
 
 const props = defineProps({
   nodes: { type: Array, default: () => [] },
   edges: { type: Array, default: () => [] },
+  currentTab: Number,
 })
 
 const { t } = useI18n()
@@ -22,6 +24,14 @@ const activeTab = ref("nodes")
 const editingItem = ref(null)
 
 const searchTerm = ref("")
+const fileInput = ref(null)
+const uploadedFile = ref(null)
+const previewUrl = ref(null)
+
+const confirmDialogOpen = ref(false)
+const confirmDialogTitle = ref("")
+const confirmDialogMessage = ref("")
+const pendingDelete = ref(null)
 
 const items = computed(() => {
   const src = activeTab.value === "nodes" ? props.nodes : props.edges
@@ -43,22 +53,92 @@ const isNodeTab = computed(() => activeTab.value === "nodes")
 const tabPrefix = computed(() => (isNodeTab.value ? "node" : "edge"))
 const editItem = item => {
   editingItem.value = { ...item }
+  if (isNodeTab.value && item.image?.dataUrl) {
+    previewUrl.value = item.image.dataUrl
+    uploadedFile.value = null
+  } else {
+    previewUrl.value = null
+    uploadedFile.value = null
+  }
 }
 
 const saveEdit = () => {
   if (!editingItem.value) return
+  if (isNodeTab.value) {
+    editingItem.value.image = uploadedFile.value
+      ? previewUrl.value
+      : (editingItem.value.image ?? null)
+  }
   emit(`edit-${tabPrefix.value}`, editingItem.value)
   editingItem.value = null
+  uploadedFile.value = null
+  previewUrl.value = null
+}
+
+const labelOrId = item => {
+  const lbl = (item.label ?? "").trim()
+  return lbl.length ? lbl : item.id
 }
 
 const deleteEdit = () => {
   if (!editingItem.value) return
-  emit(`delete-${tabPrefix.value}`, editingItem.value.id)
+  const lbl = labelOrId(editingItem.value)
+  confirmDialogTitle.value = t("editor.confirm_delete")
+
+  confirmDialogMessage.value = t("editor.confirm_delete_message")
+
+  pendingDelete.value = editingItem.value
+  confirmDialogOpen.value = true
+}
+
+const handleConfirmDelete = () => {
+  if (!pendingDelete.value) return
+  emit(`delete-${tabPrefix.value}`, pendingDelete.value.id)
   editingItem.value = null
+  pendingDelete.value = null
+  confirmDialogOpen.value = false
+}
+
+const handleCancelDelete = () => {
+  confirmDialogOpen.value = false
+  pendingDelete.value = null
 }
 
 const cancelEdit = () => {
   editingItem.value = null
+}
+
+watch(
+  () => props.currentTab,
+  () => {
+    editingItem.value = null
+  },
+)
+
+function openDialog() {
+  if (fileInput.value) fileInput.value.click()
+}
+
+async function handleFile(e) {
+  const file = e.target.files[0]
+  if (file && /image\/(png|jpeg)/.test(file.type)) {
+    uploadedFile.value = file
+    previewUrl.value = await new Promise(r => {
+      const reader = new FileReader()
+      reader.onload = () => r(reader.result)
+      reader.readAsDataURL(file)
+    })
+  } else if (file) {
+    alert("Wybierz plik PNG lub JPG")
+    e.target.value = ""
+  }
+}
+
+function resetFile() {
+  uploadedFile.value = null
+  previewUrl.value = null
+  if (fileInput.value) fileInput.value.value = ""
+  if (editingItem.value) editingItem.value.image = null
 }
 </script>
 
@@ -139,7 +219,25 @@ const cancelEdit = () => {
             <label>{{ t("editor.label") }}:</label>
             <input v-model="editingItem.label" />
           </div>
+          <div class="form-row" v-if="isNodeTab">
+            <label>{{ t("editor.upload_file") }}:</label>
+            <!-- ukryty input -->
+            <input
+              ref="fileInput"
+              type="file"
+              accept="image/png,image/jpeg"
+              class="file-input-hidden"
+              @change="handleFile"
+            />
 
+            <button type="button" class="file-btn" @click="openDialog">
+              {{ t("editor.choose_file") }}
+            </button>
+
+            <button type="button" class="reset-btn" @click="resetFile">
+              {{ t("editor.reset") }}
+            </button>
+          </div>
           <div class="form-buttons">
             <button @click="saveEdit">{{ t("editor.save") }}</button>
             <button class="delete-button" @click="deleteEdit">
@@ -150,6 +248,15 @@ const cancelEdit = () => {
         </div>
       </template>
     </div>
+    <ConfirmDialog
+      :open="confirmDialogOpen"
+      :title="confirmDialogTitle"
+      :message="confirmDialogMessage"
+      :confirm-label="t('editor.confirm')"
+      :cancel-label="t('editor.cancel')"
+      @confirm="handleConfirmDelete"
+      @cancel="handleCancelDelete"
+    />
   </div>
 </template>
 
@@ -168,10 +275,12 @@ const cancelEdit = () => {
 }
 
 .list-wrapper {
-  height: 220px;
+  height: 235px;
   display: flex;
   flex-direction: column;
   overflow: auto;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .tab-buttons {
@@ -277,15 +386,16 @@ const cancelEdit = () => {
 }
 
 .edit-form {
+  box-sizing: border-box;
+  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   padding: 8px;
   background: #fff;
   border-radius: 12px;
   font-family: "Segoe UI", sans-serif;
-  height: 100%;
-  overflow: hidden;
+  overflow: auto;
 }
 
 .edit-form h3 {
@@ -293,18 +403,18 @@ const cancelEdit = () => {
   font-size: 1.4rem;
   color: #000000;
   text-align: center;
-  margin-bottom: 12px;
+  margin-bottom: 0px;
 }
 
 .form-row {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 14px;
+  margin-bottom: 8px;
 }
 
 .form-row label {
-  width: 60px;
+  width: 150px;
   font-weight: 700;
   font-size: 16px;
   color: #000;
@@ -383,5 +493,36 @@ const cancelEdit = () => {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.file-input-hidden {
+  display: none;
+}
+
+.file-btn,
+.reset-btn {
+  padding: 6px 12px;
+  border: 2px solid #000;
+  border-radius: 4px;
+  background: #d0e3ff;
+  font:
+    600 12px/1 "Segoe UI",
+    sans-serif;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-right: 8px;
+}
+
+.file-btn:hover,
+.reset-btn:hover {
+  background: #a8caff;
+}
+
+.reset-btn {
+  background: #e5e5e5;
+}
+
+.reset-btn:hover {
+  background: #d4d4d4;
 }
 </style>
