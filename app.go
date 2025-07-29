@@ -168,7 +168,7 @@ func (a *App) SpectralLayout(laplacian map[string]map[string]float32) map[string
 	rows, _ := cvecs.Dims()
 
 	for i, val := range values {
-		fmt.Printf("%d: %f\n", i, real(val))
+		//fmt.Printf("%d: %f\n", i, real(val))
 
 		// if math.Abs(real(val)) < 1e-10 {
 		// 	continue
@@ -189,22 +189,42 @@ func (a *App) SpectralLayout(laplacian map[string]map[string]float32) map[string
 	sort.Slice(pairs, func(i, j int) bool {
 		return pairs[i].Value < pairs[j].Value
 	})
-	for i, val := range pairs {
-		fmt.Printf("sorted %d: %f\n", i, val.Value)
-	}
 
 	vec2 := pairs[1].RealVec
 	vec3 := pairs[2].RealVec
 
-	fmt.Printf("vec2: %v\n", mat.Formatted(mat.NewVecDense(len(vec2), vec2), mat.Prefix(" "), mat.Excerpt(0)))
-	fmt.Printf("vec3: %v\n", mat.Formatted(mat.NewVecDense(len(vec3), vec3), mat.Prefix(" "), mat.Excerpt(0)))
+	//fmt.Printf("vec2: %v\n", mat.Formatted(mat.NewVecDense(len(vec2), vec2), mat.Prefix(" "), mat.Excerpt(0)))
+	//fmt.Printf("vec3: %v\n", mat.Formatted(mat.NewVecDense(len(vec3), vec3), mat.Prefix(" "), mat.Excerpt(0)))
 
 	res := make(map[string]map[string]float64)
 
+	maxX := vec2[0]
+	minX := vec2[0]
+
+	maxY := vec3[0]
+	minY := vec3[0]
+
 	for i := range len(vec2) {
+		if vec2[i] > maxX {
+			maxX = vec2[i]
+		}
+		if vec2[i] < minX {
+			minX = vec2[i]
+		}
+		if vec3[i] > maxY {
+			maxY = vec3[i]
+		}
+		if vec3[i] < minY {
+			minY = vec3[i]
+		}
+	}
+
+	for i := range len(vec2) {
+		xv := vec2[i]
+		yv := vec3[i]
 		res[strconv.Itoa(i)] = map[string]float64{
-			"x": vec2[i],
-			"y": vec3[i],
+			"x": (xv - minX) / (maxX - minX),
+			"y": (yv - minY) / (maxY - minY),
 		}
 	}
 

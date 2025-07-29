@@ -12,6 +12,10 @@ import * as d3f from "d3-force-3d"
 import { LogPrint } from "../../wailsjs/runtime/runtime"
 import { SpectralLayout } from "../../wailsjs/go/main/App"
 import { assignLayout, collectLayout } from "graphology-layout/utils"
+import {
+  countConnectedComponents,
+  forEachConnectedComponent,
+} from "graphology-components"
 
 export function normalizeGraphCoordinates(graph) {
   let xMin = Infinity,
@@ -227,20 +231,37 @@ export const layouts = {
   },
   spectral: {
     apply: (graph, params = {}) => {
-      createSpectralLayout(graph, params).then(l => {
-        assignLayout(graph, l)
-        normalizeGraphCoordinates(graph)
+      const count = countConnectedComponents(graph)
+      const n = Math.floor(Math.sqrt(count)) + 1
+      const s = 1 / n
+
+      let j = 0
+      forEachConnectedComponent(graph, comp => {
+        const sc = j % n
+        const sr = Math.floor(j / n)
+        if (comp.length > 3) {
+          createSpectralLayout(graph, comp).then(l => {
+            const nl = {}
+            Object.keys(l).forEach(k => {
+              const nx = l[k].x * s + sc * s
+              const ny = l[k].y * s + sr * s
+              nl[k] = { x: nx, y: ny }
+            })
+            assignLayout(graph, nl)
+          })
+        } else {
+          const nl = {}
+          for (let k = 0; k < comp.length; k++) {
+            const nx = Math.random() * s + sc * s
+            const ny = Math.random() * s + sr * s
+            nl[comp[k]] = { x: nx, y: ny }
+          }
+          assignLayout(graph, nl)
+        }
+        j++
       })
     },
-    defaultParams: {
-      degreeMatrix: {
-        optionsList: [
-          { name: "degree", value: null },
-          { name: "inDegree", value: null },
-          { name: "outDegree", value: null },
-        ],
-      },
-    },
+    defaultParams: {},
   },
 }
 
@@ -296,31 +317,43 @@ function buildD3Hierarchy(graph, rootId) {
   return d3.hierarchy(hierarchyData, d => d.children)
 }
 
-export async function createSpectralLayout(graph, params) {
+export async function createSpectralLayout(graph, nodes) {
   let laplacian = {}
-  let indices = {}
-  const nodes = graph.nodes()
+
+  let index_to_id = {}
+  let id_to_index = {}
   for (let i = 0; i < nodes.length; i++) {
     const n = nodes[i]
     laplacian[i] = {}
     laplacian[i][i] = graph.degree(n)
-    indices[n] = i
-    //const attr = graph.getNodeAttributes(n)
+
+    id_to_index[n] = i
+    index_to_id[i] = n
   }
+  //console.log("id_to_index", id_to_index)
 
   graph.forEachEdge(e => {
     const attr = graph.getEdgeAttributes(e)
     const w = attr["weight"] ?? 1
+    const s = graph.source(e)
+    const t = graph.target(e)
+    const si = id_to_index[s] ?? null
+    const ti = id_to_index[t] ?? null
 
-    const s = indices[graph.source(e)]
-    const t = indices[graph.target(e)]
-    if (s != t) {
-      laplacian[s][t] = -1 //-w
-      laplacian[t][s] = -1 //-w
+    // console.log("s: ", s, "si: ", si)
+    // console.log("t: ", t, "ti: ", ti)
+
+    if (si != null && ti != null && si != ti) {
+      laplacian[si][ti] = -1 //-w
+      laplacian[ti][si] = -1 //-w
     }
   })
 
   const sl = await SpectralLayout(laplacian)
+  const res = {}
+  for (let i = 0; i < nodes.length; i++) {
+    res[index_to_id[i]] = sl[`${i}`]
+  }
 
-  return sl
+  return res
 }
