@@ -158,72 +158,67 @@ function setLanguage(lang) {
 </script>
 
 <template>
-  <v-app-bar>
-    <header class="header-bar">
-      <div class="branding">
-        <img src="@/assets/images/logo.svg" alt="Logo" class="logo" />
-        <span class="app-name">LinkAnalysis</span>
-      </div>
-      <div class="button-box">
-        <div class="file-button-box">
-          <HeaderButtonComponent
-            :label="t('header.file')"
-            name="file"
-            :options="[
-              {
-                label: t('header.file_menu.upload_graph'),
-                children: [
-                  {
-                    label: t('header.file_menu.upload_edges'),
-                    onClick: () => uploadEdgesConfiguration(),
-                  },
-                  {
-                    label: t('header.file_menu.upload_nodes'),
-                    onClick: () => uploadNodesConfiguration(),
-                  },
-                ],
-              },
-              {
-                label: t('header.file_menu.upload_anti_money_graph'),
-                onClick: () => uploadAntiMoneyLaunderingGraph(),
-              },
-              {
-                label: t('header.file_menu.upload_gexf'),
-                onClick: () => uploadGEXFConfiguration(),
-              },
-              {
-                label: 'Export Graph',
-                children: [
-                  {
-                    label: t('header.file_menu.export_jpg'),
-                    onClick: () => exportToJPG(),
-                  },
-                  {
-                    label: t('header.file_menu.export_png'),
-                    onClick: exportToPNG,
-                  },
-                  {
-                    label: t('header.file_menu.export_gexf'),
-                    onClick: exportToGEXF,
-                  },
-                ],
-              },
-            ]"
-          />
-        </div>
+  <header class="header-bar">
+    <div class="branding">
+      <img src="@/assets/images/logo.svg" alt="Logo" class="logo" />
+      <span class="app-name">LinkAnalysis</span>
+    </div>
+    <div class="button-box">
+      <div class="file-button-box">
         <HeaderButtonComponent
-          :label="t('header.workspace')"
-          name="workspace"
-        />
-        <HeaderButtonComponent :label="t('header.view')" name="view" />
-        <HeaderButtonComponent
-          :label="t('header.settings')"
-          name="settings"
-          :options="languageOptions"
+          :label="t('header.file')"
+          name="file"
+          :options="[
+            {
+              label: t('header.file_menu.upload_graph'),
+              children: [
+                {
+                  label: t('header.file_menu.upload_edges'),
+                  onClick: () => uploadEdgesConfiguration(),
+                },
+                {
+                  label: t('header.file_menu.upload_nodes'),
+                  onClick: () => uploadNodesConfiguration(),
+                },
+              ],
+            },
+            {
+              label: t('header.file_menu.upload_anti_money_graph'),
+              onClick: () => uploadAntiMoneyLaunderingGraph(),
+            },
+            {
+              label: t('header.file_menu.upload_gexf'),
+              onClick: () => uploadGEXFConfiguration(),
+            },
+            {
+              label: 'Export Graph',
+              children: [
+                {
+                  label: t('header.file_menu.export_jpg'),
+                  onClick: () => exportToJPG(),
+                },
+                {
+                  label: t('header.file_menu.export_png'),
+                  onClick: exportToPNG,
+                },
+                {
+                  label: t('header.file_menu.export_gexf'),
+                  onClick: exportToGEXF,
+                },
+              ],
+            },
+          ]"
         />
       </div>
-    </header>
-  </v-app-bar>
+      <HeaderButtonComponent :label="t('header.workspace')" name="workspace" />
+      <HeaderButtonComponent :label="t('header.view')" name="view" />
+      <HeaderButtonComponent
+        :label="t('header.settings')"
+        name="settings"
+        :options="languageOptions"
+      />
+    </div>
+  </header>
   <teleport to="body">
     <div v-if="amlModalOpen" class="aml-overlay">
       <div class="aml-modal">

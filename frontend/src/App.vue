@@ -18,17 +18,14 @@ const {
   selectedNodeFile,
   selectedEdgeFile,
   selectedTabId,
-  selectedLayout,
-  selectedLayoutParams,
-  tabsData,
   selectedVisualizationOptions,
   graphViewRef,
   selectedGraphMode,
+  isLoading,
 } = storeToRefs(tabs)
 
 const graph = selectedGraph
 
-const isLoading = ref(false)
 const graphKey = ref(0)
 
 watch(

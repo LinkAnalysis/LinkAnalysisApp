@@ -1,6 +1,7 @@
 import { defineStore } from "pinia"
 import { computed, ref, shallowRef, watch } from "vue"
 import { visualizationDefaultOptions } from "../config/visualizationDefaults"
+import modularity from "graphology-metrics/graph/modularity"
 
 const getFileName = fullPath => {
   return fullPath ? fullPath.split(/[/\\]/).pop() : ""
@@ -17,6 +18,11 @@ export const useTabsStore = defineStore("tabs", () => {
   const filterSearchTerm = ref([])
   const filterSearchIn = ref([])
   const tabsData = ref([])
+  const averageDegrees = ref([])
+  const averageWeightedDegrees = ref([])
+  const diameters = ref([])
+  const networkDensities = ref([])
+  const networkSimpleSize = ref([])
 
   const idToIndex = id => tabsData.value.findIndex(o => o.id == id)
   const tabsCount = computed(() => tabsData.value.length)
@@ -40,6 +46,8 @@ export const useTabsStore = defineStore("tabs", () => {
     },
   })
 
+  const isLoading = ref(false)
+
   const selectedGraphChangedMarker = ref(false)
   function markSelectedGraphChange() {
     selectedGraphChangedMarker.value = !selectedGraphChangedMarker.value
@@ -54,6 +62,11 @@ export const useTabsStore = defineStore("tabs", () => {
     layoutTypes.value.splice(index, 1)
     layoutParams.value.splice(index, 1)
     visualizationOptions.value.splice(index, 1)
+    averageDegrees.value.splice(index, 1)
+    averageWeightedDegrees.value.splice(index, 1)
+    diameters.value.splice(index, 1)
+    networkDensities.value.splice(index, 1)
+    networkSimpleSize.splice(index, 1)
   }
 
   function addTab(tabData) {
@@ -71,6 +84,11 @@ export const useTabsStore = defineStore("tabs", () => {
     filterSearchTerm.value.push("")
     filterSearchIn.value.push("Nodes")
     tabsData.value.push(tabData)
+    averageDegrees.value.push(null)
+    averageWeightedDegrees.value.push(null)
+    diameters.value.push(null)
+    networkDensities.value.push(null)
+    networkSimpleSize.value.push(null)
   }
 
   function resetSelectedTab() {
@@ -114,6 +132,66 @@ export const useTabsStore = defineStore("tabs", () => {
     set(newVal) {
       if (graphMode.value.length > 0 && graphMode.value[selectedTabIndex.value])
         graphMode.value[selectedTabIndex.value].value = newVal
+    },
+  })
+
+  const averageDegree = computed({
+    get() {
+      const i = selectedTabIndex.value
+      const slot = averageDegrees.value[i]
+      return slot ?? null
+    },
+    set(v) {
+      const i = selectedTabIndex.value
+      averageDegrees.value[i] = v
+    },
+  })
+
+  const avgWeightedDegree = computed({
+    get() {
+      const i = selectedTabIndex.value
+      const slot = averageWeightedDegrees.value[i]
+      return slot ?? null
+    },
+    set(v) {
+      const i = selectedTabIndex.value
+      averageWeightedDegrees.value[i] = v
+    },
+  })
+
+  const networkDiameter = computed({
+    get() {
+      const i = selectedTabIndex.value
+      const slot = diameters.value[i]
+      return slot ?? null
+    },
+    set(v) {
+      const i = selectedTabIndex.value
+      diameters.value[i] = v
+    },
+  })
+
+  const networkDensity = computed({
+    get() {
+      const i = selectedTabIndex.value
+      const slot = networkDensities.value[i]
+      return slot ?? null
+    },
+    set(v) {
+      const i = selectedTabIndex.value
+      networkDensities.value[i] = v
+    },
+  })
+
+  const simpleSize = computed({
+    get() {
+      const i = selectedTabIndex.value
+      const slot = networkSimpleSize.value[i]
+      return slot ?? null
+    },
+    set(v) {
+      const i = selectedTabIndex.value
+      networkSimpleSize.value[i] = v
     },
   })
 
@@ -267,7 +345,11 @@ export const useTabsStore = defineStore("tabs", () => {
     selectedSearchIn,
     selectedGraphMode,
     selectedNumberOfRows,
-
+    averageDegree,
+    avgWeightedDegree,
+    networkDiameter,
+    networkDensity,
+    simpleSize,
     createSimulation,
     startSimulation,
     stopSimulation,
@@ -275,5 +357,6 @@ export const useTabsStore = defineStore("tabs", () => {
     killSimulation,
     simulationExists,
     simulationRunning,
+    isLoading,
   }
 })
