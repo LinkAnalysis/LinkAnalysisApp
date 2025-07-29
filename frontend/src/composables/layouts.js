@@ -1,7 +1,7 @@
 import circular from "graphology-layout/circular"
 import random from "graphology-layout/random"
 import circlepack from "graphology-layout/circlepack"
-import forceAtlas2 from "graphology-layout-forceatlas2"
+import forceAtlas2, { inferSettings } from "graphology-layout-forceatlas2"
 import FA2Layout from "graphology-layout-forceatlas2/worker"
 import ForceSupervisor from "graphology-layout-force/worker"
 import forceLayout from "graphology-layout-force"
@@ -9,6 +9,13 @@ import noverlap from "graphology-layout-noverlap"
 import NoverlapLayout from "graphology-layout-noverlap/worker"
 import * as d3 from "d3-hierarchy"
 import * as d3f from "d3-force-3d"
+import { LogPrint } from "../../wailsjs/runtime/runtime"
+import { SpectralLayout } from "../../wailsjs/go/main/App"
+import { assignLayout, collectLayout } from "graphology-layout/utils"
+import {
+  countConnectedComponents,
+  forEachConnectedComponent,
+} from "graphology-components"
 
 export function normalizeGraphCoordinates(graph) {
   let xMin = Infinity,
@@ -88,8 +95,13 @@ export const layouts = {
       worker.start()
       return worker
     },
+    actions: {
+      infer: (graph, params) => {
+        return { ...params, settings: inferSettings(graph) }
+      },
+    },
     defaultParams: {
-      iterations: 1000,
+      iterations: 100,
       settings: {
         gravity: 1,
         scalingRatio: 100,
@@ -222,6 +234,40 @@ export const layouts = {
       },
     },
   },
+  spectral: {
+    apply: (graph, params = {}) => {
+      const count = countConnectedComponents(graph)
+      const n = Math.floor(Math.sqrt(count)) + 1
+      const s = 1 / n
+
+      let j = 0
+      forEachConnectedComponent(graph, comp => {
+        const sc = j % n
+        const sr = Math.floor(j / n)
+        if (comp.length > 3) {
+          createSpectralLayout(graph, comp).then(l => {
+            const nl = {}
+            Object.keys(l).forEach(k => {
+              const nx = l[k].x * s + sc * s
+              const ny = l[k].y * s + sr * s
+              nl[k] = { x: nx, y: ny }
+            })
+            assignLayout(graph, nl)
+          })
+        } else {
+          const nl = {}
+          for (let k = 0; k < comp.length; k++) {
+            const nx = Math.random() * s + sc * s
+            const ny = Math.random() * s + sr * s
+            nl[comp[k]] = { x: nx, y: ny }
+          }
+          assignLayout(graph, nl)
+        }
+        j++
+      })
+    },
+    defaultParams: {},
+  },
 }
 
 function selectRootFromParams(graph, params) {
@@ -274,4 +320,45 @@ function buildD3Hierarchy(graph, rootId) {
   }
   const hierarchyData = buildNode(rootId)
   return d3.hierarchy(hierarchyData, d => d.children)
+}
+
+export async function createSpectralLayout(graph, nodes) {
+  let laplacian = {}
+
+  let index_to_id = {}
+  let id_to_index = {}
+  for (let i = 0; i < nodes.length; i++) {
+    const n = nodes[i]
+    laplacian[i] = {}
+    laplacian[i][i] = graph.degree(n)
+
+    id_to_index[n] = i
+    index_to_id[i] = n
+  }
+  //console.log("id_to_index", id_to_index)
+
+  graph.forEachEdge(e => {
+    const attr = graph.getEdgeAttributes(e)
+    const w = attr["weight"] ?? 1
+    const s = graph.source(e)
+    const t = graph.target(e)
+    const si = id_to_index[s] ?? null
+    const ti = id_to_index[t] ?? null
+
+    // console.log("s: ", s, "si: ", si)
+    // console.log("t: ", t, "ti: ", ti)
+
+    if (si != null && ti != null && si != ti) {
+      laplacian[si][ti] = -1 //-w
+      laplacian[ti][si] = -1 //-w
+    }
+  })
+
+  const sl = await SpectralLayout(laplacian)
+  const res = {}
+  for (let i = 0; i < nodes.length; i++) {
+    res[index_to_id[i]] = sl[`${i}`]
+  }
+
+  return res
 }

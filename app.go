@@ -5,9 +5,12 @@ import (
 	"encoding/csv"
 	"fmt"
 	"os"
+	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
+	"gonum.org/v1/gonum/mat"
 )
 
 // App struct
@@ -115,6 +118,117 @@ func (a *App) SaveStringToFile(path string, content string) error {
 
 func (a *App) SaveBytesToFile(path string, content []byte) error {
 	return os.WriteFile(path, content, 0644)
+}
+
+type EigenPair struct {
+	Value   float64
+	Index   int
+	RealVec []float64
+}
+
+func (a *App) SpectralLayout(laplacian map[string]map[string]float32) map[string]map[string]float64 {
+	rowKeys := make([]string, 0, len(laplacian))
+	colKeySet := make(map[string]bool)
+	for rowKey, cols := range laplacian {
+		rowKeys = append(rowKeys, rowKey)
+		for colKey := range cols {
+			colKeySet[colKey] = true
+		}
+	}
+	colKeys := make([]string, 0, len(colKeySet))
+	for k := range colKeySet {
+		colKeys = append(colKeys, k)
+	}
+	sort.Strings(rowKeys)
+	sort.Strings(colKeys)
+
+	data := make([]float64, 0, len(rowKeys)*len(colKeys))
+	for _, rowKey := range rowKeys {
+		row := laplacian[rowKey]
+		for _, colKey := range colKeys {
+			val := float64(row[colKey])
+			data = append(data, val)
+		}
+	}
+	r := len(rowKeys)
+	c := len(colKeys)
+
+	L := mat.NewDense(r, c, data)
+	//fmt.Printf("%v\n    ", mat.Formatted(L, mat.Prefix("    "), mat.Excerpt(0)))
+
+	var eig mat.Eigen
+	eig.Factorize(L, mat.EigenRight)
+	values := eig.Values(nil)
+	var cvecs mat.CDense
+	eig.VectorsTo(&cvecs)
+
+	//fmt.Printf("    %v\n", mat.Formatted(cvecs, mat.Prefix("    "), mat.Excerpt(0)))
+
+	pairs := make([]EigenPair, 0, len(values))
+	rows, _ := cvecs.Dims()
+
+	for i, val := range values {
+		//fmt.Printf("%d: %f\n", i, real(val))
+
+		// if math.Abs(real(val)) < 1e-10 {
+		// 	continue
+		// }
+		vec := make([]float64, rows)
+		for j := range rows {
+			c := cvecs.At(j, i)
+			vec[j] = real(c)
+		}
+
+		pairs = append(pairs, EigenPair{
+			Value:   real(val),
+			Index:   i,
+			RealVec: vec,
+		})
+	}
+
+	sort.Slice(pairs, func(i, j int) bool {
+		return pairs[i].Value < pairs[j].Value
+	})
+
+	vec2 := pairs[1].RealVec
+	vec3 := pairs[2].RealVec
+
+	//fmt.Printf("vec2: %v\n", mat.Formatted(mat.NewVecDense(len(vec2), vec2), mat.Prefix(" "), mat.Excerpt(0)))
+	//fmt.Printf("vec3: %v\n", mat.Formatted(mat.NewVecDense(len(vec3), vec3), mat.Prefix(" "), mat.Excerpt(0)))
+
+	res := make(map[string]map[string]float64)
+
+	maxX := vec2[0]
+	minX := vec2[0]
+
+	maxY := vec3[0]
+	minY := vec3[0]
+
+	for i := range len(vec2) {
+		if vec2[i] > maxX {
+			maxX = vec2[i]
+		}
+		if vec2[i] < minX {
+			minX = vec2[i]
+		}
+		if vec3[i] > maxY {
+			maxY = vec3[i]
+		}
+		if vec3[i] < minY {
+			minY = vec3[i]
+		}
+	}
+
+	for i := range len(vec2) {
+		xv := vec2[i]
+		yv := vec3[i]
+		res[strconv.Itoa(i)] = map[string]float64{
+			"x": (xv - minX) / (maxX - minX),
+			"y": (yv - minY) / (maxY - minY),
+		}
+	}
+
+	return res
 }
 
 // startup is called when the app starts. The context is saved

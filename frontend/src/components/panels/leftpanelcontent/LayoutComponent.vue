@@ -92,6 +92,22 @@
           </template>
         </tbody>
       </table>
+      <template v-if="hasActions && selectedGraph">
+        <template v-for="(val, key) in layoutsMap[selectedLayout].actions">
+          <button
+            class="reset-button"
+            @click="
+              () =>
+                (selectedLayoutParams = val(
+                  selectedGraph,
+                  selectedLayoutParams,
+                ))
+            "
+          >
+            {{ formatLabel(key) }}
+          </button>
+        </template>
+      </template>
       <button v-if="hasParams" class="reset-button" @click="resetSettings">
         {{ t("layout.reset") }}
       </button>
@@ -99,7 +115,7 @@
         {{ t("layout.apply") }}
       </button>
       <button v-if="canSimulate" @click="createSimulation" class="reset-button">
-        Create simulation
+        {{ t("layout.simulation") }}
       </button>
     </div>
   </div>
@@ -115,7 +131,7 @@ import { useI18n } from "vue-i18n"
 const { t } = useI18n()
 
 const tabsStore = useTabsStore()
-const { selectedLayout, selectedLayoutParams, selectedTabId } =
+const { selectedLayout, selectedLayoutParams, selectedTabId, selectedGraph } =
   storeToRefs(tabsStore)
 
 const layoutsNames = computed(() =>
@@ -135,6 +151,9 @@ const hasParams = computed(
 )
 const canSimulate = computed(() =>
   Object.keys(layoutsMap[selectedLayout.value]).includes("simulate"),
+)
+const hasActions = computed(() =>
+  Object.keys(layoutsMap[selectedLayout.value]).includes("actions"),
 )
 
 watch(
