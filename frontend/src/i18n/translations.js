@@ -1,3 +1,5 @@
+import random from "graphology-layout/random"
+
 export default {
   pl: {
     header: {
@@ -58,10 +60,10 @@ export default {
         circular: "Kołowy",
         forceAtlas2: "Układ siłowy (ForceAtlas2)",
         circlepack: "Pakowanie kołowe (CirclePack)",
-        d3tree: "Drzewo (D3 Tree)",
+        tree: "Drzewo",
         radial: "Układ radialny",
-        force: "Symulacja siłowa (3D Force)",
-        forceLayout: "Symulacja siłowa (2D Force)",
+        d3force: "Symulacja siłowa (D3js)",
+        forceLayout: "Symulacja siłowa (Graphologyjs)",
         noverlap: "Bez nachodzenia (Noverlap)",
       },
       params: {
@@ -77,6 +79,11 @@ export default {
         inertia: "Bezwładność",
         maxMove: "Maksymalny ruch",
         adjustSizes: "Dostosowanie rozmiarów",
+        rootSelectOptions: "Sposób wyboru korzenia",
+        rootId: "ID korzenia",
+        maxDegree: "Maksymalny stopień",
+        minDegree: "Minimalny stopień",
+        random: "Losowo",
       },
     },
     visualization: {
@@ -222,10 +229,10 @@ export default {
         circular: "Circular",
         forceAtlas2: "Force-directed (ForceAtlas2)",
         circlepack: "Circle Pack",
-        d3tree: "D3 Tree",
+        tree: "Tree",
         radial: "Radial",
-        force: "3D Force Simulation",
-        forceLayout: "2D Force Simulation",
+        force: "Force Simulation (D3 js)",
+        forceLayout: "Force Simulation (Graphology js)",
         noverlap: "No Overlap",
       },
       params: {
@@ -241,6 +248,11 @@ export default {
         inertia: "Inertia",
         maxMove: "Maximum move",
         adjustSizes: "Adjust sizes",
+        rootSelectOptions: "Root select method",
+        rootId: "Root ID",
+        maxDegree: "Max degree",
+        minDegree: "Min degree",
+        random: "random",
       },
     },
     visualization: {

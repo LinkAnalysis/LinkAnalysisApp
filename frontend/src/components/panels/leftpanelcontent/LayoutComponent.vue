@@ -14,7 +14,7 @@
             <template v-if="typeof value === 'object'">
               <template v-if="value.optionsList != null">
                 <tr>
-                  <td>{{ key }}</td>
+                  <td>{{ formatLabel(key) }}</td>
                   <td>
                     <div
                       style="
@@ -36,7 +36,7 @@
                           :value="op.name"
                           style="width: 90%; height: 50%"
                         >
-                          {{ op.name }}
+                          {{ formatLabel(op.name) }}
                         </option>
                       </select>
                       <input
@@ -111,7 +111,6 @@ import { layouts as layoutsMap } from "@/composables/layouts"
 import { storeToRefs } from "pinia"
 import { computed, watch } from "vue"
 import { useI18n } from "vue-i18n"
-import { LogPrint } from "../../../../wailsjs/runtime/runtime"
 
 const { t } = useI18n()
 
