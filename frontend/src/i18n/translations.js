@@ -56,6 +56,7 @@ export default {
       title: "Układ",
       apply: "Zastosuj",
       reset: "Przywróć domyślne",
+      simulation: "Stwórz symulację",
       layouts: {
         random: "Losowy",
         circular: "Kołowy",
@@ -258,6 +259,7 @@ export default {
       title: "Layout",
       apply: "Apply",
       reset: "Restore Defaults ",
+      simulation: "Create simulation",
       layouts: {
         random: "Random",
         circular: "Circular",

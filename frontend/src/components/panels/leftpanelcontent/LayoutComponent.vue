@@ -115,7 +115,7 @@
         {{ t("layout.apply") }}
       </button>
       <button v-if="canSimulate" @click="createSimulation" class="reset-button">
-        Create simulation
+        {{ t("layout.simulation") }}
       </button>
     </div>
   </div>
