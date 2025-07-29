@@ -141,6 +141,18 @@ export default {
         reset: "🔄️",
         comingSoon: "Wkrótce dostępne",
       },
+      degreeRange: {
+        minDegree: "Minimalny stopień",
+        maxDegree: "Maksymalny stopień",
+        apply: "Zastosuj",
+        reset: "Resetuj",
+      },
+      edgeWeight: {
+        minWeight: "Minimalna waga",
+        maxWeight: "Maksymalna waga",
+        apply: "Zastosuj",
+        reset: "Resetuj",
+      },
     },
     statistics: {
       title: "Statystyki",
@@ -309,6 +321,18 @@ export default {
         search: "🔍",
         reset: "🔄️",
         comingSoon: "Coming soon",
+      },
+      degreeRange: {
+        minDegree: "Minimum degree",
+        maxDegree: "Maximum degree",
+        apply: "Apply",
+        reset: "Reset",
+      },
+      edgeWeight: {
+        minWeight: "Minimum weight",
+        maxWeight: "Maximum weight",
+        apply: "Apply",
+        reset: "Reset",
       },
     },
     statistics: {

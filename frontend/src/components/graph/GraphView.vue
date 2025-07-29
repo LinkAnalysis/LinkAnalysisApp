@@ -39,6 +39,18 @@ const {
   optionsRef: options,
 })
 
+const highlightedNode = computed(() => {
+  if (!clickedNodeData.value) return null
+  const attrs = props.graph.getNodeAttributes(clickedNodeData.value.id)
+  return attrs.highlighted ? clickedNodeData.value : null
+})
+
+const highlightedEdge = computed(() => {
+  if (!popupEdgeData.value) return null
+  const attrs = props.graph.getEdgeAttributes(popupEdgeData.value.id)
+  return attrs.highlighted ? popupEdgeData.value : null
+})
+
 const zoomIn = () => renderer.value?.getCamera().animatedZoom({ duration: 600 })
 const zoomOut = () =>
   renderer.value?.getCamera().animatedUnzoom({ duration: 600 })
@@ -172,32 +184,31 @@ watch(
       @zoomOut="zoomOut"
       @resetView="() => resetCamera()"
     />
-
     <VertexWindow
-      v-if="clickedNodeData"
+      v-if="highlightedNode"
       :visible="true"
       :position="popupNodePosition"
     >
-      ID: {{ clickedNodeData.id }}<br />
-      <span v-if="clickedNodeData.description">
-        {{ t("vertex_window.name") }}: {{ clickedNodeData.description }}<br />
+      ID: {{ highlightedNode.id }}<br />
+      <span v-if="highlightedNode.description">
+        {{ t("vertex_window.name") }}: {{ highlightedNode.description }}<br />
       </span>
       <span v-else>
         {{ t("vertex_window.name") }}: {{ t("vertex_window.no_description")
         }}<br />
       </span>
       {{ t("vertex_window.number_of_neighbors") }}:
-      {{ clickedNodeData.numOfNeighbors }}<br />
+      {{ highlightedNode.numOfNeighbors }}<br />
     </VertexWindow>
 
     <VertexWindow
-      v-if="popupEdgeData"
+      v-if="highlightedEdge"
       :visible="true"
       :position="popupEdgePosition"
     >
-      ID: {{ popupEdgeData.id }}<br />
-      {{ t("vertex_window.name") }}: {{ popupEdgeData.description }} <br />
-      {{ t("vertex_window.weight") }}: {{ popupEdgeData.weight }} <br />
+      ID: {{ highlightedEdge.id }}<br />
+      {{ t("vertex_window.name") }}: {{ highlightedEdge.description }} <br />
+      {{ t("vertex_window.weight") }}: {{ highlightedEdge.weight }} <br />
     </VertexWindow>
     <ConfirmDialog
       :open="confirmDeleteModalOpen"
@@ -205,8 +216,12 @@ watch(
       :message="confirmMessage"
       :confirm-label="t('editor.confirm')"
       :cancel-label="t('editor.cancel')"
-      @confirm="doDelete()"
-      @cancel="confirmDeleteModalOpen = false"
+      @confirm="doDelete"
+      @cancel="
+        () => {
+          confirmDeleteModalOpen.value = false
+        }
+      "
     />
   </div>
 </template>

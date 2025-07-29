@@ -248,16 +248,16 @@ function resetFile() {
         </div>
       </template>
     </div>
+    <ConfirmDialog
+      :open="confirmDialogOpen"
+      :title="confirmDialogTitle"
+      :message="confirmDialogMessage"
+      :confirm-label="t('editor.confirm')"
+      :cancel-label="t('editor.cancel')"
+      @confirm="handleConfirmDelete"
+      @cancel="handleCancelDelete"
+    />
   </div>
-  <ConfirmDialog
-    :open="confirmDialogOpen"
-    :title="confirmDialogTitle"
-    :message="confirmDialogMessage"
-    :confirm-label="t('editor.confirm')"
-    :cancel-label="t('editor.cancel')"
-    @confirm="handleConfirmDelete"
-    @cancel="handleCancelDelete"
-  />
 </template>
 
 <style scoped>
