@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/csv"
 	"fmt"
-	"math"
 	"os"
 	"sort"
 	"strconv"
@@ -155,19 +154,25 @@ func (a *App) SpectralLayout(laplacian map[string]map[string]float32) map[string
 	c := len(colKeys)
 
 	L := mat.NewDense(r, c, data)
+	//fmt.Printf("%v\n    ", mat.Formatted(L, mat.Prefix("    "), mat.Excerpt(0)))
+
 	var eig mat.Eigen
 	eig.Factorize(L, mat.EigenRight)
 	values := eig.Values(nil)
 	var cvecs mat.CDense
 	eig.VectorsTo(&cvecs)
 
+	//fmt.Printf("    %v\n", mat.Formatted(cvecs, mat.Prefix("    "), mat.Excerpt(0)))
+
 	pairs := make([]EigenPair, 0, len(values))
 	rows, _ := cvecs.Dims()
 
 	for i, val := range values {
-		if math.Abs(real(val)) < 1e-10 {
-			continue
-		}
+		fmt.Printf("%d: %f\n", i, real(val))
+
+		// if math.Abs(real(val)) < 1e-10 {
+		// 	continue
+		// }
 		vec := make([]float64, rows)
 		for j := range rows {
 			c := cvecs.At(j, i)
@@ -175,7 +180,7 @@ func (a *App) SpectralLayout(laplacian map[string]map[string]float32) map[string
 		}
 
 		pairs = append(pairs, EigenPair{
-			Value:   math.Abs(real(val)),
+			Value:   real(val),
 			Index:   i,
 			RealVec: vec,
 		})
@@ -184,9 +189,15 @@ func (a *App) SpectralLayout(laplacian map[string]map[string]float32) map[string
 	sort.Slice(pairs, func(i, j int) bool {
 		return pairs[i].Value < pairs[j].Value
 	})
+	for i, val := range pairs {
+		fmt.Printf("sorted %d: %f\n", i, val.Value)
+	}
 
 	vec2 := pairs[1].RealVec
 	vec3 := pairs[2].RealVec
+
+	fmt.Printf("vec2: %v\n", mat.Formatted(mat.NewVecDense(len(vec2), vec2), mat.Prefix(" "), mat.Excerpt(0)))
+	fmt.Printf("vec3: %v\n", mat.Formatted(mat.NewVecDense(len(vec3), vec3), mat.Prefix(" "), mat.Excerpt(0)))
 
 	res := make(map[string]map[string]float64)
 

@@ -232,7 +232,15 @@ export const layouts = {
         normalizeGraphCoordinates(graph)
       })
     },
-    defaultParams: {},
+    defaultParams: {
+      degreeMatrix: {
+        optionsList: [
+          { name: "degree", value: null },
+          { name: "inDegree", value: null },
+          { name: "outDegree", value: null },
+        ],
+      },
+    },
   },
 }
 
@@ -288,21 +296,27 @@ function buildD3Hierarchy(graph, rootId) {
   return d3.hierarchy(hierarchyData, d => d.children)
 }
 
-export async function createSpectralLayout(graph, params = {}) {
+export async function createSpectralLayout(graph, params) {
   let laplacian = {}
-  graph.forEachNode(n => {
-    const attr = graph.getNodeAttributes(n)
-    laplacian[n] = {}
-    laplacian[n][n] = graph.degree(n)
-  })
+  let indices = {}
+  const nodes = graph.nodes()
+  for (let i = 0; i < nodes.length; i++) {
+    const n = nodes[i]
+    laplacian[i] = {}
+    laplacian[i][i] = graph.degree(n)
+    indices[n] = i
+    //const attr = graph.getNodeAttributes(n)
+  }
+
   graph.forEachEdge(e => {
     const attr = graph.getEdgeAttributes(e)
-    const w = attr["weight"]
-    const s = graph.source(e)
-    const t = graph.target(e)
+    const w = attr["weight"] ?? 1
+
+    const s = indices[graph.source(e)]
+    const t = indices[graph.target(e)]
     if (s != t) {
-      laplacian[s][t] = -w
-      laplacian[t][s] = -w
+      laplacian[s][t] = -1 //-w
+      laplacian[t][s] = -1 //-w
     }
   })
 
