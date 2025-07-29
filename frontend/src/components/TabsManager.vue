@@ -90,7 +90,7 @@ onMounted(() => {
   display: flex;
   gap: 0;
   margin-bottom: 0;
-  background-color: aquamarine;
+  background-color: rgb(215, 210, 210);
 }
 
 .tab {
@@ -114,8 +114,8 @@ onMounted(() => {
 }
 
 .tab:hover {
-  color: #0bbfcb;
-  background-color: aquamarine;
+  color: #000000;
+  background-color: rgb(255, 255, 255);
 }
 
 .tab-cnt {
