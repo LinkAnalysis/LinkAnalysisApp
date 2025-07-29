@@ -1,7 +1,7 @@
 import circular from "graphology-layout/circular"
 import random from "graphology-layout/random"
 import circlepack from "graphology-layout/circlepack"
-import forceAtlas2 from "graphology-layout-forceatlas2"
+import forceAtlas2, { inferSettings } from "graphology-layout-forceatlas2"
 import FA2Layout from "graphology-layout-forceatlas2/worker"
 import ForceSupervisor from "graphology-layout-force/worker"
 import forceLayout from "graphology-layout-force"
@@ -95,8 +95,13 @@ export const layouts = {
       worker.start()
       return worker
     },
+    actions: {
+      infer: (graph, params) => {
+        return { ...params, settings: inferSettings(graph) }
+      },
+    },
     defaultParams: {
-      iterations: 1000,
+      iterations: 100,
       settings: {
         gravity: 1,
         scalingRatio: 100,
