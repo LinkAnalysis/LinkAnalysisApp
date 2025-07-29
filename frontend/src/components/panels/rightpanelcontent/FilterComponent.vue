@@ -134,7 +134,6 @@ const filters = [
 ]
 
 function applyDegreeFilter() {
-  console.log("graph type: ", props.graph.type)
   if (!props.graph) return
 
   props.graph.forEachNode((node, attributes) => {
