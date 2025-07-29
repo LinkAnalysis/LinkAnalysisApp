@@ -66,6 +66,7 @@ export default {
         d3force: "Symulacja siłowa (D3js)",
         forceLayout: "Symulacja siłowa (Graphologyjs)",
         noverlap: "Bez nachodzenia (Noverlap)",
+        spectral: "Spektralny",
       },
       params: {
         iterations: "Liczba iteracji",
@@ -94,6 +95,9 @@ export default {
         chargeForce: "Siła ładunku",
         centerForce: "Siła dośrodkowa",
         collideForce: "Siła zderzenia",
+        barnesHutOptimize: "Optymalizacja 'Barnes Hut'",
+        slowDown: "spowolnienie",
+        infer: "Wywnioskuj parametry",
       },
     },
     visualization: {
@@ -264,6 +268,7 @@ export default {
         d3force: "Force Simulation (D3 js)",
         forceLayout: "Force Simulation (Graphology js)",
         noverlap: "No Overlap",
+        spectral: "Spectral",
       },
       params: {
         iterations: "Iterations",
@@ -292,6 +297,9 @@ export default {
         chargeForce: "Charge force",
         centerForce: "Center force",
         collideForce: "Collide force",
+        barnesHutOptimize: "Barnes Hut Optimize",
+        slowDown: "Slow down",
+        infer: "Infer settings",
       },
     },
     visualization: {
