@@ -6,20 +6,13 @@
       <span class="value">
         {{ loading[s.key] ? "…" : (resultRefs[s.key]?.value ?? "—") }}
       </span>
-      <button
-        class="run-button"
-        :disabled="loading[s.key]"
-        @click="runStat(s.key)"
-      >
-        {{ t("statistics.run") }}
-      </button>
     </div>
   </div>
 </template>
 
 <script setup>
 import { useI18n } from "vue-i18n"
-import { reactive, toRef } from "vue"
+import { reactive, toRef, onMounted, watch } from "vue"
 import { useGraphStatistics } from "@/composables/useGraphStatistics"
 import { storeToRefs } from "pinia"
 import { useTabsStore } from "@/stores/tabsStore"
@@ -53,6 +46,21 @@ const resultRefs = {
 }
 
 const loading = reactive({})
+
+function runAllStats() {
+  for (const def of statDefs) {
+    runStat(def.key)
+  }
+}
+
+onMounted(runAllStats)
+
+watch(
+  () => props.graph,
+  () => {
+    runAllStats()
+  },
+)
 
 async function runStat(key) {
   const def = statDefs.find(d => d.key === key)
