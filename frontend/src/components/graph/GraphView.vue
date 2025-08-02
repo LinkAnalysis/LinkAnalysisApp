@@ -2,7 +2,7 @@
 import Graph from "graphology"
 import VertexWindow from "./VertexWindow.vue"
 import { useI18n } from "vue-i18n"
-import { watch, toRefs, computed, ref } from "vue"
+import { watch, toRefs, computed, ref, nextTick } from "vue"
 import { useSigmaRenderer } from "@/composables/useSigmaRenderer"
 import { useGraphInteractions } from "@/composables/useGraphInteractions"
 import { useGraphState } from "@/composables/useGraphState"
@@ -64,7 +64,6 @@ const handleDrop = event => {
   if (files.length === 0) return
 
   const file = files[0]
-  const isCsv = file.name.endsWith(".csv")
 
   const reader = new FileReader()
   reader.onload = async () => {
@@ -109,11 +108,26 @@ function openDeleteDialog() {
   confirmDeleteModalOpen.value = true
 }
 
-function doDelete() {
-  deleteSelection()
-  confirmDeleteModalOpen.value = false
-}
+const isDeleting = ref(false)
 
+async function doDelete() {
+  confirmDeleteModalOpen.value = false
+  await nextTick()
+
+  isDeleting.value = true
+  await nextTick()
+  await new Promise(requestAnimationFrame)
+  await new Promise(resolve => {
+    setTimeout(async () => {
+      try {
+        await deleteSelection()
+      } finally {
+        isDeleting.value = false
+        resolve()
+      }
+    }, 0)
+  })
+}
 window.addEventListener("keydown", e => {
   if (
     (e.key === "Delete" || e.key === "Backspace") &&
@@ -223,6 +237,15 @@ watch(
         }
       "
     />
+    <div
+      v-if="isDeleting"
+      class="delete-overlay"
+      role="status"
+      aria-live="polite"
+    >
+      <div class="spinner"></div>
+      <span class="loading-text">{{ t("editor.deleting") }}</span>
+    </div>
   </div>
 </template>
 
@@ -241,5 +264,34 @@ watch(
   height: 100%;
   background: lightblue;
   border: 1px solid #000;
+}
+
+.delete-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 14px;
+
+  backdrop-filter: blur(2px);
+  background: rgba(255, 255, 255, 0.7);
+  z-index: 200000;
+}
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #ddd;
+  border-top-color: #000;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

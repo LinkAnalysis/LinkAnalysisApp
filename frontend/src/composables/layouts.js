@@ -18,25 +18,33 @@ import {
 } from "graphology-components"
 
 export function normalizeGraphCoordinates(graph) {
+  const nodes = graph.nodes()
+  if (nodes.length === 0) return
+  if (nodes.length === 1) {
+    graph.mergeNodeAttributes(nodes[0], { x: 0, y: 0 })
+    return
+  }
+
   let xMin = Infinity,
     xMax = -Infinity
   let yMin = Infinity,
     yMax = -Infinity
 
   graph.forEachNode((_, attrs) => {
-    const x = attrs.x
-    const y = attrs.y
-
+    const { x = 0, y = 0 } = attrs
     if (x < xMin) xMin = x
     if (x > xMax) xMax = x
     if (y < yMin) yMin = y
     if (y > yMax) yMax = y
   })
 
+  const dx = xMax - xMin || 1
+  const dy = yMax - yMin || 1
+
   graph.forEachNode(n => {
-    const attrs = graph.getNodeAttributes(n)
-    const newX = (attrs.x - xMin) / (xMax - xMin)
-    const newY = (attrs.y - yMin) / (yMax - yMin)
+    const { x = 0, y = 0 } = graph.getNodeAttributes(n)
+    const newX = (x - xMin) / dx
+    const newY = (y - yMin) / dy
     graph.mergeNodeAttributes(n, { x: newX, y: newY })
   })
 }
