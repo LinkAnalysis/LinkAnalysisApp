@@ -210,8 +210,8 @@ function setLanguage(lang) {
           ]"
         />
       </div>
-      <HeaderButtonComponent :label="t('header.workspace')" name="workspace" />
-      <HeaderButtonComponent :label="t('header.view')" name="view" />
+      <!-- <HeaderButtonComponent :label="t('header.workspace')" name="workspace" />
+      <HeaderButtonComponent :label="t('header.view')" name="view" /> -->
       <HeaderButtonComponent
         :label="t('header.settings')"
         name="settings"

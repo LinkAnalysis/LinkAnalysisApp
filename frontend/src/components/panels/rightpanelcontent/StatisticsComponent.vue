@@ -12,7 +12,7 @@
 
 <script setup>
 import { useI18n } from "vue-i18n"
-import { reactive, toRef, onMounted, watch } from "vue"
+import { reactive, toRef, onMounted, watch, onBeforeUnmount } from "vue"
 import { useGraphStatistics } from "@/composables/useGraphStatistics"
 import { storeToRefs } from "pinia"
 import { useTabsStore } from "@/stores/tabsStore"
@@ -53,15 +53,6 @@ function runAllStats() {
   }
 }
 
-onMounted(runAllStats)
-
-watch(
-  () => props.graph,
-  () => {
-    runAllStats()
-  },
-)
-
 async function runStat(key) {
   const def = statDefs.find(d => d.key === key)
   const targetRef = resultRefs[key]
@@ -75,6 +66,40 @@ async function runStat(key) {
     loading[key] = false
   }
 }
+
+function attachGraphListeners(graph) {
+  if (!graph?.on) return
+  graph.on("nodeAdded", runAllStats)
+  graph.on("nodeDropped", runAllStats)
+  graph.on("edgeAdded", runAllStats)
+  graph.on("edgeDropped", runAllStats)
+}
+
+function detachGraphListeners(graph) {
+  if (!graph?.off) return
+  graph.off("nodeAdded", runAllStats)
+  graph.off("nodeDropped", runAllStats)
+  graph.off("edgeAdded", runAllStats)
+  graph.off("edgeDropped", runAllStats)
+}
+
+onMounted(() => {
+  if (!props.graph) return
+  runAllStats()
+  attachGraphListeners(props.graph)
+})
+
+onBeforeUnmount(() => {
+  detachGraphListeners(props.graph)
+})
+watch(
+  () => props.graph,
+  (newGraph, oldGraph) => {
+    detachGraphListeners(oldGraph)
+    attachGraphListeners(newGraph)
+    runAllStats()
+  },
+)
 </script>
 
 <style scoped>

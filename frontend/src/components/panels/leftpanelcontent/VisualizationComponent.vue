@@ -43,11 +43,11 @@
               <input
                 type="checkbox"
                 v-model="settings.nodeResize"
-                @click="showNodeResize = !showNodeResize"
+                @click="settings.nodeResize = !settings.nodeResize"
               />
             </td>
           </tr>
-          <tr v-if="showNodeResize">
+          <tr v-if="settings.nodeResize">
             <td>{{ t("visualization.settings.minSize") }}</td>
             <td>
               <input
@@ -60,7 +60,7 @@
               <span>{{ settings.minNodeSize }}</span>
             </td>
           </tr>
-          <tr v-if="showNodeResize">
+          <tr v-if="settings.nodeResize">
             <td>{{ t("visualization.settings.maxSize") }}</td>
             <td>
               <input
