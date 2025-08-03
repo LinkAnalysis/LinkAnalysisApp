@@ -8,11 +8,11 @@ The application supports loading graphs in the following formats:
 
 1. **Custom CSV format**
    - **Nodes:** `id,Description`
-   - **Edges (optional):** `x,y,edgeWeight,edgeLabel`  
+   - **Edges (optional):** `x,y,edgeWeight,edgeLabel`
      The edge file is optional — the graph can be visualized using only the node file.
 
 2. **Financial transactions format**
-   - CSV format based on the dataset from Kaggle:  
+   - CSV format based on the dataset from Kaggle:
      [IBM Transactions for Anti-Money Laundering (AML)](https://www.kaggle.com/datasets/ealtman2019/ibm-transactions-for-anti-money-laundering-aml?select=HI-Large_Trans.csv)
 
 3. **GEXF files**
