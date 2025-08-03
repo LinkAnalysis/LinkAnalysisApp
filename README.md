@@ -1,5 +1,47 @@
 # LinkAnalysis - Wails Desktop App
-This repository contains source code, and tests for graph visualization desktop app.
+# README for users
+**LinkAnalysis** is an application for visualizing and interactively analyzing graphs.
+
+## Supported file formats
+
+The application supports loading graphs in the following formats:
+
+1. **Custom CSV format**
+   - **Edges:** `x,y,edgeWeight,edgeLabel`
+     The edge file is mandatory — the graph can be visualized using only the edges file.
+   -  **Nodes (optional):** `id,Description`
+
+2. **Financial transactions format**
+   - CSV format based on the dataset from Kaggle:
+     [IBM Transactions for Anti-Money Laundering (AML)](https://www.kaggle.com/datasets/ealtman2019/ibm-transactions-for-anti-money-laundering-aml?select=HI-Large_Trans.csv)
+
+3. **GEXF files**
+   - Compatible with **GEPHI**, allowing bidirectional exchange of graph data.
+
+## Features
+
+- **Dynamic graph editing:**
+  - change node colors and sizes
+  - choose from various layout algorithms
+  - view layout stabilization as a live simulation or jump directly to the final layout after a set number of iterations
+
+- **Graph export options:**
+  - image files: `.png` or `.jpg`
+  - `.gexf` format (can be reloaded in this app or in GEPHI)
+
+- **Filtering capabilities:**
+  - by node name
+  - by edge weight
+  - by node degree range
+
+- **Statistics:**
+  - basic metrics and information about the graph structure
+
+- **Language support:**
+  -  Polish
+  -  English
+# README for developers
+This repository contains source code for graph visualization desktop app.
 
 ## Development setup and notes
 In order to efficiently and cleanly develop the application, we need to follow a few simple rules.
