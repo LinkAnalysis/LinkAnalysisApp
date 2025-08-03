@@ -41,7 +41,7 @@ The application supports loading graphs in the following formats:
   -  Polish
   -  English
 # README for developers
-This repository contains source code, and tests for graph visualization desktop app.
+This repository contains source code for graph visualization desktop app.
 
 ## Development setup and notes
 In order to efficiently and cleanly develop the application, we need to follow a few simple rules.
