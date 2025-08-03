@@ -7,9 +7,9 @@
 The application supports loading graphs in the following formats:
 
 1. **Custom CSV format**
-   - **Nodes:** `id,Description`
-   - **Edges (optional):** `x,y,edgeWeight,edgeLabel`
-     The edge file is optional — the graph can be visualized using only the node file.
+   - **Edges:** `x,y,edgeWeight,edgeLabel`
+     The edge file is mandatory — the graph can be visualized using only the edges file.
+   -  **Nodes (optional):** `id,Description`
 
 2. **Financial transactions format**
    - CSV format based on the dataset from Kaggle:
